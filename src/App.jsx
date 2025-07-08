@@ -1,16 +1,9 @@
-function MyButton() {
+import Routes from './Routes';
+
+function App() {
   return (
-    <button>
-      I'm a button
-    </button>
+        <Routes />
   );
 }
 
-export default function MyApp() {
-  return (
-    <div>
-      <h1>Welcome to my app</h1>
-      <MyButton />
-    </div>
-  );
-}
+export default App;
