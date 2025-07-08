@@ -115,7 +115,7 @@ const Login = () => {
           variant="primary"
           size="medium"
           fullWidth
-          className="mb-[12px] text-[12px] h-[36px] flex items-center justify-center"
+          className="mb-[12px] text-[12px] lg:text-2xl h-[36px] flex items-center justify-center"
         >
           Get Started
         </Button>

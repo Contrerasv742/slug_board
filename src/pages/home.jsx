@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import SearchView from '../components/ui/SearchView';
+import '../styles/home.css'
 
 const HomePage = () => {
   const [searchValue, setSearchValue] = useState('');
@@ -97,48 +98,65 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-global-1 font-ropa">
-      {/* Header */}
-      <header className="bg-global-1 border-b-2 border-white border-opacity-60 p-4 sm:p-6 lg:p-[30px_36px]">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-6 lg:gap-0 w-full max-w-full mx-auto">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <img 
-              src="/images/img_header_logo.png" 
-              alt="Slug Board"
-              className="w-48 h-12 sm:w-56 sm:h-14 md:w-64 md:h-16 lg:w-[274px] lg:h-[80px]"
-            />
+      {/* Homepage Header */}
+      <header className="bg-global-1 border-b-2 border-white border-opacity-60 p-4 sm:p-6 lg:p-[16px_32px]">
+        <div className="flex flex-row items-center justify-between w-full
+          max-w-full mx-auto gap-4 sm:gap-6 lg:gap-8">
+
+          {/* Logo Section - Matching Login Style */}
+          <div className="flex flex-row items-center justify-start
+            flex-shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-[40px]
+              lg:h-[40px] bg-global-2 rounded-sm">
+              <img
+                src="/images/standing-sammy.png"
+                className="w-full h-full object-contain"
+                alt="Slug mascot"
+              />
+            </div>
+            <h1 className="text-global-4 font-ropa text-lg sm:text-xl
+              md:text-2xl lg:text-[28px] lg:leading-[30px] font-normal ml-2
+              sm:ml-3 lg:ml-[16px] text-starship-animated">
+              Slug Board
+            </h1>
           </div>
-          
-          {/* Search */}
-          <div className="w-full sm:w-auto sm:flex-1 sm:max-w-md md:max-w-lg lg:max-w-[66%]">
+
+          {/* Search Bar */}
+          <div className="pl-[40px] w-[800px] max-w-[650px] header-search">
             <SearchView
               placeholder="Search Events"
               value={searchValue}
               onChange={handleSearchChange}
               leftIcon="/images/img_search.png"
-              className="text-sm sm:text-base md:text-lg lg:text-[40px] lg:leading-[43px]"
+              className="text-sm sm:text-base md:text-lg lg:text-[20px]
+              lg:leading-[10px] py-[8px] sm:py-[10px] lg:pl-[50px] lg:py-[12px] w-full"
             />
           </div>
+
+          <div className="flex-1"></div>
+
         </div>
       </header>
 
       {/* Main Content */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="hidden lg:flex lg:w-[16%] bg-global-1 border-r-2 border-white border-opacity-60 p-10">
-          <nav className="flex flex-col gap-6 lg:gap-[44px] w-full">
+        <aside className="hidden lg:flex lg:w-[16%] bg-global-1 border-r-2
+          border-white border-opacity-60 p-5">
+          <nav className="flex flex-col gap-6 lg:gap-[2px] w-full">
             {menuItems.map((item) => (
               <button
                 key={item.name}
                 onClick={() => handleMenuClick(item.name)}
-                className={`flex justify-center items-center p-3 rounded-[20px] transition-all duration-200 
+                className={`flex justify-center items-center p-3 rounded-[10px]
+                            transition-all duration-200 lg:h-10
                            border-none cursor-pointer font-normal
                            ${activeMenuItem === item.name 
                              ? 'bg-global-2 text-global-1' 
                              : 'bg-global-1 text-sidebar-1 hover:bg-global-2 hover:text-global-1'
                            }`}
               >
-                <span className="text-lg lg:text-[35px] lg:leading-[38px]">
+                <span className="text-lg lg:text-3xl lg:leading-[38px]">
                   {item.name}
                 </span>
               </button>
