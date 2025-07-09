@@ -76,7 +76,7 @@ const Login = () => {
             onChange={handleEmailChange}
             type="email"
             leftIcon="/images/img_envelope.png"
-            className="text-[12px] lg:text-xl py-[12px] px-[12px] pl-[36px] h-[36px]"
+            className="text-[12px] lg:text-lg py-[12px] px-[12px] pl-[36px] h-[36px]"
           />
 
           <div className="relative">
@@ -86,7 +86,7 @@ const Login = () => {
               onChange={handlePasswordChange}
               type={showPassword ? "text" : "password"}
               leftIcon="/images/img_lock.png"
-              className="text-[12px] lg:text-xl py-[12px] px-[12px] pl-[36px] h-[36px]"
+              className="text-[12px] lg:text-lg py-[12px] px-[12px] pl-[36px] h-[36px]"
             />
             <button
               type="button"
@@ -115,7 +115,7 @@ const Login = () => {
           variant="primary"
           size="medium"
           fullWidth
-          className="mb-[12px] text-[12px] lg:text-2xl h-[36px] flex items-center justify-center"
+          className="mb-[12px] text-[12px] lg:text-xl h-[36px] flex items-center justify-center"
         >
           Get Started
         </Button>
