@@ -19,4 +19,3 @@ Sehaj Singh
 npm run start
 # Then copy the url: https://localhost 1 :<xxxx> into a browser
 ```
-
