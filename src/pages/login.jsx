@@ -29,17 +29,21 @@ const Login = () => {
 
   return (
     // Page Settings
-    <div className="min-h-screen bg-global-1 flex flex-col items-center justify-start gap-6 sm:gap-8 md:gap-10 lg:gap-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-global-1 flex flex-col items-center
+      justify-start gap-6 sm:gap-8 md:gap-10 lg:gap-12 px-4 sm:px-6 lg:px-8">
 
       {/* Header Section */}
-      <div className="flex flex-row items-center justify-start w-full mt-4 sm:mt-6 lg:mt-[16px]"> 
-        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-[40px] lg:h-[40px] bg-global-2 rounded-sm">
+      <div className="flex flex-row items-center justify-start w-full mt-4
+        sm:mt-6 lg:mt-[16px]"> <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12
+          md:h-12 lg:w-[40px] lg:h-[40px] bg-global-2 rounded-sm">
           <img
             src="/images/standing-sammy.png"
             className="w-full h-full object-contain"
           />
         </div>
-        <h1 className="text-global-4 font-ropa text-lg sm:text-xl md:text-2xl lg:text-[28px] lg:leading-[30px] font-normal ml-2 sm:ml-3 lg:ml-[16px] text-starship-animated">
+        <h1 className="text-global-4 font-ropa text-lg sm:text-xl md:text-2xl
+          lg:text-[28px] lg:leading-[30px] font-normal ml-2 sm:ml-3
+          lg:ml-[16px] text-starship-animated">
           Slug Board
         </h1>
       </div>
