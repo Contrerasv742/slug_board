@@ -27,7 +27,7 @@ const HomePage = () => {
       userName: 'User Name',
       timeAgo: '2 days ago',
       title: 'Post Name...',
-      description: 'Fuck bitches get money',
+      description: 'get money',
       upvotes: 534,
       hasComments: true,
       canShare: true
@@ -36,7 +36,7 @@ const HomePage = () => {
       id: 2,
       userName: 'User Name',
       timeAgo: '2 days ago',
-      title: 'Stoners or Boners General Meeting',
+      title: 'General Meeting',
       description: 'Stoners Unites',
       upvotes: 420,
       hasComments: true,
@@ -46,7 +46,7 @@ const HomePage = () => {
       id: 3,
       userName: 'User Name',
       timeAgo: '2 days ago',
-      title: 'Mission or Missionary 101',
+      title: 'Mission 101',
       upvotes: 69,
       hasComments: true,
       canShare: true
