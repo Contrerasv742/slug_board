@@ -1,9 +1,17 @@
 import React from 'react';
+import Header from '../components/common/Header.jsx';
 
 const MapPage = () => {
   return (
     <div className="w-full h-screen bg-global-1 font-ropa">
       {/* Header */}
+      <Header 
+        showSearch={true}
+        searchPlaceholder="Search Posts"
+        userName="John Doe"
+        userHandle="@johndoe"
+        userAvatar="/images/default-avatar.png"
+      />
       
       <button 
         onClick={() => window.location.href = '/home'}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Header from '../components/common/Header.jsx';
 
 const PostDetailPage = () => {
   const [searchValue, setSearchValue] = useState('');
@@ -136,58 +137,13 @@ const PostDetailPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-global-1 font-ropa">
       {/* Header */}
-      <header className="bg-global-1 border-b-2 border-white border-opacity-60
-        p-4 sm:p-6 lg:p-[16px_32px]">
-        <div className="flex flex-row items-center justify-between w-full
-          max-w-full mx-auto gap-4 sm:gap-6 lg:gap-8">
-
-          {/* Logo Section */}
-          <button 
-            onClick={() => window.location.href = '/home'}
-            className="flex flex-row items-center justify-start
-              flex-shrink-0 bg-transparent border-none cursor-pointer
-              hover:opacity-80 transition-opacity duration-200 p-0"
-          >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-[40px]
-              lg:h-[40px] bg-global-2 rounded-sm">
-              <img
-                src="/images/standing-sammy.png"
-                className="w-full h-full object-contain"
-                alt="Slug mascot"
-              />
-            </div>
-            <h1 className="text-global-4 font-ropa text-lg sm:text-xl
-              md:text-2xl lg:text-[28px] lg:leading-[30px] font-normal ml-2
-              sm:ml-3 lg:ml-[16px] text-starship-animated">
-              Slug Board
-            </h1>
-          </button>
-
-          {/* Search Bar */}
-          <div className="pl-[40px] w-[800px] max-w-[650px] header-search">
-            <div className="relative">
-              <img
-                src="/images/img_search.png"
-                alt="search"
-                className="absolute left-3 lg:left-4 top-1/2 transform
-                -translate-y-1/2 w-4 h-4 lg:w-5 lg:h-5"
-              />
-              <input
-                type="text"
-                placeholder="Search Posts"
-                value={searchValue}
-                onChange={handleSearchChange}
-                className="w-full h-[40px] bg-global-2 text-global-1
-                rounded-[20px] border-none outline-none text-sm sm:text-base
-                md:text-lg lg:text-xl lg:leading-[10px] py-[2px] sm:py-[4px]
-                lg:py-[2px] pl-10 lg:pl-[45px] placeholder-gray-400"
-              />
-            </div>
-          </div>
-
-          <div className="flex-1"></div>
-        </div>
-      </header>
+      <Header 
+        showSearch={true}
+        searchPlaceholder="Search Posts"
+        userName="John Doe"
+        userHandle="@johndoe"
+        userAvatar="/images/default-avatar.png"
+      />
 
       {/* Main Content */}
       <div className="flex flex-1">

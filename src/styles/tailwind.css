@@ -141,6 +141,22 @@
   100% { background-position: 0% 50%; }
 }
 
+@keyframes gradient-shift {
+  0% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+  100% { 
+    background-position: 0% 50%; 
+  }
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 3s ease infinite;
+}
+
 /* Text colors that work well with these gradients */
 .text-starship-contrast {
   color: #ffffff;
@@ -163,4 +179,27 @@
   background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(138,43,226,0.3);
+}
+
+/* Profile Animation */
+.profile-border-animated {
+  position: relative;
+  display: inline-block;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(45deg, #ff1493, #ff69b4, #da70d6, #9370db, #8a2be2, #ff1493);
+  background-size: 300% 300%;
+  animation: gradientRotate 3s ease infinite;
+}
+
+@keyframes gradientRotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
