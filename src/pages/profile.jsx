@@ -39,20 +39,6 @@ const UserProfilePage = () => {
     'Dudes',
   ];
 
-  const frustrations = [
-    'Too much time spent booking - she\'s busy!',
-    'Too many websites visited per trip',
-    'Not terribly tech savvy - doesn\'t like the process'
-  ];
-
-  const motivations = [
-    { label: 'Price', value: 90 },
-    { label: 'Comfort', value: 85 },
-    { label: 'Convenience', value: 75 },
-    { label: 'Speed', value: 65 },
-    { label: 'Loyalty/Miles', value: 45 }
-  ];
-
   const recentPosts = [
     {
       title: 'Photography Club Meetup',
@@ -72,14 +58,6 @@ const UserProfilePage = () => {
       upvotes: 156,
       timeAgo: '2 weeks ago'
     }
-  ];
-
-  const brands = [
-    { name: 'Adidas', logo: '/images/adidas-logo.png' },
-    { name: 'Nike', logo: '/images/nike-logo.png' },
-    { name: 'Netflix', logo: '/images/netflix-logo.png' },
-    { name: 'Airbnb', logo: '/images/airbnb-logo.png' },
-    { name: 'Zara', logo: '/images/zara-logo.png' }
   ];
 
   return (
@@ -145,10 +123,10 @@ const UserProfilePage = () => {
                 onClick={() => handleMenuClick(item.name)}
                 className={`flex justify-center items-center p-3 rounded-[10px]
 transition-all duration-200 lg:h-10 border-none cursor-pointer font-normal
-                           ${activeMenuItem === item.name 
-                             ? 'bg-global-2 text-global-1' 
-                             : 'bg-global-1 text-sidebar-1 hover:bg-global-2 hover:text-global-1'
-                           }`}
+${activeMenuItem === item.name 
+? 'bg-global-2 text-global-1' 
+: 'bg-global-1 text-sidebar-1 hover:bg-global-2 hover:text-global-1'
+}`}
               >
                 <span className="text-lg lg:text-3xl lg:leading-[38px]">
                   {item.name}
@@ -159,18 +137,18 @@ transition-all duration-200 lg:h-10 border-none cursor-pointer font-normal
         </aside>
 
         {/* Profile Content */}
-        <main className="flex-1 p-6 sm:p-6 lg:p-[44px_48px]">
+        <main className="flex-1 p-6 sm:p-6 lg:p-[24px_28px]">
           <div className="max-w-7xl mx-auto">
-            
+
             {/* Main Profile Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-              
+
               {/* Left Column - Profile Header Info */}
               <div className="lg:col-span-4">
                 <div className="bg-global-2 rounded-[35px] p-6 lg:p-[32px]">
                   <div className="flex flex-col items-center text-center
                     gap-6">
-                    
+
                     {/* Profile Image */}
                     <div className="relative">
                       <div className="w-24 h-24 lg:w-[120px] lg:h-[120px]
@@ -214,7 +192,7 @@ transition-all duration-200 lg:h-10 border-none cursor-pointer font-normal
                           UC Santa Cruz • Class of 2025 • @jamiesilva
                         </p>
                       </div>
-                      
+
                       <button
                         onClick={() => setIsEditing(!isEditing)}
                         className="w-full bg-purple-500 hover:bg-purple-600
@@ -229,17 +207,21 @@ transition-all duration-200 lg:h-10 border-none cursor-pointer font-normal
                       <div className="bg-global-3 rounded-[20px] p-4 lg:p-6
                         mb-4">
                         <h3 className="text-global-1 text-lg lg:text-[20px]
-                          font-normal mb-2">Bio</h3>
-                        <p className="text-global-1 text-sm lg:text-[16px]
+                          font-normal mb-1">Bio</h3>
+                        <p className="text-global-1 text-sm lg:text-[15px]
                           lg:leading-[20px]">
-                          Passionate CS student who loves connecting with fellow Slugs! Always looking for new opportunities to collaborate on projects and organize campus events. Coffee enthusiast and weekend photographer.
+                          Passionate CS student who loves connecting with
+                          fellow Slugs! Always looking for new opportunities to
+                          collaborate on projects and organize campus events.
+                          Coffee enthusiast and weekend photographer.
                         </p>
                       </div>
 
                       {/* Quick Stats */}
 
                       {/* Interests */}
-                      <div className="bg-global-3 rounded-[20px] p-4 lg:p-6">
+                      <div className="bg-global-3 rounded-[20px] p-4 lg:p-6
+                        mb-4">
                         <h3 className="text-global-1 text-lg lg:text-[20px]
                           font-normal mb-3">Interests</h3>
                         <div className="flex flex-wrap gap-2">
@@ -255,16 +237,75 @@ transition-all duration-200 lg:h-10 border-none cursor-pointer font-normal
                           ))}
                         </div>
                       </div>
+
+                      {/* Goals */}
+                      <div className="bg-global-3 rounded-[25px] p-6 lg:p-[24px]">
+                        <h3 className="text-global-1 text-xl lg:text-[20px]
+                          font-normal mb-4">Goals</h3>
+                        <div className="space-y-3">
+                          {goals.map((goal, index) => (
+                            <div key={index} className="flex items-start gap-3">
+                              <div className="w-2 h-2 bg-purple-500 rounded-full
+                                mt-2 flex-shrink-0"></div>
+                              <span className="text-global-1 text-sm lg:text-[16px]
+                                lg:leading-[20px]">{goal}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                     </div>
                   </div>
                 </div>
               </div>
               {/* Right Content Area */}
               <div className="lg:col-span-8 space-y-6">
-                
-                {/* Personality & Goals Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  
+
+                {/* Recent Activity */}
+                <div className="bg-global-2 rounded-[25px] p-6 lg:p-[24px]">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-global-1 text-xl lg:text-[24px]
+                      font-normal">Recent Posts</h3>
+                    <button className="text-purple-400 hover:text-purple-300
+                      text-sm lg:text-[16px]">
+                      View All
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {recentPosts.map((post, index) => (
+                      <div key={index} className="bg-global-3 rounded-[20px]
+                        p-4 lg:p-5">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="text-global-1 text-lg lg:text-[20px]
+                            font-normal">{post.title}</h4>
+                          <span className="text-gray-400 text-xs lg:text-[12px]
+                            flex-shrink-0 ml-4">{post.timeAgo}</span>
+                        </div>
+                        <p className="text-global-1 text-sm lg:text-[16px]
+                          lg:leading-[20px] mb-3">{post.description}</p>
+
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1 bg-global-2
+                            rounded-[10px] px-3 py-1">
+                            <img 
+                              src="/images/img_arrow.png"
+                              alt="upvote"
+                              className="w-4 h-4"
+                            />
+                            <span className="text-global-1 text-sm
+                              lg:text-[16px]">{post.upvotes}</span>
+                          </div>
+                          <button className="text-purple-400
+                            hover:text-purple-300 text-sm lg:text-[14px]">
+                            View Post
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                   {/* Personality Traits */}
                   <div className="bg-global-2 rounded-[25px] p-6 lg:p-[24px]">
                     <h3 className="text-global-1 text-xl lg:text-[24px]
@@ -291,67 +332,6 @@ transition-all duration-200 lg:h-10 border-none cursor-pointer font-normal
                     </div>
                   </div>
 
-                  {/* Goals */}
-                  <div className="bg-global-2 rounded-[25px] p-6 lg:p-[24px]">
-                    <h3 className="text-global-1 text-xl lg:text-[24px]
-                      font-normal mb-4">Goals</h3>
-                    <div className="space-y-3">
-                      {goals.map((goal, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <div className="w-2 h-2 bg-purple-500 rounded-full
-                            mt-2 flex-shrink-0"></div>
-                          <span className="text-global-1 text-sm lg:text-[16px]
-                            lg:leading-[20px]">{goal}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Recent Activity */}
-                <div className="bg-global-2 rounded-[25px] p-6 lg:p-[24px]">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-global-1 text-xl lg:text-[24px]
-                      font-normal">Recent Posts</h3>
-                    <button className="text-purple-400 hover:text-purple-300
-                      text-sm lg:text-[16px]">
-                      View All
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {recentPosts.map((post, index) => (
-                      <div key={index} className="bg-global-3 rounded-[20px]
-                        p-4 lg:p-5">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="text-global-1 text-lg lg:text-[20px]
-                            font-normal">{post.title}</h4>
-                          <span className="text-gray-400 text-xs lg:text-[12px]
-                            flex-shrink-0 ml-4">{post.timeAgo}</span>
-                        </div>
-                        <p className="text-global-1 text-sm lg:text-[16px]
-                          lg:leading-[20px] mb-3">{post.description}</p>
-                        
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1 bg-global-2
-                            rounded-[10px] px-3 py-1">
-                            <img 
-                              src="/images/img_arrow.png"
-                              alt="upvote"
-                              className="w-4 h-4"
-                            />
-                            <span className="text-global-1 text-sm
-                              lg:text-[16px]">{post.upvotes}</span>
-                          </div>
-                          <button className="text-purple-400
-                            hover:text-purple-300 text-sm lg:text-[14px]">
-                            View Post
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
