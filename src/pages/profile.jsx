@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import Header from '../components/common/Header.jsx';
+import Sidebar from '../components/common/Sidebar.jsx';
 
 const UserProfilePage = () => {
-  const [searchValue, setSearchValue] = useState('');
-  const [activeMenuItem, setActiveMenuItem] = useState('Profile');
   const [isEditing, setIsEditing] = useState(false);
 
   const handleSearchChange = (e) => {
@@ -75,27 +74,7 @@ const UserProfilePage = () => {
       {/* Main Content */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="hidden lg:flex lg:w-[16%] bg-global-1 border-r-2
-          border-white border-opacity-60 p-5">
-          <nav className="flex flex-col gap-6 lg:gap-[2px] w-full">
-            {menuItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => handleMenuClick(item.name)}
-                className={`flex justify-center items-center p-3 rounded-[10px]
-transition-all duration-200 lg:h-10 border-none cursor-pointer font-normal
-${activeMenuItem === item.name 
-? 'bg-global-2 text-global-1' 
-: 'bg-global-1 text-sidebar-1 hover:bg-global-2 hover:text-global-1'
-}`}
-              >
-                <span className="text-lg lg:text-3xl lg:leading-[38px]">
-                  {item.name}
-                </span>
-              </button>
-            ))}
-          </nav>
-        </aside>
+        <Sidebar/>
 
         {/* Profile Content */}
         <main className="flex-1 p-6 sm:p-6 lg:p-[24px_28px]">
@@ -105,7 +84,7 @@ ${activeMenuItem === item.name
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
 
               {/* Left Column - Profile Header Info */}
-              <div className="lg:col-span-4">
+              <div className="lg:col-span-4 h-full">
                 <div className="bg-global-2 rounded-[35px] p-6 lg:p-[32px]">
                   <div className="flex flex-col items-center text-center
                     gap-6">
@@ -219,8 +198,9 @@ ${activeMenuItem === item.name
                   </div>
                 </div>
               </div>
+
               {/* Right Content Area */}
-              <div className="lg:col-span-8 space-y-6">
+              <div className="lg:col-span-8 space-y-6 h-full">
 
                 {/* Recent Activity */}
                 <div className="bg-global-2 rounded-[25px] p-6 lg:p-[24px]">

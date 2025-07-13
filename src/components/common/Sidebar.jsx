@@ -1,53 +1,51 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 const Sidebar = ({ isOpen = false, onClose, className = '' }) => {
+  const location = useLocation();
+
+  const handleMenuClick = () => {
+    if (onClose) onClose(); // Close mobile menu if provided
+  };
+
+  const menuItems = [
+    { name: 'Home', path: '/', active: location.pathname === '/' },
+    { name: 'Map', path: '/map', active: location.pathname === '/map' },
+    { name: 'Explore', path: '/explore', active: location.pathname === '/explore' },
+    { name: 'Popular', path: '/popular', active: location.pathname === '/popular' },
+    { name: 'Profile', path: '/profile', active: location.pathname === '/profile' },
+  ];
+
+  // Function to check if a menu item is active
+  const isActiveMenuItem = (path) => {
+    return location.pathname === path;
+  };
+
   return (
-    <>
-      {/* Overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={onClose}
-        />
-      )}
-      
-      {/* Sidebar */}
-      <aside className={`
-        fixed top-0 left-0 h-full w-64 bg-global-4 shadow-lg transform transition-transform duration-300 z-50
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:shadow-none
-        ${className}
-      `}>
-        <div className="p-4 sm:p-6">
-          <div className="flex justify-between items-center mb-6 lg:mb-8">
-            <h2 className="text-lg sm:text-xl font-ropa font-normal text-global-1">
-              Menu
-            </h2>
-            <button 
-              onClick={onClose}
-              className="lg:hidden p-2 text-global-1 hover:bg-global-2 rounded"
-              aria-label="Close menu"
-            >
-              ×
-            </button>
-          </div>
-          
-          <nav>
-            <ul className="space-y-2">
-              <li>
-                <a 
-                  href="/login" 
-                  className="block px-3 py-2 text-global-1 hover:bg-global-2 rounded font-ropa"
-                >
-                  Sign In
-                </a>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </aside>
-    </>
+    <aside className={`hidden lg:flex lg:w-[16%] bg-global-1 border-r-2
+      border-white border-opacity-60 p-5 ${className}`}>
+      <nav className="flex flex-col gap-6 lg:gap-[2px] w-full">
+        {menuItems.map((item) => (
+          <Link
+            key={item.name}
+            to={item.path}
+            onClick={handleMenuClick}
+            className={`flex justify-center items-center p-3 rounded-[10px]
+              transition-all duration-200 lg:h-10 border-none cursor-pointer 
+              font-normal no-underline
+              ${isActiveMenuItem(item.path)
+                ? 'bg-global-2 text-global-1' 
+                : 'bg-global-1 text-sidebar-1 hover:bg-global-2 hover:text-global-1'
+              }`}
+          >
+            <span className="text-lg lg:text-3xl lg:leading-[38px]">
+              {item.name}
+            </span>
+          </Link>
+        ))}
+      </nav>
+    </aside>
   );
 };
 

@@ -14,12 +14,14 @@ const AppRoutes = () => {
     <Router>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/home" element={<HomePage />} />
+        <Route path="/" element={<HomePage/>} />
+        <Route path="/home" element={<HomePage/>} />
+        <Route path="/explore" element={<HomePage/>} />
+        <Route path="/popular" element={<HomePage/>} />
+        <Route path="/post" element={<PostDetailPage/>} />
         <Route path="/create-post" element={<CreatePostPage/>} />
         <Route path="/map" element={<MapPage/>} />
         <Route path="/profile" element={<UserProfilePage/>} />
-        <Route path="/post" element={<PostDetailPage/>} />
       </Routes>
     </Router>
   );

@@ -1,4 +1,3 @@
-// components/common/Header.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SearchView from '../ui/SearchView';
@@ -21,7 +20,7 @@ const Header = ({
       p-4 sm:p-6 lg:p-[16px_32px]">
       <div className="flex flex-row items-center justify-between w-full
         max-w-full mx-auto gap-4 sm:gap-6 lg:gap-8">
-        
+
         {/* Logo Section */}
         <Link to="/home" className="flex items-center flex-shrink-0
           hover:opacity-80 transition-opacity duration-200" >

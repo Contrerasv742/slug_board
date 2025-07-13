@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/common/Header.jsx';
+import Sidebar from '../components/common/Sidebar.jsx';
 import '../styles/home.css'
 
 const HomePage = () => {
-  const [searchValue, setSearchValue] = useState('');
-  const [activeMenuItem, setActiveMenuItem] = useState('Home');
-
   const handleSearchChange = (e) => {
     setSearchValue(e.target.value);
   };
@@ -128,28 +127,7 @@ cursor-pointer bg-global-3 hover:bg-global-5 transition-colors ${className}`}
       {/* Main Content */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="hidden lg:flex lg:w-[16%] bg-global-1 border-r-2
-          border-white border-opacity-60 p-5">
-          <nav className="flex flex-col gap-6 lg:gap-[2px] w-full">
-            {menuItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => handleMenuClick(item.name)}
-                className={`flex justify-center items-center p-3 rounded-[10px]
-                            transition-all duration-200 lg:h-10
-                           border-none cursor-pointer font-normal
-                           ${activeMenuItem === item.name 
-                             ? 'bg-global-2 text-global-1' 
-                             : 'bg-global-1 text-sidebar-1 hover:bg-global-2 hover:text-global-1'
-                           }`}
-              >
-                <span className="text-lg lg:text-3xl lg:leading-[38px]">
-                  {item.name}
-                </span>
-              </button>
-            ))}
-          </nav>
-        </aside>
+        <Sidebar/>
 
         {/* Mobile Menu Button */}
         <button className="block lg:hidden fixed top-4 left-4 z-50 p-3
@@ -246,17 +224,18 @@ cursor-pointer bg-global-3 hover:bg-global-5 transition-colors ${className}`}
       </div>
 
       {/* Create Events */}
-      <button
-        onClick={() => console.log('Add events button clicked!')}
+      <Link
+        to="/create-post"
         className="fixed bottom-6 right-6 w-[50px] h-[50px] rounded-full 
         bg-global-2 hover:bg-global-3 transition-all duration-200 
         shadow-lg hover:shadow-xl transform hover:scale-105
-        flex items-center justify-center z-50"
+        flex items-center justify-center z-50 no-underline"
       >
         <span className="text-5xl font-bold leading-none text-starship-animated">
           +
         </span>
-      </button>
+      </Link>
+
     </div>
   );
 };

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import Header from '../components/common/Header.jsx';
+import Sidebar from '../components/common/Sidebar.jsx';
 
 const PostDetailPage = () => {
-  const [searchValue, setSearchValue] = useState('');
-  const [activeMenuItem, setActiveMenuItem] = useState('Home');
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState([
     {
@@ -148,25 +147,7 @@ const PostDetailPage = () => {
       {/* Main Content */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="hidden lg:flex lg:w-[16%] bg-global-1 border-r-2 border-white border-opacity-60 p-5">
-          <nav className="flex flex-col gap-6 lg:gap-[2px] w-full">
-            {menuItems.map((item) => (
-              <button
-                key={item.name}
-                onClick={() => handleMenuClick(item.name)}
-                className={`flex justify-center items-center p-3 rounded-[10px] transition-all duration-200 lg:h-10 border-none cursor-pointer font-normal
-                ${activeMenuItem === item.name 
-                  ? 'bg-global-2 text-global-1' 
-                  : 'bg-global-1 text-sidebar-1 hover:bg-global-2 hover:text-global-1'
-                }`}
-              >
-                <span className="text-lg lg:text-3xl lg:leading-[38px]">
-                  {item.name}
-                </span>
-              </button>
-            ))}
-          </nav>
-        </aside>
+        <Sidebar/>
 
         {/* Post Detail Content */}
         <main className="flex-1 p-6 sm:p-6 lg:p-[44px_48px] flex justify-center">

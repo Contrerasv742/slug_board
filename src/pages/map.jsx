@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/common/Header.jsx';
+import Sidebar from '../components/common/Sidebar.jsx';
 
 const MapPage = () => {
+  const handleMenuClick = (menuItem) => {
+    setActiveMenuItem(menuItem);
+  };
+
   return (
-    <div className="w-full h-screen bg-global-1 font-ropa">
+    <div className="flex flex-col h-screen bg-global-1 font-ropa">
       {/* Header */}
       <Header 
         showSearch={true}
@@ -13,34 +18,23 @@ const MapPage = () => {
         userAvatar="/images/default-avatar.png"
       />
       
-      <button 
-        onClick={() => window.location.href = '/home'}
-        className="flex flex-row items-center justify-start
-        flex-shrink-0 bg-transparent border-none cursor-pointer
-        hover:opacity-80 transition-opacity duration-200 p-0"
-      >
-        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-[40px]
-          lg:h-[40px] bg-global-2 rounded-sm">
-          <img
-            src="/images/standing-sammy.png"
-            className="w-full h-full object-contain"
-            alt="Slug mascot"
+      {/* Main Content Container */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <Sidebar onMenuClick={handleMenuClick} />
+        
+        {/* Map Container */}
+        <div className="flex-1 relative">
+          <iframe 
+            src="https://maps.ucsc.edu/"
+            width="100%" 
+            height="100%"
+            title="UCSC Interactive Map"
+            className="border-none absolute inset-0"
+            loading="lazy"
           />
         </div>
-        <h1 className="text-global-4 font-ropa text-lg sm:text-xl
-          md:text-2xl lg:text-[28px] lg:leading-[30px] font-normal ml-2
-          sm:ml-3 lg:ml-[16px] text-starship-animated">
-          Slug Board
-        </h1>
-      </button>
-      {/* Embedded Map */}
-      <iframe 
-        src="https://maps.ucsc.edu/"
-        width="100%" 
-        height="100%"
-        title="UCSC Interactive Map"
-        className="border-none"
-      />
+      </div>
     </div>
   );
 };
