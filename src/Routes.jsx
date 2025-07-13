@@ -7,6 +7,7 @@ import HomePage from './pages/home.jsx';
 import CreatePostPage from './pages/create-post.jsx';
 import MapPage from './pages/map.jsx';
 import UserProfilePage from './pages/profile.jsx';
+import PostDetailPage from './pages/post.jsx';
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
         <Route path="/create-post" element={<CreatePostPage/>} />
         <Route path="/map" element={<MapPage/>} />
         <Route path="/profile" element={<UserProfilePage/>} />
+        <Route path="/post" element={<PostDetailPage/>} />
       </Routes>
     </Router>
   );
