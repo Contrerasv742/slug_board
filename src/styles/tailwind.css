@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Global Colors */
+    --global-bg-1: #262424;
+    --global-bg-2: #d9d9d9;
+    --global-bg-3: #ffffff;
+    --global-bg-4: #000000;
+    --global-bg-5: #c7c7c7;
+    --global-bg-9: #ffffffaa;
+    --global-text-1: #000000;
+    --global-text-2: #00000099;
+    --global-text-3: #454040;
+    --global-text-4: #ffffff;
+
+    /* EditText Colors */
+    --edittext-bg-1: #c7c7c7;
+    --edittext-text-1: #00000066;
+
+    /* Button Colors */
+    --button-bg-1: #131313;
+
+    /* Sidebar Colors */
+    --sidebar-text-1: #d9d9d9;
+  }
+}
+
+@layer utilities {
+  /* Global */
+  .bg-global-1 {
+    background-color: var(--global-bg-1);
+  }
+  .bg-global-2 {
+    background-color: var(--global-bg-2);
+  }
+  .bg-global-3 {
+    background-color: var(--global-bg-3);
+  }
+  .bg-global-4 {
+    background-color: var(--global-bg-4);
+  }
+  .bg-global-5 {
+    background-color: var(--global-bg-5);
+  }
+  .bg-global-6 {
+    background-color: var(--global-bg-6);
+  }
+  .bg-global-7 {
+    background-color: var(--global-bg-7);
+  }
+  .bg-global-8 {
+    background-color: var(--global-bg-8);
+  }
+  .bg-global-9 {
+    background-color: var(--global-bg-9);
+  }
+  .text-global-1 {
+    color: var(--global-text-1);
+  }
+  .text-global-2 {
+    color: var(--global-text-2);
+  }
+  .text-global-3 {
+    color: var(--global-text-3);
+  }
+  .text-global-4 {
+    color: var(--global-text-4);
+  }
+
+  /* EditText */
+  .bg-edittext-1 {
+    background-color: var(--edittext-bg-1);
+  }
+  .text-edittext-1 {
+    color: var(--edittext-text-1);
+  }
+
+  /* Button */
+  .bg-button-1 {
+    background-color: var(--button-bg-1);
+  }
+
+  /* Sidebar */
+  .text-sidebar-1 {
+    color: var(--sidebar-text-1);
+  }
+}
+
+/* Main Starship Gradient (Pink to Purple) */
+.bg-starship-gradient {
+  background: linear-gradient(135deg, #ff1493 0%, #ff69b4 25%, #da70d6 50%, #9370db 75%, #8a2be2 100%);
+}
+
+/* Alternative Starship Variations */
+.bg-starship-soft {
+  background: linear-gradient(135deg, #ff69b4 0%, #da70d6 50%, #9370db 100%);
+}
+
+.bg-starship-vivid {
+  background: linear-gradient(135deg, #ff1493 0%, #ff4500 25%, #ff69b4 50%, #da70d6 75%, #9370db 100%);
+}
+
+.bg-starship-purple {
+  background: linear-gradient(135deg, #da70d6 0%, #9370db 50%, #663399 100%);
+}
+
+/* Radial version (like spotlight effect) */
+.bg-starship-radial {
+  background: radial-gradient(circle at 30% 30%, #ff1493 0%, #ff69b4 25%, #da70d6 50%, #9370db 75%, #8a2be2 100%);
+}
+
+/* With subtle opacity for elegance */
+.bg-starship-elegant {
+  background: linear-gradient(135deg, rgba(255,20,147,0.9) 0%, rgba(255,105,180,0.9) 25%, rgba(218,112,214,0.9) 50%, rgba(147,112,219,0.9) 75%, rgba(138,43,226,0.9) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Animated gradient (optional) */
+.bg-starship-animated {
+  background: linear-gradient(135deg, #ff1493, #ff69b4, #da70d6, #9370db, #8a2be2);
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease infinite;
+}
+
+.text-starship-animated {
+  background: linear-gradient(135deg, #ff1493, #ff69b4, #da70d6, #9370db, #8a2be2);
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Text colors that work well with these gradients */
+.text-starship-contrast {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.text-starship-dark {
+  color: #2d1b69;
+}
+
+/* Button styles to complement the gradient */
+.btn-starship {
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.9) 100%);
+  color: #8a2be2;
+  border: 1px solid rgba(255,255,255,0.3);
+  font-weight: 600;
+}
+
+.btn-starship:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(138,43,226,0.3);
+}
