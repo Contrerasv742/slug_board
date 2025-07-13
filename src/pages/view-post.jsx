@@ -140,9 +140,14 @@ const PostDetailPage = () => {
         p-4 sm:p-6 lg:p-[16px_32px]">
         <div className="flex flex-row items-center justify-between w-full
           max-w-full mx-auto gap-4 sm:gap-6 lg:gap-8">
+
           {/* Logo Section */}
-          <div className="flex flex-row items-center justify-start
-            flex-shrink-0">
+          <button 
+            onClick={() => window.location.href = '/home'}
+            className="flex flex-row items-center justify-start
+              flex-shrink-0 bg-transparent border-none cursor-pointer
+              hover:opacity-80 transition-opacity duration-200 p-0"
+          >
             <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-[40px]
               lg:h-[40px] bg-global-2 rounded-sm">
               <img
@@ -156,7 +161,7 @@ const PostDetailPage = () => {
               sm:ml-3 lg:ml-[16px] text-starship-animated">
               Slug Board
             </h1>
-          </div>
+          </button>
 
           {/* Search Bar */}
           <div className="pl-[40px] w-[800px] max-w-[650px] header-search">
@@ -164,14 +169,18 @@ const PostDetailPage = () => {
               <img
                 src="/images/img_search.png"
                 alt="search"
-                className="absolute left-3 lg:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 lg:w-5 lg:h-5"
+                className="absolute left-3 lg:left-4 top-1/2 transform
+                -translate-y-1/2 w-4 h-4 lg:w-5 lg:h-5"
               />
               <input
                 type="text"
                 placeholder="Search Posts"
                 value={searchValue}
                 onChange={handleSearchChange}
-                className="w-full h-[40px] bg-global-2 text-global-1 rounded-[20px] border-none outline-none text-sm sm:text-base md:text-lg lg:text-xl lg:leading-[10px] py-[2px] sm:py-[4px] lg:py-[2px] pl-10 lg:pl-[45px] placeholder-gray-400"
+                className="w-full h-[40px] bg-global-2 text-global-1
+                rounded-[20px] border-none outline-none text-sm sm:text-base
+                md:text-lg lg:text-xl lg:leading-[10px] py-[2px] sm:py-[4px]
+                lg:py-[2px] pl-10 lg:pl-[45px] placeholder-gray-400"
               />
             </div>
           </div>

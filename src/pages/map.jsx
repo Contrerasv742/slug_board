@@ -4,26 +4,27 @@ const MapPage = () => {
   return (
     <div className="w-full h-screen bg-global-1 font-ropa">
       {/* Header */}
-      <header className="bg-global-1 border-b-2 border-white border-opacity-60 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-global-2 rounded-sm">
-              <img
-                src="/images/standing-sammy.png"
-                className="w-full h-full object-contain"
-                alt="Slug mascot"
-              />
-            </div>
-            <h1 className="text-global-4 font-ropa text-xl font-normal ml-3">
-              Campus Map
-            </h1>
-          </div>
-          <button className="bg-global-2 hover:bg-global-3 px-4 py-2 rounded-lg">
-            Back to Feed
-          </button>
-        </div>
-      </header>
       
+      <button 
+        onClick={() => window.location.href = '/home'}
+        className="flex flex-row items-center justify-start
+        flex-shrink-0 bg-transparent border-none cursor-pointer
+        hover:opacity-80 transition-opacity duration-200 p-0"
+      >
+        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-[40px]
+          lg:h-[40px] bg-global-2 rounded-sm">
+          <img
+            src="/images/standing-sammy.png"
+            className="w-full h-full object-contain"
+            alt="Slug mascot"
+          />
+        </div>
+        <h1 className="text-global-4 font-ropa text-lg sm:text-xl
+          md:text-2xl lg:text-[28px] lg:leading-[30px] font-normal ml-2
+          sm:ml-3 lg:ml-[16px] text-starship-animated">
+          Slug Board
+        </h1>
+      </button>
       {/* Embedded Map */}
       <iframe 
         src="https://maps.ucsc.edu/"

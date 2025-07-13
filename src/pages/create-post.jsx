@@ -112,8 +112,12 @@ ${className || 'bg-global-3 hover:bg-global-5'}`
           max-w-full mx-auto gap-4 sm:gap-6 lg:gap-8">
 
           {/* Logo Section */}
-          <div className="flex flex-row items-center justify-start
-            flex-shrink-0">
+          <button 
+            onClick={() => window.location.href = '/home'}
+            className="flex flex-row items-center justify-start
+              flex-shrink-0 bg-transparent border-none cursor-pointer
+              hover:opacity-80 transition-opacity duration-200 p-0"
+          >
             <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-[40px]
               lg:h-[40px] bg-global-2 rounded-sm">
               <img
@@ -127,7 +131,7 @@ ${className || 'bg-global-3 hover:bg-global-5'}`
               sm:ml-3 lg:ml-[16px] text-starship-animated">
               Slug Board
             </h1>
-          </div>
+          </button>
 
           {/* Search Bar */}
           <div className="pl-[40px] w-[800px] max-w-[650px] header-search">
@@ -180,7 +184,7 @@ ${className || 'bg-global-3 hover:bg-global-5'}`
 
             {/* Page Information */}
             <div className="mb-0 lg:mb-0 text-center">
-              <div className="inline-block px-6 py-3 rounded-[40px] mb-3
+              <div className="inline-block px-4 py-2 rounded-[40px] mb-3
                 lg:mb-2 bg-gradient-to-br from-white/[0.15] to-white/[0.05]
                 border border-white/[0.18]
                 shadow-[0_8px_32px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.2)]
@@ -193,7 +197,7 @@ ${className || 'bg-global-3 hover:bg-global-5'}`
                 before:to-transparent before:opacity-0 before:hover:opacity-100
                 before:transition-opacity before:duration-300">
                 <h1 className="text-[rgba(147,122,250,0.9)] text-2xl
-                  sm:text-3xl lg:text-[42px] lg:leading-tight font-light
+                  sm:text-3xl lg:text-[38px] lg:leading-tight font-light
                   drop-shadow-lg relative z-10">
                   Create a post below
                 </h1>
