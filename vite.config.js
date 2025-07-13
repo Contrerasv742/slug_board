@@ -2,11 +2,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import tagger from "@dhiwise/component-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(),tagger()],
+  plugins: [react()],
   build: {
     outDir: "build",
   },
