@@ -19,10 +19,44 @@ const CommentSection = ({ comments }) => {
     </button>
   );
 
+  const CollapseButton = ({ isCollapsed, onClick, hasReplies }) => {
+    if (!hasReplies) return null;
+    
+    return (
+      <button
+        onClick={onClick}
+        className="absolute left-0 lg:left-[17.5px] w-4 h-4 lg:w-5 lg:h-5
+        bg-transparent border-white border-solid border-[0.5px] hover:bg-gray-600 rounded-full flex items-center
+        justify-center transition-colors z-20 transform -translate-x-1/2
+        -translate-y-1/2" style={{ top: '54px' }}
+      >
+        <svg 
+          width="10" 
+          height="10" 
+          viewBox="0 0 10 10" 
+          className="w-2.5 h-2.5 lg:w-3 lg:h-3"
+        >
+          {isCollapsed ? (
+            // Plus sign
+            <>
+              <path d="M5 1V9M1 5H9" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+            </>
+          ) : (
+            // Minus sign
+            <path d="M1 5H9" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+          )}
+        </svg>
+      </button>
+    );
+  };
+
   const CommentItem = ({ comment, depth = 0, isLast = false, parentRef = null }) => {
     const commentRef = useRef(null);
     const [lineHeight, setLineHeight] = useState(0);
     const [shouldShowLine, setShouldShowLine] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const hasReplies = comment.replies && comment.replies.length > 0;
 
     useEffect(() => {
       if (depth > 0 && commentRef.current && parentRef?.current) {
@@ -58,6 +92,10 @@ const CommentSection = ({ comments }) => {
       }
     }, [depth, parentRef]);
 
+    const toggleCollapse = () => {
+      setIsCollapsed(!isCollapsed);
+    };
+
     return (
       <div className="relative" ref={commentRef}>
         {/* Threading lines - only show for nested comments */}
@@ -65,17 +103,18 @@ const CommentSection = ({ comments }) => {
           <>
             {/* Dynamic vertical line */}
             <div 
-              className="absolute left-0 lg:left-[17.5px] z-0"
+              className="absolute left-0 lg:left-[17px] z-0 threading-line"
               style={{
                 top: `-${lineHeight - 35}px`,
                 height: isLast ? `${lineHeight - 27}px` : `${lineHeight}px`,
                 width: '1px',
-                backgroundColor: 'rgb(75, 85, 99)'
+                backgroundColor: 'rgb(75, 85, 99)',
+                transition: 'all 0.2s ease'
               }}
             />
             
             {/* Horizontal connector line with curve */}
-            <div className="absolute top-0 lg:top-0 left-0 lg:left-[1px] z-0">
+            <div className="absolute top-0 lg:top-0 left-[1px] lg:-left-[1px] z-0">
               <svg 
                 width="40" 
                 height="20" 
@@ -83,18 +122,29 @@ const CommentSection = ({ comments }) => {
                 viewBox="0 0 40 20"
               >
                 <path
-                  d="M 17 0 L 17 12 C 17 16 21 16 26 16 L 40 16"
+                  className="threading-path"
+                  d="M 18.5 0 L 18.5 12 C 18.5 16 22.5 16 27.5 16 L 45 16"
                   stroke="rgb(75, 85, 99)"
                   strokeWidth="1"
                   fill="none"
+                  style={{ transition: 'all 0.2s ease' }}
                 />
               </svg>
             </div>
           </>
         )}
         
+        {/* Collapse/Expand button - positioned on the vertical line */}
+        {depth === 0 && (
+          <CollapseButton 
+            isCollapsed={isCollapsed} 
+            onClick={toggleCollapse} 
+            hasReplies={hasReplies}
+          />
+        )}
+        
         {/* Comment content */}
-        <div className={`${depth > 0 ? 'ml-10 lg:ml-12' : ''} mb-4 lg:mb-6 group relative z-10`}>
+        <div className={`${depth > 0 ? 'ml-10 lg:ml-12' : ''} mb-4 lg:mb-6 group relative z-10 hover-trigger`}>
           <div className="bg-transparent rounded-[20px] p-0 lg:p-0">
             {/* Comment Header */}
             <div className="flex items-center gap-3 mb-3">
@@ -132,7 +182,7 @@ const CommentSection = ({ comments }) => {
             </div>
 
             {/* Nested replies */}
-            {comment.replies && comment.replies.length > 0 && (
+            {hasReplies && !isCollapsed && (
               <div className="mt-2">
                 {comment.replies.map((reply, index) => (
                   <CommentItem 
@@ -153,6 +203,18 @@ const CommentSection = ({ comments }) => {
 
   return (
     <div className="bg-transparent min-h-screen p-6">
+      <style jsx>{`
+        .hover-trigger:hover .threading-line {
+          background-color: white !important;
+          width: 1px !important;
+        }
+        
+        .hover-trigger:hover .threading-path {
+          stroke: white !important;
+          stroke-width: 1 !important;
+        }
+      `}</style>
+      
       <div className="bg-transparent rounded-[25px] p-0 lg:p-0">
         <h3 className="text-white text-lg lg:text-[22px] font-normal mb-6">
           Comments ({comments.length})
