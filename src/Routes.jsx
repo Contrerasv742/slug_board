@@ -7,7 +7,7 @@ import HomePage from './pages/home.jsx';
 import CreatePostPage from './pages/create-post.jsx';
 import MapPage from './pages/map.jsx';
 import UserProfilePage from './pages/profile.jsx';
-import PostDetailPage from './pages/view-post.jsx';
+import PostDetailPage from './pages/post.jsx';
 
 const AppRoutes = () => {
   return (

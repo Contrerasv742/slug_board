@@ -60,9 +60,9 @@ lg:w-[40px] lg:h-[40px] rounded-[10px] lg:rounded-[20px] border-none
 cursor-pointer bg-global-3 hover:bg-global-5 transition-colors ${className}`}
     >
       <img 
-        src="/images/img_arrow.png"
+        src="/images/vote-arrow-black.png"
         alt={type === 'up' ? "upvote" : "downvote"}
-        className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-[32px] lg:h-[30px] ${type ===
+        className={`w-2 h-2 sm:w-4 sm:h-4 lg:w-[20px] lg:h-[20px] ${type ===
 'down' ? 'rotate-180' : ''}`}
       />
     </button>

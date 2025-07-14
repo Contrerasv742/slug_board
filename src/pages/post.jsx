@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import Header from '../components/common/Header.jsx';
 import Sidebar from '../components/common/Sidebar.jsx';
+import ExpandableComment from '../components/ui/Add-Comment.jsx';
+import CommentSection from '../components/ui/Comments-Section.jsx';
 
 const PostDetailPage = () => {
   const [newComment, setNewComment] = useState('');
+  const [searchValue, setSearchValue] = useState('');
+  const [activeMenuItem, setActiveMenuItem] = useState(''); 
   const [comments, setComments] = useState([
     {
       id: 1,
@@ -17,8 +21,26 @@ const PostDetailPage = () => {
           userName: 'Jamie Silva',
           timeAgo: '2 hours ago',
           content: 'Glad you like it! See you there 📸',
-          upvotes: 5
-        }
+          upvotes: 5,
+          replies: [
+            {
+              id: 11,
+              userName: 'Jamie Silva',
+              timeAgo: '2 hours ago',
+              content: 'Glad you like it! See you there 📸',
+              upvotes: 5,
+              replies: []
+            },
+          ]
+        },
+        {
+          id: 11,
+          userName: 'Jamie Silva',
+          timeAgo: '2 hours ago',
+          content: 'Glad you like it! See you there 📸',
+          upvotes: 5,
+          replies: []
+        },
       ]
     },
     {
@@ -27,7 +49,24 @@ const PostDetailPage = () => {
       timeAgo: '2 hours ago',
       content: 'Perfect timing! I\'ve been wanting to improve my sunset photography skills.',
       upvotes: 8,
-      replies: []
+      replies: [
+        {
+          id: 11,
+          userName: 'Jamie Silva',
+          timeAgo: '2 hours ago',
+          content: 'Glad you like it! See you there 📸',
+          upvotes: 5,
+          replies: []
+        },
+        {
+          id: 11,
+          userName: 'Jamie Silva',
+          timeAgo: '2 hours ago',
+          content: 'Glad you like it! See you there 📸',
+          upvotes: 5,
+          replies: []
+        },
+      ]
     },
     {
       id: 3,
@@ -74,24 +113,17 @@ const PostDetailPage = () => {
     }
   };
 
-  const menuItems = [
-    { name: 'Home', active: false },
-    { name: 'Map', active: false },
-    { name: 'Explore', active: false },
-    { name: 'Popular', active: false }
-  ];
-
   const VoteButton = ({ type, onClick, className = "" }) => (
     <button 
       onClick={onClick}
-      className={`flex justify-center items-center w-6 h-6 sm:w-8 sm:h-8 lg:w-[40px] lg:h-[40px] 
-                  rounded-[10px] lg:rounded-[20px] border-none cursor-pointer bg-global-3 
+      className={`flex justify-center items-center w-6 h-6 sm:w-8 sm:h-8 lg:w-[25px] lg:h-[25px] 
+                  rounded-[10px] lg:rounded-[20px] border-none cursor-pointer bg-transparent
                   hover:bg-global-5 transition-colors ${className}`}
     >
       <img 
-        src="/images/img_arrow.png"
+        src="/images/vote-arrow-white.png"
         alt={type === 'up' ? "upvote" : "downvote"}
-        className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-[32px] lg:h-[30px] ${type === 'down' ? 'rotate-180' : ''}`}
+        className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-[20px] lg:h-[20px] ${type === 'down' ? 'rotate-180' : ''}`}
       />
     </button>
   );
@@ -133,6 +165,8 @@ const PostDetailPage = () => {
     }
   };
 
+
+
   return (
     <div className="flex flex-col min-h-screen bg-global-1 font-ropa">
       {/* Header */}
@@ -142,23 +176,29 @@ const PostDetailPage = () => {
         userName="John Doe"
         userHandle="@johndoe"
         userAvatar="/images/default-avatar.png"
+        searchValue={searchValue}
+        onSearchChange={handleSearchChange}
       />
 
       {/* Main Content */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <Sidebar/>
+        <Sidebar 
+          activeMenuItem={activeMenuItem}
+          onMenuClick={handleMenuClick}
+        />
 
         {/* Post Detail Content */}
         <main className="flex-1 p-6 sm:p-6 lg:p-[44px_48px] flex justify-center">
           <div className="w-[95%] sm:w-[85%] lg:w-[80%] max-w-[800px] mx-auto">
             
             {/* Back Button */}
-            <button className="flex items-center gap-2 text-global-4 hover:text-purple-400 mb-6 transition-colors">
+            <button className="flex items-center gap-2 text-global-4
+              hover:text-purple-400 mb-6 transition-colors">
               <img 
-                src="/images/img_arrow.png"
+                src="/images/vote-arrow-white.png"
                 alt="back"
-                className="w-4 h-4 rotate-90"
+                className="w-2 h-2 sm:w-3 sm:h-3 lg:w-4 lg:h-4"
               />
               <span className="text-sm lg:text-[18px]">Back to Posts</span>
             </button>
@@ -172,24 +212,30 @@ const PostDetailPage = () => {
                   <span className="text-global-1 text-sm sm:text-base lg:text-[24px] lg:leading-[26px] font-normal">
                     {post.userName} •
                   </span>
-                  <span className="text-global-2 text-sm sm:text-base lg:text-[24px] lg:leading-[26px] font-normal">
+                  <span className="text-global-2 text-sm sm:text-base
+                    lg:text-[24px] lg:leading-[26px] font-normal">
                     {post.timeAgo}
                   </span>
                 </div>
               </div>
 
               {/* Post Title */}
-              <h1 className="text-global-1 text-lg sm:text-xl lg:text-[32px] lg:leading-[36px] font-normal mb-3 lg:mb-4">
+              <h1 className="text-global-1 text-lg sm:text-xl lg:text-[32px]
+                lg:leading-[36px] font-normal mb-3 lg:mb-4">
                 {post.title}
               </h1>
 
               {/* Post Description */}
-              <p className="text-global-1 text-sm sm:text-base lg:text-[18px] lg:leading-[24px] font-normal mb-4 lg:mb-6">
+              <p className="text-global-1 text-sm sm:text-base lg:text-[18px]
+                lg:leading-[24px] font-normal mb-4 lg:mb-6">
                 {post.description}
               </p>
 
               {/* Post Image */}
-              <div className="w-full h-64 sm:h-80 lg:h-[400px] bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600 rounded-[20px] sm:rounded-[25px] lg:rounded-[35px] mb-4 lg:mb-6 flex items-center justify-center">
+              <div className="w-full h-64 sm:h-80 lg:h-[400px]
+                bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600
+                rounded-[20px] sm:rounded-[25px] lg:rounded-[35px] mb-4 lg:mb-6
+                flex items-center justify-center">
                 <div className="text-white text-center">
                   <div className="text-4xl lg:text-6xl mb-2">🌅</div>
                   <div className="text-sm lg:text-lg">Sunset Photo Walk Image</div>
@@ -199,16 +245,19 @@ const PostDetailPage = () => {
               {/* Post Actions */}
               <div className="flex items-center gap-2 sm:gap-3 lg:gap-[12px] flex-wrap">
                 {/* Upvote Section */}
-                <div className="flex items-center gap-1 lg:gap-0 p-1 lg:p-0 bg-global-3 rounded-[15px] lg:rounded-[22px]">
+                <div className="flex items-center gap-1 lg:gap-0 p-1 lg:p-0
+                  bg-transparent"> 
                   <VoteButton type="up" onClick={() => console.log('upvote')} />
-                  <span className="text-global-1 text-xs sm:text-sm lg:text-[24px] lg:leading-[26px] font-normal px-2">
+                  <span className="text-global-1 text-xs sm:text-sm
+                    lg:text-[24px] lg:leading-[26px] font-normal px-2">
                     {post.upvotes}
                   </span>
                   <VoteButton type="down" onClick={() => console.log('downvote')} />
                 </div>
 
                 {/* Comment Count */}
-                <div className="flex items-center gap-2 px-3 py-2 bg-global-3 rounded-[15px] lg:rounded-[22px]">
+                <div className="flex items-center gap-2 px-3 py-2 bg-global-3
+                  rounded-[15px] lg:rounded-[22px]">
                   <img 
                     src="/images/img_speech_bubble.png"
                     alt="comments"
@@ -230,99 +279,14 @@ const PostDetailPage = () => {
             </article>
 
             {/* Comment Form */}
-            <div className="bg-global-2 rounded-[25px] p-4 lg:p-6 mb-6">
-              <h3 className="text-global-1 text-lg lg:text-[22px] font-normal mb-4">Add a comment</h3>
-              <div className="space-y-4">
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="What are your thoughts?"
-                  className="w-full h-24 lg:h-32 bg-global-3 text-global-1 rounded-[15px] p-3 lg:p-4 border-none outline-none resize-none text-sm lg:text-[16px] placeholder-gray-400"
-                />
-                <div className="flex justify-end">
-                  <button
-                    onClick={handleCommentSubmit}
-                    className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 lg:px-8 lg:py-3 rounded-[20px] transition-colors duration-200 text-sm lg:text-[16px]"
-                  >
-                    Post Comment
-                  </button>
-                </div>
-              </div>
-            </div>
+            <ExpandableComment 
+              newComment={newComment}
+              setNewComment={setNewComment}
+              onCommentSubmit={handleCommentSubmit}
+            />
 
             {/* Comments Section */}
-            <div className="bg-global-2 rounded-[25px] p-4 lg:p-6">
-              <h3 className="text-global-1 text-lg lg:text-[22px] font-normal mb-6">
-                Comments ({comments.length})
-              </h3>
-              
-              <div className="space-y-4 lg:space-y-6">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="bg-global-3 rounded-[20px] p-4 lg:p-5">
-                    {/* Comment Header */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full"></div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-global-1 text-sm lg:text-[18px] font-normal">
-                          {comment.userName}
-                        </span>
-                        <span className="text-gray-400 text-xs lg:text-[14px]">
-                          {comment.timeAgo}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Comment Content */}
-                    <p className="text-global-1 text-sm lg:text-[16px] lg:leading-[20px] mb-3">
-                      {comment.content}
-                    </p>
-
-                    {/* Comment Actions */}
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="flex items-center gap-1 bg-global-2 rounded-[10px] px-2 py-1">
-                        <VoteButton type="up" onClick={() => console.log('upvote comment')} />
-                        <span className="text-global-1 text-xs lg:text-[14px] px-1">
-                          {comment.upvotes}
-                        </span>
-                        <VoteButton type="down" onClick={() => console.log('downvote comment')} />
-                      </div>
-                      <button className="text-purple-400 hover:text-purple-300 text-xs lg:text-[14px]">
-                        Reply
-                      </button>
-                    </div>
-
-                    {/* Replies */}
-                    {comment.replies.length > 0 && (
-                      <div className="ml-4 lg:ml-6 space-y-3">
-                        {comment.replies.map((reply) => (
-                          <div key={reply.id} className="bg-global-2 rounded-[15px] p-3 lg:p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full"></div>
-                              <span className="text-global-1 text-xs lg:text-[16px] font-normal">
-                                {reply.userName}
-                              </span>
-                              <span className="text-gray-400 text-xs lg:text-[12px]">
-                                {reply.timeAgo}
-                              </span>
-                            </div>
-                            <p className="text-global-1 text-xs lg:text-[14px] mb-2">
-                              {reply.content}
-                            </p>
-                            <div className="flex items-center gap-1">
-                              <div className="flex items-center gap-1 bg-global-3 rounded-[8px] px-2 py-1">
-                                <span className="text-global-1 text-xs">↑</span>
-                                <span className="text-global-1 text-xs">{reply.upvotes}</span>
-                                <span className="text-global-1 text-xs">↓</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <CommentSection comments={comments} />
           </div>
         </main>
       </div>

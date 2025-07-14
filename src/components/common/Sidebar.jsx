@@ -4,26 +4,42 @@ import PropTypes from 'prop-types';
 
 const Sidebar = ({ isOpen = false, onClose, className = '' }) => {
   const location = useLocation();
-
+  
   const handleMenuClick = () => {
-    if (onClose) onClose(); // Close mobile menu if provided
+    // Close mobile menu if provided
+    if (onClose) onClose(); 
   };
-
+  
   const menuItems = [
-    { name: 'Home', path: '/', active: location.pathname === '/' },
-    { name: 'Map', path: '/map', active: location.pathname === '/map' },
-    { name: 'Explore', path: '/explore', active: location.pathname === '/explore' },
-    { name: 'Popular', path: '/popular', active: location.pathname === '/popular' },
-    { name: 'Profile', path: '/profile', active: location.pathname === '/profile' },
+    { 
+      name: 'Home', 
+      path: '/', 
+      active: (location.pathname === '/' || location.pathname === '/home') 
+    },
+    { 
+      name: 'Popular', 
+      path: '/popular', 
+      active: location.pathname === '/popular' 
+    },
+    { 
+      name: 'Explore', 
+      path: '/explore', 
+      active: location.pathname === '/explore' 
+    },
+    { 
+      name: 'Map', 
+      path: '/map', 
+      active: location.pathname === '/map' 
+    },
+    { 
+      name: 'Profile', 
+      path: '/profile', 
+      active: location.pathname === '/profile' 
+    },
   ];
-
-  // Function to check if a menu item is active
-  const isActiveMenuItem = (path) => {
-    return location.pathname === path;
-  };
-
+  
   return (
-    <aside className={`hidden lg:flex lg:w-[16%] bg-global-1 border-r-2
+    <aside className={`hidden lg:flex lg:w-[14%] bg-global-1 border-r-2
       border-white border-opacity-60 p-5 ${className}`}>
       <nav className="flex flex-col gap-6 lg:gap-[2px] w-full">
         {menuItems.map((item) => (
@@ -34,7 +50,7 @@ const Sidebar = ({ isOpen = false, onClose, className = '' }) => {
             className={`flex justify-center items-center p-3 rounded-[10px]
               transition-all duration-200 lg:h-10 border-none cursor-pointer 
               font-normal no-underline
-              ${isActiveMenuItem(item.path)
+              ${item.active
                 ? 'bg-global-2 text-global-1' 
                 : 'bg-global-1 text-sidebar-1 hover:bg-global-2 hover:text-global-1'
               }`}
