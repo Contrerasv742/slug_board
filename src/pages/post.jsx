@@ -24,7 +24,24 @@ const PostDetailPage = () => {
           upvotes: 5,
           replies: [
             {
-              id: 11,
+              id: 12,
+              userName: 'Jamie Silva',
+              timeAgo: '2 hours ago',
+              content: 'Glad you like it! See you there 📸',
+              upvotes: 5,
+              replies: [
+                {
+                  id: 22,
+                  userName: 'Jamie Silva',
+                  timeAgo: '2 hours ago',
+                  content: 'Glad you like it! See you there 📸',
+                  upvotes: 5,
+                  replies: []
+                },
+              ]
+            },
+            {
+              id: 34,
               userName: 'Jamie Silva',
               timeAgo: '2 hours ago',
               content: 'Glad you like it! See you there 📸',
@@ -34,7 +51,7 @@ const PostDetailPage = () => {
           ]
         },
         {
-          id: 11,
+          id: 13,
           userName: 'Jamie Silva',
           timeAgo: '2 hours ago',
           content: 'Glad you like it! See you there 📸',
@@ -51,7 +68,7 @@ const PostDetailPage = () => {
       upvotes: 8,
       replies: [
         {
-          id: 11,
+          id: 8,
           userName: 'Jamie Silva',
           timeAgo: '2 hours ago',
           content: 'Glad you like it! See you there 📸',
@@ -59,7 +76,7 @@ const PostDetailPage = () => {
           replies: []
         },
         {
-          id: 11,
+          id: 18,
           userName: 'Jamie Silva',
           timeAgo: '2 hours ago',
           content: 'Glad you like it! See you there 📸',
