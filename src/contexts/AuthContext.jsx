@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { AuthService, authStateListener } from '../services/authService';
+import { runDatabaseSetup } from '../utils/databaseSetup';
 
 const AuthContext = createContext();
 
@@ -20,6 +21,23 @@ export const AuthProvider = ({ children }) => {
   const [userRSVPs, setUserRSVPs] = useState([]);
 
   useEffect(() => {
+    // Run database setup check
+    const initializeAuth = async () => {
+      try {
+        // Check database setup
+        const dbSetupOk = await runDatabaseSetup();
+        if (!dbSetupOk) {
+          console.warn('Database setup check failed - user storage may not work properly');
+        }
+        
+        // Get initial session
+        await getInitialSession();
+      } catch (error) {
+        console.error('Error in auth initialization:', error);
+        setLoading(false);
+      }
+    };
+
     // Get initial session
     const getInitialSession = async () => {
       try {
@@ -30,9 +48,44 @@ export const AuthProvider = ({ children }) => {
         setUser(user);
         
         if (user) {
+          console.log('Initial session - user found:', user.id);
+          
           // Get user data from users table
-          const { data: userInfo } = await AuthService.getUserData(user.id);
-          setUserData(userInfo);
+          const { data: userInfo, error: userError } = await AuthService.getUserData(user.id);
+          
+          if (userError && userError.code !== 'PGRST116') {
+            console.error('Error fetching user data:', userError);
+          }
+          
+          // If user doesn't exist in our database, create them
+          if (!userInfo && user) {
+            console.log('Creating new user in database (initial session):', user.id);
+            const userData = {
+              email: user.email,
+              created_at: new Date().toISOString(),
+              provider: user.app_metadata?.provider || 'email',
+              last_sign_in: new Date().toISOString(),
+              full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+              avatar_url: user.user_metadata?.avatar_url || null
+            };
+            
+            const { data: storedUser, error: storeError } = await AuthService.storeUserData(user.id, userData);
+            if (storeError) {
+              console.error('Error storing user data:', storeError);
+            } else {
+              console.log('User data stored successfully (initial session):', storedUser);
+              setUserData(userData);
+            }
+          } else if (userInfo) {
+            // Update last sign in for existing users
+            const { error: updateError } = await AuthService.updateUserData(user.id, {
+              last_sign_in: new Date().toISOString()
+            });
+            if (updateError) {
+              console.error('Error updating last sign in:', updateError);
+            }
+            setUserData(userInfo);
+          }
           
           // Get user events and RSVPs
           const { data: events } = await AuthService.getUserEvents(user.id);
@@ -48,24 +101,62 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    getInitialSession();
+    initializeAuth();
 
     // Set up auth state listener
     const { data: { subscription } } = authStateListener(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        // Get user data when user signs in
-        const { data: userInfo } = await AuthService.getUserData(session.user.id);
-        setUserData(userInfo);
-        
-        // Get user events and RSVPs
-        const { data: events } = await AuthService.getUserEvents(session.user.id);
-        const { data: rsvps } = await AuthService.getUserRSVPs(session.user.id);
-        
-        setUserEvents(events || []);
-        setUserRSVPs(rsvps || []);
+        try {
+          // Get user data when user signs in
+          const { data: userInfo, error: userError } = await AuthService.getUserData(session.user.id);
+          
+          if (userError && userError.code !== 'PGRST116') {
+            console.error('Error fetching user data:', userError);
+          }
+          
+          // If user doesn't exist in our database, create them
+          if (!userInfo && session.user) {
+            console.log('Creating new user in database:', session.user.id);
+            const userData = {
+              email: session.user.email,
+              created_at: new Date().toISOString(),
+              provider: session.user.app_metadata?.provider || 'email',
+              last_sign_in: new Date().toISOString(),
+              full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || null,
+              avatar_url: session.user.user_metadata?.avatar_url || null
+            };
+            
+            const { data: storedUser, error: storeError } = await AuthService.storeUserData(session.user.id, userData);
+            if (storeError) {
+              console.error('Error storing user data:', storeError);
+            } else {
+              console.log('User data stored successfully:', storedUser);
+              setUserData(userData);
+            }
+          } else if (userInfo) {
+            // Update last sign in for existing users
+            const { error: updateError } = await AuthService.updateUserData(session.user.id, {
+              last_sign_in: new Date().toISOString()
+            });
+            if (updateError) {
+              console.error('Error updating last sign in:', updateError);
+            }
+            setUserData(userInfo);
+          }
+          
+          // Get user events and RSVPs
+          const { data: events } = await AuthService.getUserEvents(session.user.id);
+          const { data: rsvps } = await AuthService.getUserRSVPs(session.user.id);
+          
+          setUserEvents(events || []);
+          setUserRSVPs(rsvps || []);
+        } catch (error) {
+          console.error('Error in auth state listener:', error);
+        }
       } else {
         setUserData(null);
         setUserEvents([]);
@@ -91,6 +182,30 @@ export const AuthProvider = ({ children }) => {
     const { data, error } = await AuthService.signIn(email, password);
     if (!error && data?.user) {
       setUser(data.user);
+      
+      // Ensure user is stored in our database
+      try {
+        const { data: userInfo } = await AuthService.getUserData(data.user.id);
+        if (!userInfo) {
+          console.log('Creating new user in database (sign in):', data.user.id);
+          const userData = {
+            email: data.user.email,
+            created_at: new Date().toISOString(),
+            provider: 'email',
+            last_sign_in: new Date().toISOString()
+          };
+          
+          const { error: storeError } = await AuthService.storeUserData(data.user.id, userData);
+          if (storeError) {
+            console.error('Error storing user data:', storeError);
+          } else {
+            console.log('User data stored successfully (sign in)');
+          }
+        }
+      } catch (error) {
+        console.error('Error ensuring user storage:', error);
+      }
+      
       // User data will be set by the auth state listener
     }
     return { data, error };

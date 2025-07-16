@@ -52,10 +52,15 @@ const Login = () => {
   const handleSocialLogin = async (provider) => {
     setLoading(true);
     try {
-      const { error } = await signInWithProvider(provider);
+      const { data, error } = await signInWithProvider(provider);
       if (error) throw error;
+      
+      // For OAuth providers, the redirect will happen automatically
+      // We don't need to navigate manually as Supabase handles the redirect
+      console.log(`${provider} login initiated successfully`);
     } catch (error) {
-      alert(error.message);
+      console.error(`${provider} login error:`, error);
+      alert(`Failed to sign in with ${provider}: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -254,14 +259,20 @@ const Login = () => {
                 <button
                     key={provider}
                     onClick={() => handleSocialLogin(provider)}
-                    className="flex items-center justify-center bg-global-2 rounded-[8px] shadow-md hover:shadow-lg transition-shadow duration-200 w-[90px] h-[32px]"
+                    className={`flex items-center justify-center bg-global-2 rounded-[8px] shadow-md hover:shadow-lg transition-all duration-200 w-[90px] h-[32px] ${
+                      loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-global-3'
+                    }`}
                     disabled={loading}
                 >
-                  <img
-                      src={`/images/${provider.toLowerCase()}.png`}
-                      alt={`Sign in with ${provider}`}
-                      className="max-w-[70%] max-h-[70%] object-contain"
-                  />
+                  {loading ? (
+                    <div className="w-4 h-4 border-2 border-global-1 border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <img
+                        src={`/images/${provider.toLowerCase()}.png`}
+                        alt={`Sign in with ${provider}`}
+                        className="max-w-[70%] max-h-[70%] object-contain"
+                    />
+                  )}
                 </button>
             ))}
           </div>

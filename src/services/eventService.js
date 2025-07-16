@@ -5,15 +5,36 @@ export class EventService {
   static async getAllEvents() {
     try {
       const { data, error } = await supabase
-        .from('events')
-        .select(`
-          *,
-          users (id, full_name, email)
-        `)
-        .order('created_at', { ascending: false });
+        .from('Events')
+        .select('*')
+        .order('start_time', { ascending: true }); // Use start_time instead of created_at
 
       if (error) throw error;
-      return { data, error: null };
+      
+      // If we have events, fetch user data for each event
+      if (data && data.length > 0) {
+        const eventsWithUsers = await Promise.all(
+          data.map(async (event) => {
+            if (event.host_id) { // Use host_id instead of user_id
+              const { data: userData } = await supabase
+                .from('users')
+                .select('id, full_name, email')
+                .eq('id', event.host_id)
+                .single();
+              
+              return {
+                ...event,
+                users: userData || null
+              };
+            }
+            return event;
+          })
+        );
+        
+        return { data: eventsWithUsers, error: null };
+      }
+      
+      return { data: data || [], error: null };
     } catch (error) {
       return { data: null, error };
     }
@@ -23,20 +44,29 @@ export class EventService {
   static async getEventById(eventId) {
     try {
       const { data, error } = await supabase
-        .from('events')
-        .select(`
-          *,
-          users (id, full_name, email),
-          RSVPs (
-            *,
-            users (id, full_name, email)
-          )
-        `)
+        .from('Events')
+        .select('*')
         .eq('id', eventId)
         .single();
 
       if (error) throw error;
-      return { data, error: null };
+      
+      // Fetch user data for the event
+      let eventWithUser = data;
+      if (data && data.host_id) { // Use host_id instead of user_id
+        const { data: userData } = await supabase
+          .from('users')
+          .select('id, full_name, email')
+          .eq('id', data.host_id)
+          .single();
+        
+        eventWithUser = {
+          ...data,
+          users: userData || null
+        };
+      }
+      
+      return { data: eventWithUser, error: null };
     } catch (error) {
       return { data: null, error };
     }
@@ -46,7 +76,7 @@ export class EventService {
   static async createEvent(eventData) {
     try {
       const { data, error } = await supabase
-        .from('events')
+        .from('Events')
         .insert(eventData)
         .select()
         .single();
@@ -62,11 +92,8 @@ export class EventService {
   static async updateEvent(eventId, updates) {
     try {
       const { data, error } = await supabase
-        .from('events')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .from('Events')
+        .update(updates)
         .eq('id', eventId)
         .select()
         .single();
@@ -82,7 +109,7 @@ export class EventService {
   static async deleteEvent(eventId) {
     try {
       const { error } = await supabase
-        .from('events')
+        .from('Events')
         .delete()
         .eq('id', eventId);
 
@@ -94,14 +121,13 @@ export class EventService {
   }
 
   // RSVP to an event
-  static async rsvpToEvent(userId, eventId, status = 'going') {
+  static async rsvpToEvent(userId, eventId) {
     try {
       const { data, error } = await supabase
         .from('RSVPs')
         .upsert({
           user_id: userId,
           event_id: eventId,
-          status: status,
           created_at: new Date().toISOString()
         })
         .select()
@@ -135,14 +161,35 @@ export class EventService {
     try {
       const { data, error } = await supabase
         .from('RSVPs')
-        .select(`
-          *,
-          users (id, full_name, email)
-        `)
+        .select('*')
         .eq('event_id', eventId);
 
       if (error) throw error;
-      return { data, error: null };
+      
+      // If we have RSVPs, fetch user data for each RSVP
+      if (data && data.length > 0) {
+        const rsvpsWithUsers = await Promise.all(
+          data.map(async (rsvp) => {
+            if (rsvp.user_id) {
+              const { data: userData } = await supabase
+                .from('users')
+                .select('id, full_name, email')
+                .eq('id', rsvp.user_id)
+                .single();
+              
+              return {
+                ...rsvp,
+                users: userData || null
+              };
+            }
+            return rsvp;
+          })
+        );
+        
+        return { data: rsvpsWithUsers, error: null };
+      }
+      
+      return { data: data || [], error: null };
     } catch (error) {
       return { data: null, error };
     }
@@ -153,14 +200,35 @@ export class EventService {
     try {
       const { data, error } = await supabase
         .from('RSVPs')
-        .select(`
-          *,
-          events (*)
-        `)
+        .select('*')
         .eq('user_id', userId);
 
       if (error) throw error;
-      return { data, error: null };
+      
+      // If we have RSVPs, fetch event data for each RSVP
+      if (data && data.length > 0) {
+        const rsvpsWithEvents = await Promise.all(
+          data.map(async (rsvp) => {
+            if (rsvp.event_id) {
+              const { data: eventData } = await supabase
+                .from('Events') // Use correct table name with capital E
+                .select('*')
+                .eq('id', rsvp.event_id)
+                .single();
+              
+              return {
+                ...rsvp,
+                events: eventData || null
+              };
+            }
+            return rsvp;
+          })
+        );
+        
+        return { data: rsvpsWithEvents, error: null };
+      }
+      
+      return { data: data || [], error: null };
     } catch (error) {
       return { data: null, error };
     }
@@ -170,16 +238,37 @@ export class EventService {
   static async searchEvents(searchTerm) {
     try {
       const { data, error } = await supabase
-        .from('events')
-        .select(`
-          *,
-          users (id, full_name, email)
-        `)
+        .from('Events')
+        .select('*')
         .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
-        .order('created_at', { ascending: false });
+        .order('start_time', { ascending: true }); // Use start_time instead of created_at
 
       if (error) throw error;
-      return { data, error: null };
+      
+      // If we have events, fetch user data for each event
+      if (data && data.length > 0) {
+        const eventsWithUsers = await Promise.all(
+          data.map(async (event) => {
+            if (event.host_id) { // Use host_id instead of user_id
+              const { data: userData } = await supabase
+                .from('users')
+                .select('id, full_name, email')
+                .eq('id', event.host_id)
+                .single();
+              
+              return {
+                ...event,
+                users: userData || null
+              };
+            }
+            return event;
+          })
+        );
+        
+        return { data: eventsWithUsers, error: null };
+      }
+      
+      return { data: data || [], error: null };
     } catch (error) {
       return { data: null, error };
     }
@@ -189,16 +278,37 @@ export class EventService {
   static async getEventsByCategory(category) {
     try {
       const { data, error } = await supabase
-        .from('events')
-        .select(`
-          *,
-          users (id, full_name, email)
-        `)
-        .eq('category', category)
-        .order('created_at', { ascending: false });
+        .from('Events')
+        .select('*')
+        .eq('college_tag', category) // Use college_tag instead of category
+        .order('start_time', { ascending: true }); // Use start_time instead of created_at
 
       if (error) throw error;
-      return { data, error: null };
+      
+      // If we have events, fetch user data for each event
+      if (data && data.length > 0) {
+        const eventsWithUsers = await Promise.all(
+          data.map(async (event) => {
+            if (event.host_id) { // Use host_id instead of user_id
+              const { data: userData } = await supabase
+                .from('users')
+                .select('id, full_name, email')
+                .eq('id', event.host_id)
+                .single();
+              
+              return {
+                ...event,
+                users: userData || null
+              };
+            }
+            return event;
+          })
+        );
+        
+        return { data: eventsWithUsers, error: null };
+      }
+      
+      return { data: data || [], error: null };
     } catch (error) {
       return { data: null, error };
     }
@@ -208,16 +318,37 @@ export class EventService {
   static async getUpcomingEvents() {
     try {
       const { data, error } = await supabase
-        .from('events')
-        .select(`
-          *,
-          users (id, full_name, email)
-        `)
-        .gte('event_date', new Date().toISOString())
-        .order('event_date', { ascending: true });
+        .from('Events')
+        .select('*')
+        .gte('start_time', new Date().toISOString())
+        .order('start_time', { ascending: true });
 
       if (error) throw error;
-      return { data, error: null };
+      
+      // If we have events, fetch user data for each event
+      if (data && data.length > 0) {
+        const eventsWithUsers = await Promise.all(
+          data.map(async (event) => {
+            if (event.host_id) { // Use host_id instead of user_id
+              const { data: userData } = await supabase
+                .from('users')
+                .select('id, full_name, email')
+                .eq('id', event.host_id)
+                .single();
+              
+              return {
+                ...event,
+                users: userData || null
+              };
+            }
+            return event;
+          })
+        );
+        
+        return { data: eventsWithUsers, error: null };
+      }
+      
+      return { data: data || [], error: null };
     } catch (error) {
       return { data: null, error };
     }

@@ -81,17 +81,27 @@ export class AuthService {
   // Store user data in users table
   static async storeUserData(uid, userData) {
     try {
+      console.log('Storing user data for:', uid, userData);
+      
       const { data, error } = await supabase
         .from('users')
         .upsert({
           id: uid,
           ...userData,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'id'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error in storeUserData:', error);
+        throw error;
+      }
+      
+      console.log('User data stored successfully:', data);
       return { data, error: null };
     } catch (error) {
+      console.error('Exception in storeUserData:', error);
       return { data: null, error };
     }
   }
@@ -134,9 +144,9 @@ export class AuthService {
   static async getUserEvents(uid) {
     try {
       const { data, error } = await supabase
-        .from('events')
+        .from('Events')
         .select('*')
-        .eq('user_id', uid);
+        .eq('host_id', uid); // Use host_id instead of user_id
 
       if (error) throw error;
       return { data, error: null };
@@ -152,7 +162,7 @@ export class AuthService {
         .from('RSVPs')
         .select(`
           *,
-          events (*)
+          Events (*)
         `)
         .eq('user_id', uid);
 
@@ -167,7 +177,7 @@ export class AuthService {
   static async createEvent(eventData) {
     try {
       const { data, error } = await supabase
-        .from('events')
+        .from('Events')
         .insert(eventData);
 
       if (error) throw error;
@@ -178,14 +188,13 @@ export class AuthService {
   }
 
   // RSVP to an event
-  static async rsvpToEvent(userId, eventId, status = 'going') {
+  static async rsvpToEvent(userId, eventId) {
     try {
       const { data, error } = await supabase
         .from('RSVPs')
         .upsert({
           user_id: userId,
           event_id: eventId,
-          status: status,
           created_at: new Date().toISOString()
         });
 
@@ -227,17 +236,32 @@ export class AuthService {
   // Social login
   static async signInWithProvider(provider) {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: provider.toLowerCase(),
         options: {
-          redirectTo: window.location.origin + '/home'
+          redirectTo: window.location.origin + '/home',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         }
       });
 
       if (error) throw error;
-      return { error: null };
+      
+      // If we have user data from the OAuth response, store it
+      if (data?.user) {
+        await this.storeUserData(data.user.id, {
+          email: data.user.email,
+          created_at: new Date().toISOString(),
+          provider: provider.toLowerCase(),
+          last_sign_in: new Date().toISOString()
+        });
+      }
+      
+      return { data, error: null };
     } catch (error) {
-      return { error };
+      return { data: null, error };
     }
   }
 }
