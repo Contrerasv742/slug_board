@@ -25,7 +25,6 @@ const UpVotesSection = ({
   const arrow_size = small ? "lg:w-[16px] lg:h-[16px] " :
                              "lg:w-[20px] lg:h-[20px] ";
 
-
   const VoteButton = ({ type, onClick, rotate }) => (
     <button
       onClick={type === 'up' ? upvote_action : downvote_action}

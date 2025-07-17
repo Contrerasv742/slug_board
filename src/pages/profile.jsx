@@ -6,11 +6,11 @@ const UserProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const personalityTraits = [
-    { name: 'Extrovert', value: 85, color: 'bg-red-500' },
-    { name: 'Creative', value: 72, color: 'bg-orange-500' },
-    { name: 'Analytical', value: 60, color: 'bg-yellow-500' },
-    { name: 'Adventurous', value: 90, color: 'bg-green-500' },
-    { name: 'Social', value: 78, color: 'bg-blue-500' }
+    { name: 'Extrovert', value: 9, color: 'bg-red-500' },
+    { name: 'Creative', value: 7, color: 'bg-orange-500' },
+    { name: 'Analytical', value: 6, color: 'bg-yellow-500' },
+    { name: 'Adventurous', value: 10, color: 'bg-green-500' },
+    { name: 'Social', value: 8, color: 'bg-blue-500' }
   ];
 
   const goals = [
@@ -188,7 +188,7 @@ const UserProfilePage = () => {
               <div className="lg:col-span-8 space-y-6 h-full">
 
                 {/* Recent Activity */}
-                <div className="bg-global-2 rounded-[25px] p-6 lg:p-[24px]">
+                <div className="bg-global-2 rounded-[25px] p-6 lg:p-[32px]">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-global-1 text-xl lg:text-[24px]
                       font-normal">Recent Posts</h3>
@@ -232,31 +232,31 @@ const UserProfilePage = () => {
                   </div>
                 </div>
 
-                  {/* Personality Traits */}
-                  <div className="bg-global-2 rounded-[25px] p-6 lg:p-[24px]">
-                    <h3 className="text-global-1 text-xl lg:text-[24px]
-                      font-normal mb-4">Personality</h3>
-                    <div className="space-y-3">
-                      {personalityTraits.map((trait, index) => (
-                        <div key={index}>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-global-1 text-sm
-                              lg:text-[16px]">{trait.name}</span>
-                            <span className="text-gray-400 text-sm
-                              lg:text-[14px]">{trait.value}%</span>
-                          </div>
-                          <div className="w-full bg-global-3 rounded-full h-2">
-                            <div 
-                              className="bg-gradient-to-r from-purple-500
-                              to-blue-500 h-2 rounded-full transition-all
-                              duration-500"
-                              style={{ width: `${trait.value}%` }}
-                            ></div>
-                          </div>
+                {/* Personality Traits */}
+                <div className="bg-global-2 rounded-[25px] p-6 lg:p-[32px]">
+                  <h3 className="text-global-1 text-xl lg:text-[24px]
+                    font-normal mb-4">Personality</h3>
+                  <div className="space-y-[23px]">
+                    {personalityTraits.map((trait, index) => (
+                      <div key={index}>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-global-1 text-sm
+                            lg:text-[16px]">{trait.name}</span>
+                          <span className="text-gray-400 text-sm
+                            lg:text-[14px]">{trait.value}/10</span>
                         </div>
-                      ))}
-                    </div>
+                        <div className="w-full bg-global-3 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-purple-500
+                            to-blue-500 h-2 rounded-full transition-all
+                            duration-500"
+                            style={{ width: `${trait.value * 10}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                </div>
 
               </div>
             </div>

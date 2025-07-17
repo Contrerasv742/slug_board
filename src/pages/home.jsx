@@ -104,7 +104,7 @@ const HomePage = () => {
                   {post.description}
                 </h4>
 
-                {/* Post Content Area - Reduced Height */}
+                {/* Post Image */}
                 <div className="w-full h-32 sm:h-40 lg:h-[320px] bg-global-5
                   rounded-[20px] sm:rounded-[25px] lg:rounded-[35px] mb-3
                   lg:mb-[20px]">

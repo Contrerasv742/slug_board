@@ -203,14 +203,9 @@ const PostDetailPage = () => {
               </p>
 
               {/* Post Image */}
-              <div className="w-full h-64 sm:h-80 lg:h-[400px]
-                bg-gradient-to-br from-orange-400 via-pink-500 to-purple-600
-                rounded-[20px] sm:rounded-[25px] lg:rounded-[35px] mb-4 lg:mb-6
-                flex items-center justify-center">
-                <div className="text-white text-center">
-                  <div className="text-4xl lg:text-6xl mb-2">🌅</div>
-                  <div className="text-sm lg:text-lg">Sunset Photo Walk Image</div>
-                </div>
+              <div className="w-full h-32 sm:h-40 lg:h-[320px] bg-global-5
+                rounded-[20px] sm:rounded-[25px] lg:rounded-[35px] mb-3
+                lg:mb-[20px]">
               </div>
 
               {/* Post Actions */}
