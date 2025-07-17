@@ -4,20 +4,10 @@ import Sidebar from '../components/common/Sidebar.jsx';
 import '../styles/home.css'
 
 const CreatePostPage = () => {
-  const [searchValue, setSearchValue] = useState('');
-  const [activeMenuItem, setActiveMenuItem] = useState('create-post');
   const [postTitle, setPostTitle] = useState('');
   const [postDescription, setPostDescription] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-
-  const handleSearchChange = (e) => {
-    setSearchValue(e.target.value);
-  };
-
-  const handleMenuClick = (menuItem) => {
-    setActiveMenuItem(menuItem);
-  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -36,13 +26,6 @@ const CreatePostPage = () => {
   const handleImageClick = () => {
     document.getElementById('image-upload-input').click();
   };
-
-  const menuItems = [
-    { name: 'Home', active: false },
-    { name: 'Map', active: false },
-    { name: 'Explore', active: false },
-    { name: 'Popular', active: false }
-  ];
 
   const VoteButton = ({ type, onClick, className = "" }) => (
     <button 

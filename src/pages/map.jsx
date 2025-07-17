@@ -1,12 +1,7 @@
-import React, { useState } from 'react';
 import Header from '../components/common/Header.jsx';
 import Sidebar from '../components/common/Sidebar.jsx';
 
 const MapPage = () => {
-  const handleMenuClick = (menuItem) => {
-    setActiveMenuItem(menuItem);
-  };
-
   return (
     <div className="flex flex-col h-screen bg-global-1 font-ropa">
       {/* Header */}

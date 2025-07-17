@@ -5,21 +5,6 @@ import Sidebar from '../components/common/Sidebar.jsx';
 const UserProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleSearchChange = (e) => {
-    setSearchValue(e.target.value);
-  };
-
-  const handleMenuClick = (menuItem) => {
-    setActiveMenuItem(menuItem);
-  };
-
-  const menuItems = [
-    { name: 'Home', active: false },
-    { name: 'Map', active: false },
-    { name: 'Explore', active: false },
-    { name: 'Popular', active: false }
-  ];
-
   const personalityTraits = [
     { name: 'Extrovert', value: 85, color: 'bg-red-500' },
     { name: 'Creative', value: 72, color: 'bg-orange-500' },

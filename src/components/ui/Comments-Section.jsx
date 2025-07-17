@@ -1,23 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
+import UpVotesSection from './Vote-Buttons.jsx';
 
 const CommentSection = ({ comments }) => {
-  const VoteButton = ({ type, onClick, className = "" }) => (
-    <button 
-      onClick={onClick}
-      className={`flex justify-center items-center w-6 h-6 sm:w-8 sm:h-8 lg:w-[25px] lg:h-[25px] 
-                  rounded-[10px] lg:rounded-[20px] border-none cursor-pointer bg-transparent
-                  hover:bg-gray-700 transition-colors ${className}`}
-    >
-      <svg 
-        width="16" 
-        height="16" 
-        viewBox="0 0 16 16" 
-        className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-[20px] lg:h-[20px] ${type === 'down' ? 'rotate-180' : ''}`}
-      >
-        <path d="M8 2L12 6H4L8 2Z" fill="white" />
-      </svg>
-    </button>
-  );
 
   const CollapseButton = ({ isCollapsed, onClick, hasReplies }) => {
     if (!hasReplies) return null;
@@ -168,13 +152,11 @@ const CommentSection = ({ comments }) => {
 
               {/* Comment Actions */}
               <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center gap-1 bg-transparent rounded-[10px] px-2 py-1">
-                  <VoteButton type="up" onClick={() => console.log('upvote comment')} />
-                  <span className="text-white text-xs lg:text-[14px] px-1">
-                    {comment.upvotes}
-                  </span>
-                  <VoteButton type="down" onClick={() => console.log('downvote comment')} />
-                </div>
+                <UpVotesSection
+                  upvotes={comment.upvotes}
+                  light={false}
+                  small={true}
+                />
                 <button className="text-purple-400 hover:text-purple-300 text-xs lg:text-[14px]">
                   Reply
                 </button>
@@ -203,7 +185,7 @@ const CommentSection = ({ comments }) => {
 
   return (
     <div className="bg-transparent min-h-screen p-6">
-      <style jsx>{`
+      <style>{`
         .hover-trigger:hover .threading-line {
           background-color: white !important;
           width: 1px !important;

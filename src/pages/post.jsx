@@ -3,6 +3,8 @@ import Header from '../components/common/Header.jsx';
 import Sidebar from '../components/common/Sidebar.jsx';
 import ExpandableComment from '../components/ui/Add-Comment.jsx';
 import CommentSection from '../components/ui/Comments-Section.jsx';
+import UpVotesSection from '../components/ui/Vote-Buttons.jsx';
+import ActionButton from '../components/ui/Action-Button.jsx';
 
 const PostDetailPage = () => {
   const [newComment, setNewComment] = useState('');
@@ -130,60 +132,6 @@ const PostDetailPage = () => {
     }
   };
 
-  const VoteButton = ({ type, onClick, className = "" }) => (
-    <button 
-      onClick={onClick}
-      className={`flex justify-center items-center w-6 h-6 sm:w-8 sm:h-8 lg:w-[25px] lg:h-[25px] 
-                  rounded-[10px] lg:rounded-[20px] border-none cursor-pointer bg-transparent
-                  hover:bg-global-5 transition-colors ${className}`}
-    >
-      <img 
-        src="/images/vote-arrow-white.png"
-        alt={type === 'up' ? "upvote" : "downvote"}
-        className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-[20px] lg:h-[20px] ${type === 'down' ? 'rotate-180' : ''}`}
-      />
-    </button>
-  );
-
-  const ActionButton = ({ type, onClick, children, className = "" }) => {
-    const baseClasses = "flex justify-center items-center border-none cursor-pointer bg-global-3 hover:bg-global-5 transition-colors";
-    
-    if (type === 'comment') {
-      return (
-        <button 
-          onClick={onClick}
-          className={`${baseClasses} w-10 h-8 sm:w-12 sm:h-10 lg:w-[50px] lg:h-[40px] rounded-[15px] lg:rounded-[20px] p-1 lg:p-[3px] ${className}`}
-        >
-          <img 
-            src="/images/img_speech_bubble.png"
-            alt="comments"
-            className="w-5 h-4 sm:w-6 sm:h-5 lg:w-[30px] lg:h-[30px]"
-          />
-        </button>
-      );
-    }
-    
-    if (type === 'share') {
-      return (
-        <button 
-          onClick={onClick}
-          className={`${baseClasses} gap-1 lg:gap-[4px] px-2 py-2 sm:px-3 lg:px-4 lg:py-[3px] rounded-[15px] lg:rounded-[22px] ${className}`}
-        >
-          <img 
-            src="/images/share_arrow.png"
-            alt="share"
-            className="w-3 h-3 sm:w-4 sm:h-4 lg:w-[32px] lg:h-[32px]"
-          />
-          <span className="text-global-1 text-xs sm:text-sm lg:text-[24px] lg:leading-[26px] font-normal">
-            {children}
-          </span>
-        </button>
-      );
-    }
-  };
-
-
-
   return (
     <div className="flex flex-col min-h-screen bg-global-1 font-ropa">
       {/* Header */}
@@ -221,12 +169,18 @@ const PostDetailPage = () => {
             </button>
 
             {/* Main Post */}
-            <article className="bg-global-2 rounded-[35px] p-3 sm:p-4 lg:p-[24px] w-full mb-6">
+            <article className="bg-global-2 rounded-[35px] p-3 sm:p-4
+              lg:p-[24px] w-full mb-6">
               {/* Post Header */}
-              <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-3 lg:mb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-[56px] lg:h-[56px] bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex-shrink-0"></div>
-                <div className="flex items-center gap-2 sm:gap-2 lg:gap-[12px] flex-wrap">
-                  <span className="text-global-1 text-sm sm:text-base lg:text-[24px] lg:leading-[26px] font-normal">
+              <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-3
+                lg:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-[56px]
+                  lg:h-[56px] bg-gradient-to-br from-purple-400 to-blue-500
+                  rounded-full flex-shrink-0"></div>
+                <div className="flex items-center gap-2 sm:gap-2 lg:gap-[12px]
+                  flex-wrap">
+                  <span className="text-global-1 text-sm sm:text-base
+                    lg:text-[24px] lg:leading-[26px] font-normal">
                     {post.userName} •
                   </span>
                   <span className="text-global-2 text-sm sm:text-base
@@ -262,15 +216,10 @@ const PostDetailPage = () => {
               {/* Post Actions */}
               <div className="flex items-center gap-2 sm:gap-3 lg:gap-[12px] flex-wrap">
                 {/* Upvote Section */}
-                <div className="flex items-center gap-1 lg:gap-0 p-1 lg:p-0
-                  bg-transparent"> 
-                  <VoteButton type="up" onClick={() => console.log('upvote')} />
-                  <span className="text-global-1 text-xs sm:text-sm
-                    lg:text-[24px] lg:leading-[26px] font-normal px-2">
-                    {post.upvotes}
-                  </span>
-                  <VoteButton type="down" onClick={() => console.log('downvote')} />
-                </div>
+                  <UpVotesSection
+                    upvotes={post.upvotes}
+                    light={true}
+                  />
 
                 {/* Comment Count */}
                 <div className="flex items-center gap-2 px-3 py-2 bg-global-3

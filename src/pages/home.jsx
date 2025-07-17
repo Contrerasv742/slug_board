@@ -1,32 +1,18 @@
-import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/common/Header.jsx';
 import Sidebar from '../components/common/Sidebar.jsx';
+import UpVotesSection from '../components/ui/Vote-Buttons.jsx';
+import ActionButton from '../components/ui/Action-Button.jsx';
 import '../styles/home.css'
 
 const HomePage = () => {
-  const handleSearchChange = (e) => {
-    setSearchValue(e.target.value);
-  };
-
-  const handleMenuClick = (menuItem) => {
-    setActiveMenuItem(menuItem);
-  };
-
-  const menuItems = [
-    { name: 'Home', active: true },
-    { name: 'Map', active: false },
-    { name: 'Explore', active: false },
-    { name: 'Popular', active: false }
-  ];
-
   const feedPosts = [
     {
       id: 1,
       userName: 'User Name',
       timeAgo: '2 days ago',
       title: 'Post Name...',
-      description: 'Fuck bitches get money',
+      description: 'Economics get money',
       upvotes: 534,
       hasComments: true,
       canShare: true
@@ -35,7 +21,7 @@ const HomePage = () => {
       id: 2,
       userName: 'User Name',
       timeAgo: '2 days ago',
-      title: 'Stoners or Boners General Meeting',
+      title: 'General Meeting',
       description: 'Stoners Unites',
       upvotes: 420,
       hasComments: true,
@@ -45,73 +31,12 @@ const HomePage = () => {
       id: 3,
       userName: 'User Name',
       timeAgo: '2 days ago',
-      title: 'Mission or Missionary 101',
+      title: 'Mission 101',
       upvotes: 69,
       hasComments: true,
       canShare: true
     }
   ];
-
-  const VoteButton = ({ type, onClick, className = "" }) => (
-    <button 
-      onClick={onClick}
-      className={`flex justify-center items-center w-6 h-6 sm:w-8 sm:h-8
-lg:w-[40px] lg:h-[40px] rounded-[10px] lg:rounded-[20px] border-none
-cursor-pointer bg-global-3 hover:bg-global-5 transition-colors ${className}`}
-    >
-      <img 
-        src="/images/vote-arrow-black.png"
-        alt={type === 'up' ? "upvote" : "downvote"}
-        className={`w-2 h-2 sm:w-4 sm:h-4 lg:w-[20px] lg:h-[20px] ${type ===
-'down' ? 'rotate-180' : ''}`}
-      />
-    </button>
-  );
-
-  const ActionButton = ({ type, onClick, children, className = "" }) => {
-    const baseClasses = "flex justify-center items-center border-none \
-      cursor-pointer bg-global-3 hover:bg-global-5 transition-colors";
-    
-    if (type === 'comment') {
-      return (
-        <button 
-          onClick={onClick}
-          className={`${baseClasses} w-10 h-8 sm:w-12 sm:h-10 lg:w-[50px]
-                      lg:h-[40px] rounded-[15px] lg:rounded-[20px] p-1
-                      lg:p-[3px]
-                      ${className}`}
-        >
-          <img 
-            src="/images/img_speech_bubble.png"
-            alt="comments"
-            className="w-5 h-4 sm:w-6 sm:h-5 lg:w-[30px] lg:h-[30px]"
-          />
-        </button>
-      );
-    }
-    
-    if (type === 'share') {
-      return (
-        <button 
-          onClick={onClick}
-          className={`${baseClasses} gap-1 lg:gap-[4px] px-2 py-2 sm:px-3
-                      lg:px-4 lg:py-[3px] rounded-[15px] lg:rounded-[22px]
-                    ${className}`
-          }
-          >
-          <img 
-            src="/images/share_arrow.png"
-            alt="share"
-            className="w-3 h-3 sm:w-4 sm:h-4 lg:w-[32px] lg:h-[32px]"
-          />
-          <span className="text-global-1 text-xs sm:text-sm lg:text-[24px]
-            lg:leading-[26px] font-normal">
-            {children}
-          </span>
-        </button>
-      );
-    }
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-global-1 font-ropa">
@@ -189,15 +114,10 @@ cursor-pointer bg-global-3 hover:bg-global-5 transition-colors ${className}`}
                 <div className="flex items-center gap-2 sm:gap-3 lg:gap-[12px]
                   flex-wrap">
                   {/* Upvote Section */}
-                  <div className="flex items-center gap-1 lg:gap-0 p-1 lg:p-0
-                    bg-global-3 rounded-[15px] lg:rounded-[22px]">
-                    <VoteButton type="up" onClick={() => console.log('upvote')} />
-                    <span className="text-global-1 text-xs sm:text-sm
-                      lg:text-[24px] lg:leading-[26px] font-normal px-2">
-                      {post.upvotes}
-                    </span>
-                    <VoteButton type="down" onClick={() => console.log('downvote')} />
-                  </div>
+                  <UpVotesSection
+                    upvotes={post.upvotes}
+                    light={true}
+                  />
 
                   {/* Comment Button */}
                   {post.hasComments && (
