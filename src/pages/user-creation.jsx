@@ -120,7 +120,8 @@ const UserCreationPage = () => {
       <div className="flex items-center space-x-4">
         {[1, 2, 3, 4].map((step) => (
           <React.Fragment key={step}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            <div className={`w-8 h-8 rounded-full flex items-center
+              justify-center text-sm font-medium ${
               step <= currentStep 
                 ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white' 
                 : 'bg-gray-300 text-gray-600'
@@ -129,7 +130,8 @@ const UserCreationPage = () => {
             </div>
             {step < 4 && (
               <div className={`w-12 h-0.5 ${
-                step < currentStep ? 'bg-gradient-to-r from-purple-500 to-blue-500' : 'bg-gray-300'
+                step < currentStep ? 'bg-gradient-to-r from-purple-500 to-blue-500' :
+                                     'bg-gray-300'
               }`} />
             )}
           </React.Fragment>
@@ -170,7 +172,9 @@ const UserCreationPage = () => {
             type="text"
             value={formData.lastName}
             onChange={(e) => handleInputChange('lastName', e.target.value)}
-            className="w-full px-4 py-3 bg-global-2 border border-gray-200 rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-4 py-3 bg-global-2 border border-gray-200
+            rounded-[15px] focus:outline-none focus:ring-2
+            focus:ring-purple-500"
             placeholder="Enter your last name"
           />
         </div>
@@ -184,7 +188,8 @@ const UserCreationPage = () => {
           type="email"
           value={formData.email}
           onChange={(e) => handleInputChange('email', e.target.value)}
-          className="w-full px-4 py-3 bg-global-2 border border-gray-200 rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full px-4 py-3 bg-global-2 border border-gray-200
+          rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-500"
           placeholder="Enter your email address"
         />
       </div>
@@ -198,7 +203,9 @@ const UserCreationPage = () => {
             type="password"
             value={formData.password}
             onChange={(e) => handleInputChange('password', e.target.value)}
-            className="w-full px-4 py-3 bg-global-2 border border-gray-200 rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-4 py-3 bg-global-2 border border-gray-200
+            rounded-[15px] focus:outline-none focus:ring-2
+            focus:ring-purple-500"
             placeholder="Create a password"
           />
         </div>
@@ -210,7 +217,9 @@ const UserCreationPage = () => {
             type="password"
             value={formData.confirmPassword}
             onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-            className="w-full px-4 py-3 bg-global-2 border border-gray-200 rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full px-4 py-3 bg-global-2 border border-gray-200
+            rounded-[15px] focus:outline-none focus:ring-2
+            focus:ring-purple-500"
             placeholder="Confirm your password"
           />
         </div>
@@ -268,8 +277,8 @@ const UserCreationPage = () => {
         <label className="block text-gray-700 text-sm font-medium mb-2">
           Username Handle
         </label>
-        <div className="relative">
-          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">@</span>
+        <div className="relative"> <span className="absolute left-4 top-1/2
+          transform -translate-y-1/2 text-gray-500">@</span>
           <input
             type="text"
             value={formData.handle}
@@ -332,12 +341,15 @@ const UserCreationPage = () => {
             type="text"
             value={newInterest}
             onChange={(e) => setNewInterest(e.target.value)}
-            className="flex-1 px-4 py-2 bg-global-1 border border-gray-200 rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="flex-1 px-4 py-2 bg-global-2 border border-gray-200
+            rounded-[15px] focus:outline-none focus:ring-2
+            focus:ring-purple-500"
             placeholder="Add custom interest..."
           />
           <button
             onClick={() => addInterest(newInterest)}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-[15px] hover:opacity-90"
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500
+            text-white rounded-[15px] hover:opacity-90"
           >
             Add
           </button>
@@ -346,7 +358,9 @@ const UserCreationPage = () => {
           {formData.interests.map(interest => (
             <span
               key={interest}
-              className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1"
+              className="bg-gradient-to-r from-purple-500 to-blue-500
+              text-white px-3 py-1 rounded-full text-sm flex items-center
+              gap-1"
             >
               {interest}
               <button
@@ -369,20 +383,25 @@ const UserCreationPage = () => {
             type="text"
             value={newGoal}
             onChange={(e) => setNewGoal(e.target.value)}
-            className="flex-1 px-4 py-2 bg-global-1 border border-gray-200 rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="flex-1 px-4 py-2 bg-global-2 border border-gray-200
+            rounded-[15px] focus:outline-none focus:ring-2
+            focus:ring-purple-500"
             placeholder="Add a goal..."
           />
           <button
             onClick={addGoal}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-[15px] hover:opacity-90"
+            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500
+            text-white rounded-[15px] hover:opacity-90"
           >
             Add
           </button>
         </div>
         <div className="space-y-2">
           {formData.goals.map((goal, index) => (
-            <div key={index} className="flex items-center gap-3 bg-global-1 p-3 rounded-[15px]">
-              <div className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0"></div>
+            <div key={index} className="flex items-center gap-3 bg-global-1 p-3
+              rounded-[15px]">
+              <div className="w-2 h-2 bg-purple-500 rounded-full
+                flex-shrink-0"></div>
               <span className="flex-1 text-gray-700">{goal}</span>
               <button
                 onClick={() => removeGoal(goal)}
@@ -419,16 +438,18 @@ const UserCreationPage = () => {
               max="10"
               value={value}
               onChange={(e) => handlePersonalityChange(trait, parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none
+              cursor-pointer"
               style={{
-                background: `linear-gradient(to right, #8b5cf6 0%, #3b82f6 ${value * 10}%, #e5e7eb ${value * 10}%, #e5e7eb 100%)`
+                background: `linear-gradient(to right, #8b5cf6 0%, #3b82f6
+                             ${value * 10}%, #e5e7eb ${value * 10}%, #e5e7eb 100%)`
               }}
             />
           </div>
         ))}
       </div>
 
-      <div className="bg-global-1 p-6 rounded-[20px] mt-8">
+      <div className="bg-global-2 p-6 rounded-[20px] mt-8">
         <h3 className="text-lg font-medium text-gray-800 mb-4">Preview Your Profile</h3>
         <div className="text-sm text-gray-600 space-y-2">
           <p><strong>Name:</strong> {formData.firstName} {formData.lastName}</p>
@@ -478,14 +499,18 @@ const UserCreationPage = () => {
             {currentStep < 4 ? (
               <button
                 onClick={nextStep}
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-[20px] hover:opacity-90 transition-opacity"
+                className="px-6 py-3 bg-gradient-to-r from-purple-500
+                to-blue-500 text-white rounded-[20px] hover:opacity-90
+                transition-opacity"
               >
                 Next
               </button>
             ) : (
               <button
                 onClick={handleSubmit}
-                className="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-[20px] hover:opacity-90 transition-opacity"
+                className="px-6 py-3 bg-gradient-to-r from-green-500
+                  to-blue-500 text-white rounded-[20px] hover:opacity-90
+                  transition-opacity"
               >
                 Create Account
               </button>
