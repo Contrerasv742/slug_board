@@ -21,9 +21,28 @@ const UserProfilePage = () => {
   const [location, setLocation] = useState('');
   const [classYear, setClassYear] = useState('');
   const [username, setUsername] = useState('');
+  const [userInterests, setUserInterests] = useState([]);
 
   // Store original values for cancel functionality
   const [originalValues, setOriginalValues] = useState({});
+
+  // Predefined interests/categories that users can choose from
+  const availableInterests = [
+    'Technology', 'Computer Science', 'Programming', 'Gaming',
+    'Music', 'Art', 'Photography', 'Design', 'Creative Writing',
+    'Sports', 'Fitness', 'Basketball', 'Soccer', 'Tennis', 'Swimming',
+    'Academic', 'Study Groups', 'Research', 'Mathematics', 'Science',
+    'Environmental', 'Sustainability', 'Hiking', 'Nature', 'Gardening',
+    'Social', 'Networking', 'Community Service', 'Volunteering',
+    'Workshop', 'Learning', 'Teaching', 'Mentoring',
+    'Food', 'Cooking', 'Restaurants', 'Nutrition',
+    'Travel', 'Adventure', 'Exploration', 'Culture',
+    'Books', 'Reading', 'Literature', 'Poetry',
+    'Movies', 'Film', 'Animation', 'Entertainment',
+    'Business', 'Entrepreneurship', 'Finance', 'Career',
+    'Health', 'Mental Health', 'Wellness', 'Meditation',
+    'Other'
+  ];
 
   // Helper function to format time ago
   const formatTimeAgo = (dateString) => {
@@ -123,12 +142,14 @@ const UserProfilePage = () => {
             setLocation(createdProfile.location || '');
             setClassYear(createdProfile.class_year || '');
             setUsername(createdProfile.username || '');
+            setUserInterests(createdProfile.interests || []);
             setOriginalValues({
               full_name: createdProfile.name || '',
               bio: createdProfile.bio || '',
               location: createdProfile.location || '',
               class_year: createdProfile.class_year || '',
-              username: createdProfile.username || ''
+              username: createdProfile.username || '',
+              interests: createdProfile.interests || []
             });
             
             // Fetch user events for the new profile
@@ -146,13 +167,15 @@ const UserProfilePage = () => {
           setLocation(data.location || '');
           setClassYear(data.class_year || '');
           setUsername(data.username || '');
+          setUserInterests(data.interests || []);
           // Initialize original values for cancel functionality
           setOriginalValues({
             full_name: data.name || '',
             bio: data.bio || '',
             location: data.location || '',
             class_year: data.class_year || '',
-            username: data.username || ''
+            username: data.username || '',
+            interests: data.interests || []
           });
           
           // Fetch user events for the existing profile
@@ -211,6 +234,7 @@ const UserProfilePage = () => {
         location: location.trim(),
         class_year: classYear.trim(),
         username: username.trim(),
+        interests: userInterests,
         updated_at: new Date(),
       };
 
@@ -235,6 +259,7 @@ const UserProfilePage = () => {
     setLocation(originalValues.location || '');
     setClassYear(originalValues.class_year || '');
     setUsername(originalValues.username || '');
+    setUserInterests(originalValues.interests || []);
     setError(null);
     setIsEditing(false);
   };
@@ -246,10 +271,23 @@ const UserProfilePage = () => {
       bio: profile?.bio || '',
       location: profile?.location || '',
       class_year: profile?.class_year || '',
-      username: profile?.username || ''
+      username: profile?.username || '',
+      interests: userInterests || []
     });
     setError(null);
     setIsEditing(true);
+  };
+
+  // Add interest to user's list
+  const handleAddInterest = (interest) => {
+    if (!userInterests.includes(interest)) {
+      setUserInterests([...userInterests, interest]);
+    }
+  };
+
+  // Remove interest from user's list
+  const handleRemoveInterest = (interest) => {
+    setUserInterests(userInterests.filter(item => item !== interest));
   };
 
   const personalityTraits = [
@@ -268,7 +306,8 @@ const UserProfilePage = () => {
     'Share knowledge and experiences'
   ];
 
-  const interests = [
+  // Use user's actual interests from database, fallback to some defaults for display
+  const displayInterests = userInterests.length > 0 ? userInterests : [
     'Technology', 'Design', 'Photography', 'Music', 'Gaming', 'Art'
   ];
 
@@ -545,17 +584,73 @@ const UserProfilePage = () => {
 
                 {/* Interests */}
                 <div className="bg-global-2 rounded-[25px] p-6 lg:p-[24px]">
-                  <h3 className="text-global-1 text-xl lg:text-[24px] font-normal mb-4">Interests</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {interests.map((interest, index) => (
-                      <span 
-                        key={index} 
-                        className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-1 rounded-full text-xs lg:text-[14px]"
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-global-1 text-xl lg:text-[24px] font-normal">Interests</h3>
+                    {!isEditing && (
+                      <button
+                        onClick={handleStartEdit}
+                        className="text-purple-400 hover:text-purple-300 text-sm lg:text-[14px]"
                       >
-                        {interest}
-                      </span>
-                    ))}
+                        Edit
+                      </button>
+                    )}
                   </div>
+                  
+                  {isEditing ? (
+                    <div className="space-y-4">
+                      {/* Available interests to add */}
+                      <div>
+                        <p className="text-gray-400 text-sm mb-2">Add interests:</p>
+                        <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                          {availableInterests
+                            .filter(interest => !userInterests.includes(interest))
+                            .map((interest, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handleAddInterest(interest)}
+                              className="bg-global-3 hover:bg-purple-500 text-white px-3 py-1 rounded-full text-xs lg:text-[14px] transition-colors border border-gray-600 hover:border-purple-500"
+                            >
+                              + {interest}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Selected interests */}
+                      <div>
+                        <p className="text-gray-400 text-sm mb-2">Your interests (click to remove):</p>
+                        <div className="flex flex-wrap gap-2">
+                          {userInterests.map((interest, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handleRemoveInterest(interest)}
+                              className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-red-500 hover:to-red-600 text-white px-3 py-1 rounded-full text-xs lg:text-[14px] transition-all duration-200"
+                              title="Click to remove"
+                            >
+                              {interest} ×
+                            </button>
+                          ))}
+                          {userInterests.length === 0 && (
+                            <p className="text-gray-400 text-sm italic">No interests selected yet</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {displayInterests.map((interest, index) => (
+                        <span 
+                          key={index} 
+                          className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-1 rounded-full text-xs lg:text-[14px]"
+                        >
+                          {interest}
+                        </span>
+                      ))}
+                      {displayInterests.length === 0 && (
+                        <p className="text-gray-400 text-sm italic">No interests added yet</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
