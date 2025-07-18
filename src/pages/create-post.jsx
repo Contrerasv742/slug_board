@@ -103,18 +103,18 @@ const CreatePostPage = () => {
     setError(null);
 
     try {
-      // First, ensure the user exists in the users table
+      // First, ensure the user exists in the Profiles table
       const { data: existingUser, error: userCheckError } = await supabase
-        .from('users')
+        .from('Profiles')
         .select('id')
         .eq('id', user.id)
         .single();
 
       if (userCheckError && userCheckError.code === 'PGRST116') {
-        // User doesn't exist in users table, create them
-        console.log('Creating user record in users table...');
+        // User doesn't exist in Profiles table, create them
+        console.log('Creating user record in Profiles table...');
         const { error: userCreateError } = await supabase
-          .from('users')
+          .from('Profiles')
           .insert({
             id: user.id,
             email: user.email,

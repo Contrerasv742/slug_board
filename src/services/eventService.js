@@ -17,8 +17,8 @@ export class EventService {
           data.map(async (event) => {
             if (event.host_id) { // Use host_id instead of user_id
               const { data: userData } = await supabase
-                .from('users')
-                .select('id, full_name, email')
+                .from('Profiles')
+                .select('id, name, email')
                 .eq('id', event.host_id)
                 .single();
               
@@ -55,8 +55,8 @@ export class EventService {
       let eventWithUser = data;
       if (data && data.host_id) { // Use host_id instead of user_id
         const { data: userData } = await supabase
-          .from('users')
-          .select('id, full_name, email')
+          .from('Profiles')
+          .select('id, name, email')
           .eq('id', data.host_id)
           .single();
         
@@ -172,8 +172,8 @@ export class EventService {
           data.map(async (rsvp) => {
             if (rsvp.user_id) {
               const { data: userData } = await supabase
-                .from('users')
-                .select('id, full_name, email')
+                .from('Profiles')
+                .select('id, name, email')
                 .eq('id', rsvp.user_id)
                 .single();
               
@@ -253,8 +253,8 @@ export class EventService {
           data.map(async (event) => {
             if (event.host_id) { // Use host_id instead of user_id
               const { data: userData } = await supabase
-                .from('users')
-                .select('id, full_name, email')
+                .from('Profiles')
+                .select('id, name, email')
                 .eq('id', event.host_id)
                 .single();
               
@@ -293,8 +293,8 @@ export class EventService {
           data.map(async (event) => {
             if (event.host_id) { // Use host_id instead of user_id
               const { data: userData } = await supabase
-                .from('users')
-                .select('id, full_name, email')
+                .from('Profiles')
+                .select('id, name, email')
                 .eq('id', event.host_id)
                 .single();
               
@@ -333,8 +333,8 @@ export class EventService {
           data.map(async (event) => {
             if (event.host_id) { // Use host_id instead of user_id
               const { data: userData } = await supabase
-                .from('users')
-                .select('id, full_name, email')
+                .from('Profiles')
+                .select('id, name, email')
                 .eq('id', event.host_id)
                 .single();
               

@@ -1,23 +1,23 @@
 import { supabase } from '../supabaseClient';
 
 export class DatabaseSetup {
-  // Check if users table exists and has the correct structure
-  static async checkUsersTable() {
+  // Check if Profiles table exists and has the correct structure
+  static async checkProfilesTable() {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('Profiles')
         .select('*')
         .limit(1);
 
       if (error) {
-        console.error('Users table check failed:', error);
+        console.error('Profiles table check failed:', error);
         return { exists: false, error };
       }
 
-      console.log('Users table exists and is accessible');
+      console.log('Profiles table exists and is accessible');
       return { exists: true, error: null };
     } catch (error) {
-      console.error('Exception checking users table:', error);
+      console.error('Exception checking Profiles table:', error);
       return { exists: false, error };
     }
   }
@@ -43,11 +43,11 @@ export class DatabaseSetup {
     }
   }
 
-  // Get the structure of the users table
-  static async getUsersTableStructure() {
+  // Get the structure of the Profiles table
+  static async getProfilesTableStructure() {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('Profiles')
         .select('*')
         .limit(0);
 
@@ -57,7 +57,7 @@ export class DatabaseSetup {
       }
 
       // This will give us information about the table structure
-      console.log('Users table structure check completed');
+      console.log('Profiles table structure check completed');
       return { structure: 'accessible', error: null };
     } catch (error) {
       console.error('Exception getting table structure:', error);
@@ -65,10 +65,10 @@ export class DatabaseSetup {
     }
   }
 
-  // Create a test user record to verify the table works
-  static async testUserCreation() {
+  // Create a test profile record to verify the table works
+  static async testProfileCreation() {
     try {
-      const testUserData = {
+      const testProfileData = {
         id: 'test-user-' + Date.now(),
         email: 'test@example.com',
         created_at: new Date().toISOString(),
@@ -77,65 +77,69 @@ export class DatabaseSetup {
       };
 
       const { data, error } = await supabase
-        .from('users')
-        .insert(testUserData)
+        .from('Profiles')
+        .insert(testProfileData)
         .select()
         .single();
 
       if (error) {
-        console.error('Test user creation failed:', error);
+        console.error('Test profile creation failed:', error);
         return { success: false, error };
       }
 
-      // Clean up the test user
+      // Clean up the test profile
       await supabase
-        .from('users')
+        .from('Profiles')
         .delete()
-        .eq('id', testUserData.id);
+        .eq('id', testProfileData.id);
 
-      console.log('Test user creation successful');
+      console.log('Test profile creation successful');
       return { success: true, error: null };
     } catch (error) {
-      console.error('Exception in test user creation:', error);
+      console.error('Exception in test profile creation:', error);
       return { success: false, error };
     }
   }
 }
 
-// SQL script to create the users table if it doesn't exist
-export const CREATE_USERS_TABLE_SQL = `
--- Create users table if it doesn't exist
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+// SQL script to create the Profiles table if it doesn't exist
+export const CREATE_PROFILES_TABLE_SQL = `
+-- Create consolidated Profiles table with all user data
+CREATE TABLE IF NOT EXISTS "Profiles" (
+  id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
-  full_name TEXT,
+  name TEXT,
+  username TEXT UNIQUE,
+  bio TEXT,
+  location TEXT,
+  class_year TEXT,
   avatar_url TEXT,
   provider TEXT DEFAULT 'email',
+  last_sign_in TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  last_sign_in TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Enable Row Level Security
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "Profiles" ENABLE ROW LEVEL SECURITY;
 
 -- Create policy to allow users to read their own data
-CREATE POLICY "Users can view own data" ON users
+CREATE POLICY "Users can view own profile" ON "Profiles"
   FOR SELECT USING (auth.uid() = id);
 
 -- Create policy to allow users to update their own data
-CREATE POLICY "Users can update own data" ON users
+CREATE POLICY "Users can update own profile" ON "Profiles"
   FOR UPDATE USING (auth.uid() = id);
 
 -- Create policy to allow users to insert their own data
-CREATE POLICY "Users can insert own data" ON users
+CREATE POLICY "Users can insert own profile" ON "Profiles"
   FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Create index on email for faster lookups
-CREATE INDEX IF NOT EXISTS users_email_idx ON users(email);
-
--- Create index on provider for filtering
-CREATE INDEX IF NOT EXISTS users_provider_idx ON users(provider);
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS profiles_email_idx ON "Profiles"(email);
+CREATE INDEX IF NOT EXISTS profiles_username_idx ON "Profiles"(username);
+CREATE INDEX IF NOT EXISTS profiles_provider_idx ON "Profiles"(provider);
+CREATE INDEX IF NOT EXISTS profiles_last_sign_in_idx ON "Profiles"(last_sign_in);
 `;
 
 // SQL script to create the events and RSVPs tables
@@ -148,7 +152,7 @@ CREATE TABLE IF NOT EXISTS events (
   event_date TIMESTAMP WITH TIME ZONE,
   location TEXT,
   category TEXT,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES "Profiles"(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -181,7 +185,7 @@ CREATE INDEX IF NOT EXISTS events_created_at_idx ON events(created_at);
 -- Create RSVPs table for event attendance
 CREATE TABLE IF NOT EXISTS "RSVPs" (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES "Profiles"(id) ON DELETE CASCADE,
   event_id UUID REFERENCES events(id) ON DELETE CASCADE,
   status TEXT DEFAULT 'going' CHECK (status IN ('going', 'maybe', 'not_going')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -217,12 +221,12 @@ CREATE INDEX IF NOT EXISTS rsvps_status_idx ON "RSVPs"(status);
 export const runDatabaseSetup = async () => {
   console.log('Running database setup checks...');
   
-  // Check if users table exists
-  const usersTableCheck = await DatabaseSetup.checkUsersTable();
-  if (!usersTableCheck.exists) {
-    console.error('Users table does not exist or is not accessible');
+  // Check if Profiles table exists
+  const profilesTableCheck = await DatabaseSetup.checkProfilesTable();
+  if (!profilesTableCheck.exists) {
+    console.error('Profiles table does not exist or is not accessible');
     console.log('Please run the following SQL in your Supabase SQL editor:');
-    console.log(CREATE_USERS_TABLE_SQL);
+    console.log(CREATE_PROFILES_TABLE_SQL);
     return false;
   }
 
@@ -235,10 +239,10 @@ export const runDatabaseSetup = async () => {
     return false;
   }
 
-  // Test user creation
-  const testCreation = await DatabaseSetup.testUserCreation();
+  // Test profile creation
+  const testCreation = await DatabaseSetup.testProfileCreation();
   if (!testCreation.success) {
-    console.error('User creation test failed:', testCreation.error);
+    console.error('Profile creation test failed:', testCreation.error);
     return false;
   }
 

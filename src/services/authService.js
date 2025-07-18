@@ -78,13 +78,13 @@ export class AuthService {
     }
   }
 
-  // Store user data in users table
+  // Store user data in Profiles table
   static async storeUserData(uid, userData) {
     try {
       console.log('Storing user data for:', uid, userData);
       
       const { data, error } = await supabase
-        .from('users')
+        .from('Profiles')
         .upsert({
           id: uid,
           ...userData,
@@ -106,11 +106,11 @@ export class AuthService {
     }
   }
 
-  // Get user data from users table
+  // Get user data from Profiles table
   static async getUserData(uid) {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('Profiles')
         .select('*')
         .eq('id', uid)
         .single();
@@ -126,7 +126,7 @@ export class AuthService {
   static async updateUserData(uid, updates) {
     try {
       const { data, error } = await supabase
-        .from('users')
+        .from('Profiles')
         .update({
           ...updates,
           updated_at: new Date().toISOString()

@@ -1,0 +1,22 @@
+-- Manual Fix Required for eventService.js
+-- 
+-- The eventService.js file has multiple instances of:
+--   .select('id, full_name, email')
+-- 
+-- These need to be changed to:
+--   .select('id, name, email')
+--
+-- There are approximately 5-6 instances at these lines:
+-- - Line ~21
+-- - Line ~58  
+-- - Line ~175
+-- - Line ~256
+-- - Line ~296
+-- - Line ~336
+--
+-- Please manually find and replace all instances of:
+-- 'id, full_name, email' 
+-- with:
+-- 'id, name, email'
+-- 
+-- in the eventService.js file. 

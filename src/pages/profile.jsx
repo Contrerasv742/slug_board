@@ -9,6 +9,7 @@ const UserProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
   
   // State for form fields
@@ -17,6 +18,9 @@ const UserProfilePage = () => {
   const [location, setLocation] = useState('');
   const [classYear, setClassYear] = useState('');
   const [username, setUsername] = useState('');
+
+  // Store original values for cancel functionality
+  const [originalValues, setOriginalValues] = useState({});
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -29,20 +33,77 @@ const UserProfilePage = () => {
         }
 
         const { data, error } = await supabase
-          .from('profiles')
+          .from('Profiles')
           .select('*')
           .eq('id', user.id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          // If profile doesn't exist (PGRST116 error), create it automatically
+          if (error.code === 'PGRST116') {
+            console.log('No profile found, creating new profile for user:', user.id);
+            
+            const newProfile = {
+              id: user.id,
+              email: user.email,
+              name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '',
+              username: null,
+              bio: null,
+              location: null,
+              class_year: null,
+              avatar_url: user.user_metadata?.avatar_url || null,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
+
+            const { data: createdProfile, error: createError } = await supabase
+              .from('Profiles')
+              .insert(newProfile)
+              .select()
+              .single();
+
+            if (createError) {
+              console.error('Error creating profile:', createError);
+              throw createError;
+            }
+
+            console.log('Profile created successfully:', createdProfile);
+            setProfile(createdProfile);
+            
+            // Initialize form state with new profile
+            setFullName(createdProfile.name || '');
+            setBio(createdProfile.bio || '');
+            setLocation(createdProfile.location || '');
+            setClassYear(createdProfile.class_year || '');
+            setUsername(createdProfile.username || '');
+            setOriginalValues({
+              full_name: createdProfile.name || '',
+              bio: createdProfile.bio || '',
+              location: createdProfile.location || '',
+              class_year: createdProfile.class_year || '',
+              username: createdProfile.username || ''
+            });
+            return; // Exit early since we've handled the profile creation
+          } else {
+            throw error; // Re-throw other errors
+          }
+        }
         setProfile(data);
         // Initialize form state
         if (data) {
-          setFullName(data.full_name || '');
+          setFullName(data.name || '');
           setBio(data.bio || '');
           setLocation(data.location || '');
           setClassYear(data.class_year || '');
           setUsername(data.username || '');
+          // Initialize original values for cancel functionality
+          setOriginalValues({
+            full_name: data.name || '',
+            bio: data.bio || '',
+            location: data.location || '',
+            class_year: data.class_year || '',
+            username: data.username || ''
+          });
         }
       } catch (error) {
         setError(error.message);
@@ -61,31 +122,81 @@ const UserProfilePage = () => {
 
   const handleProfileUpdate = async () => {
     try {
-      setLoading(true);
+      setSaving(true);
+      setError(null);
+      
+      // Basic validation
+      if (!fullName.trim()) {
+        throw new Error("Full name is required");
+      }
+      
+      if (!username.trim()) {
+        throw new Error("Username is required");
+      }
+      
+             // Check if username is unique (if changed)
+       if (username !== originalValues.username) {
+         const { data: existingUser } = await supabase
+           .from('Profiles')
+           .select('id')
+           .eq('username', username)
+           .neq('id', profile.id)
+           .single();
+          
+        if (existingUser) {
+          throw new Error("Username already exists. Please choose a different one.");
+        }
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not found");
 
       const updates = {
         id: user.id,
-        full_name: fullName,
-        bio,
-        location,
-        class_year: classYear,
-        username,
+        name: fullName.trim(),
+        bio: bio.trim(),
+        location: location.trim(),
+        class_year: classYear.trim(),
+        username: username.trim(),
         updated_at: new Date(),
       };
 
-      const { error } = await supabase.from('profiles').upsert(updates);
+      const { error } = await supabase.from('Profiles').upsert(updates);
 
       if (error) throw error;
       
       setProfile(updates);
+      setOriginalValues(updates);
       setIsEditing(false);
     } catch (error) {
       setError(error.message);
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
+  };
+
+  const handleCancelEdit = () => {
+    // Restore original values
+    setFullName(originalValues.full_name || '');
+    setBio(originalValues.bio || '');
+    setLocation(originalValues.location || '');
+    setClassYear(originalValues.class_year || '');
+    setUsername(originalValues.username || '');
+    setError(null);
+    setIsEditing(false);
+  };
+
+  const handleStartEdit = () => {
+    // Store current values for cancel functionality
+    setOriginalValues({
+      full_name: profile?.name || '',
+      bio: profile?.bio || '',
+      location: profile?.location || '',
+      class_year: profile?.class_year || '',
+      username: profile?.username || ''
+    });
+    setError(null);
+    setIsEditing(true);
   };
 
   const personalityTraits = [
@@ -141,7 +252,7 @@ const UserProfilePage = () => {
       <Header 
         showSearch={true}
         searchPlaceholder="Search Posts"
-        userName={profile?.full_name || "John Doe"}
+        userName={profile?.name || "John Doe"}
         userHandle={`@${profile?.username || 'johndoe'}`}
         userAvatar="/images/default-avatar.png"
       />
@@ -182,7 +293,7 @@ const UserProfilePage = () => {
                           from-purple-400 to-blue-500 flex items-center
                           justify-center text-white text-3xl lg:text-5xl
                           font-bold" style={{display: 'none'}}>
-                          {profile?.full_name?.charAt(0) || 'U'}
+                          {profile?.name?.charAt(0) || 'U'}
                         </div>
                       </div>
                       <div className="absolute bottom-1 right-1 w-5 h-5
@@ -197,23 +308,29 @@ const UserProfilePage = () => {
                           type="text" 
                           value={fullName} 
                           onChange={(e) => setFullName(e.target.value)} 
-                          className="bg-global-3 text-white text-2xl lg:text-[28px] rounded p-2 mb-2 w-full text-center" 
-                          placeholder="Full Name"
+                          className="bg-global-3 text-white text-2xl lg:text-[28px] rounded-[15px] p-2 mb-2 w-full text-center border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
+                          placeholder="Enter your full name"
+                          maxLength={100}
+                          required
                         />
                       ) : (
                         <h1 className="text-global-1 text-2xl lg:text-[28px] lg:leading-[32px] font-normal mb-2">
-                          {profile?.full_name || 'User Name'}
+                          {profile?.name || 'User Name'}
                         </h1>
                       )}
                       
                       {isEditing ? (
-                        <textarea 
-                          value={bio} 
-                          onChange={(e) => setBio(e.target.value)} 
-                          className="bg-global-3 text-white text-lg lg:text-[18px] rounded p-2 mb-2 w-full" 
-                          placeholder="Bio"
-                          rows="3"
-                        />
+                        <div className="w-full">
+                          <textarea 
+                            value={bio} 
+                            onChange={(e) => setBio(e.target.value)} 
+                            className="bg-global-3 text-white text-lg lg:text-[18px] rounded-[15px] p-3 mb-1 w-full border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors resize-none" 
+                            placeholder="Tell us about yourself..."
+                            rows="3"
+                            maxLength={500}
+                          />
+                          <p className="text-gray-400 text-xs text-right mb-2">{bio.length}/500</p>
+                        </div>
                       ) : (
                         <p className="text-global-1 text-lg lg:text-[18px] lg:leading-[22px] font-normal mb-2">
                           {profile?.bio || 'User Bio'}
@@ -221,28 +338,35 @@ const UserProfilePage = () => {
                       )}
                       
                       {isEditing ? (
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           <input 
                             type="text" 
                             value={location} 
                             onChange={(e) => setLocation(e.target.value)} 
-                            className="bg-global-3 text-white text-sm rounded p-2 w-full" 
-                            placeholder="Location" 
+                            className="bg-global-3 text-white text-sm rounded-[15px] p-3 w-full border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
+                            placeholder="e.g., Santa Cruz, CA" 
+                            maxLength={100}
                           />
                           <input 
                             type="text" 
                             value={classYear} 
                             onChange={(e) => setClassYear(e.target.value)} 
-                            className="bg-global-3 text-white text-sm rounded p-2 w-full" 
-                            placeholder="Class Year" 
+                            className="bg-global-3 text-white text-sm rounded-[15px] p-3 w-full border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
+                            placeholder="e.g., Class of 2025" 
+                            maxLength={50}
                           />
-                          <input 
-                            type="text" 
-                            value={username} 
-                            onChange={(e) => setUsername(e.target.value)} 
-                            className="bg-global-3 text-white text-sm rounded p-2 w-full" 
-                            placeholder="Username" 
-                          />
+                          <div className="relative">
+                            <input 
+                              type="text" 
+                              value={username} 
+                              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))} 
+                              className="bg-global-3 text-white text-sm rounded-[15px] p-3 w-full pl-6 border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
+                              placeholder="username" 
+                              maxLength={30}
+                              required
+                            />
+                            <span className="absolute left-3 top-3 text-gray-400 text-sm">@</span>
+                          </div>
                         </div>
                       ) : (
                         <p className="text-gray-400 text-sm lg:text-[14px] lg:leading-[16px]">
@@ -250,19 +374,31 @@ const UserProfilePage = () => {
                         </p>
                       )}
 
+                      {/* Error Display */}
+                      {error && (
+                        <div className="mt-4 p-3 bg-red-500/20 border border-red-500 rounded-[15px] text-red-400 text-sm">
+                          {error}
+                        </div>
+                      )}
+
                       {/* Action Buttons */}
-                      <div className="flex gap-2 mt-4 justify-center">
+                      <div className="flex gap-2 mt-4 justify-center flex-wrap">
                         <button
-                          onClick={() => {
-                            if (isEditing) {
-                              handleProfileUpdate();
-                            }
-                            setIsEditing(!isEditing);
-                          }}
-                          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 lg:px-6 lg:py-2 rounded-[15px] transition-colors duration-200 text-sm lg:text-[16px]"
+                          onClick={isEditing ? handleProfileUpdate : handleStartEdit}
+                          disabled={saving}
+                          className="bg-purple-500 hover:bg-purple-600 disabled:bg-purple-400 disabled:cursor-not-allowed text-white px-4 py-2 lg:px-6 lg:py-2 rounded-[15px] transition-colors duration-200 text-sm lg:text-[16px]"
                         >
-                          {isEditing ? 'Save Profile' : 'Edit Profile'}
+                          {saving ? 'Saving...' : (isEditing ? 'Save Profile' : 'Edit Profile')}
                         </button>
+                        {isEditing && (
+                          <button
+                            onClick={handleCancelEdit}
+                            disabled={saving}
+                            className="bg-gray-500 hover:bg-gray-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 lg:px-6 lg:py-2 rounded-[15px] transition-colors duration-200 text-sm lg:text-[16px]"
+                          >
+                            Cancel
+                          </button>
+                        )}
                         <button
                           onClick={handleLogout}
                           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 lg:px-6 lg:py-2 rounded-[15px] transition-colors duration-200 text-sm lg:text-[16px]"
