@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import CompleteNavigation from '../components/common/CompleteNavigation';
+import Header from '../components/common/Header.jsx';
+import Sidebar from '../components/common/Sidebar.jsx';
 import '../styles/home.css'
 import { supabase } from '../supabaseClient';
 import TimeAgo from 'javascript-time-ago'
@@ -171,14 +172,27 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-global-1">
-      <CompleteNavigation 
+      {/* Header */}
+      <Header 
+        showSearch={true}
+        searchPlaceholder="Search events..."
+        userName={user?.email || "John Doe"}
+        userHandle={`@${user?.email?.split('@')[0] || 'johndoe'}`}
+        userAvatar="/images/default-avatar.png"
         searchValue={searchValue}
         onSearchChange={handleSearchChange}
-        onSearch={handleSearch}
-        searchPlaceholder="Search events..."
-      >
-        {/* Events Feed */}
-        <div className="space-y-6">
+      />
+
+      {/* Main Content */}
+      <div className="flex">
+        {/* Sidebar */}
+        <Sidebar/>
+
+        {/* Main Page */}
+        <main className="flex-1 p-6 sm:p-6 lg:p-[24px_28px]">
+          <div className="max-w-4xl mx-auto">
+            {/* Events Feed */}
+            <div className="space-y-6">
           {loading && <p className="text-global-1 text-center">Loading events...</p>}
           {error && <p className="text-red-500 text-center">Error fetching events: {error}</p>}
           {!loading && !error && events.length === 0 && (
@@ -285,8 +299,10 @@ const HomePage = () => {
               {visibleComments === event.id && <CommentSection postId={event.id} user={user} />}
             </article>
           ))}
-        </div>
-      </CompleteNavigation>
+            </div>
+          </div>
+        </main>
+      </div>
 
       {/* Create Events Button - keeping from UI version */}
       <Link

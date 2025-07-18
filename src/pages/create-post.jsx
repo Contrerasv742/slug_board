@@ -5,10 +5,15 @@ import Sidebar from '../components/common/Sidebar.jsx';
 import '../styles/home.css';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
+import { EventService } from '../services/eventService';
 
 const CreatePostPage = () => {
   const [postTitle, setPostTitle] = useState('');
   const [postDescription, setPostDescription] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [location, setLocation] = useState('');
+  const [collegeTag, setCollegeTag] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [user, setUser] = useState(null);
@@ -49,20 +54,26 @@ const CreatePostPage = () => {
       return;
     }
 
+    if (!startTime) {
+      setError("Please select a start time for the event.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      const { data, error } = await supabase
-        .from('posts')
-        .insert([
-          {
-            title: postTitle,
-            description: postDescription,
-            author_id: user.id
-          }
-        ])
-        .select();
+      const eventData = {
+        title: postTitle,
+        description: postDescription,
+        start_time: startTime,
+        end_time: endTime || null,
+        location: location || null,
+        college_tag: collegeTag || null,
+        host_id: user.id
+      };
+
+      const { data, error } = await EventService.createEvent(eventData);
 
       if (error) throw error;
 
@@ -190,7 +201,7 @@ const CreatePostPage = () => {
                 <h1 className="text-[rgba(147,122,250,0.9)] text-2xl
                   sm:text-3xl lg:text-[38px] lg:leading-tight font-light
                   drop-shadow-lg relative z-10">
-                  Create a post below
+                  Create an event below
                 </h1>
               </div>
               <div>
@@ -239,12 +250,12 @@ const CreatePostPage = () => {
                 </div>
               </div>
 
-              {/* Post Title Input */}
+              {/* Event Title Input */}
               <div className="mb-2 lg:mb-3">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-global-1 text-base sm:text-lg
                     lg:text-[32px] lg:leading-[36px] font-normal">
-                    Post Title
+                    Event Title
                   </span>
                   <span className="w-2 h-2 bg-purple-400/80 rounded-full
                     animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
@@ -254,7 +265,7 @@ const CreatePostPage = () => {
                   type="text"
                   value={postTitle}
                   onChange={(e) => setPostTitle(e.target.value)}
-                  placeholder="Enter your post title here..."
+                  placeholder="Enter your event title here..."
                   className="w-full bg-global-2 text-global-1 text-base
                   sm:text-lg lg:text-[32px] lg:leading-[36px] font-normal
                   border-none outline-none placeholder-gray-400
@@ -267,22 +278,111 @@ const CreatePostPage = () => {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-global-1 text-sm sm:text-base
                     lg:text-lg lg:leading-[36px] font-normal">
-                    Post Description
+                    Event Description
+                  </span>
+                  <span className="w-2 h-2 bg-purple-400/80 rounded-full
+                    animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+                    relative z-10"></span>
+                </div>
+                <textarea
+                  value={postDescription}
+                  onChange={(e) => setPostDescription(e.target.value)}
+                  placeholder="Describe your event..."
+                  rows="3"
+                  className="w-full bg-transparent text-global-1 text-sm
+                  sm:text-base lg:text-lg lg:leading-[36px] font-normal
+                  border-none outline-none placeholder-gray-400
+                  focus:placeholder-gray-500 resize-none"
+                />
+              </div>
+
+              {/* Start Time Input */}
+              <div className="mb-3 lg:mb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-global-1 text-sm sm:text-base
+                    lg:text-lg lg:leading-[36px] font-normal">
+                    Start Time
                   </span>
                   <span className="w-2 h-2 bg-purple-400/80 rounded-full
                     animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
                     relative z-10"></span>
                 </div>
                 <input
+                  type="datetime-local"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full bg-global-2 text-global-1 text-sm
+                  sm:text-base lg:text-lg lg:leading-[36px] font-normal
+                  border border-global-3 rounded-lg px-3 py-2 outline-none
+                  focus:border-purple-400"
+                />
+              </div>
+
+              {/* End Time Input */}
+              <div className="mb-3 lg:mb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-global-1 text-sm sm:text-base
+                    lg:text-lg lg:leading-[36px] font-normal">
+                    End Time (Optional)
+                  </span>
+                </div>
+                <input
+                  type="datetime-local"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="w-full bg-global-2 text-global-1 text-sm
+                  sm:text-base lg:text-lg lg:leading-[36px] font-normal
+                  border border-global-3 rounded-lg px-3 py-2 outline-none
+                  focus:border-purple-400"
+                />
+              </div>
+
+              {/* Location Input */}
+              <div className="mb-3 lg:mb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-global-1 text-sm sm:text-base
+                    lg:text-lg lg:leading-[36px] font-normal">
+                    Location (Optional)
+                  </span>
+                </div>
+                <input
                   type="text"
-                  value={postDescription}
-                  onChange={(e) => setPostDescription(e.target.value)}
-                  placeholder="Describe your post..."
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="Where is this event taking place?"
                   className="w-full bg-transparent text-global-1 text-sm
                   sm:text-base lg:text-lg lg:leading-[36px] font-normal
                   border-none outline-none placeholder-gray-400
                   focus:placeholder-gray-500"
                 />
+              </div>
+
+              {/* College Tag Input */}
+              <div className="mb-3 lg:mb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-global-1 text-sm sm:text-base
+                    lg:text-lg lg:leading-[36px] font-normal">
+                    Event Category (Optional)
+                  </span>
+                </div>
+                <select
+                  value={collegeTag}
+                  onChange={(e) => setCollegeTag(e.target.value)}
+                  className="w-full bg-global-2 text-global-1 text-sm
+                  sm:text-base lg:text-lg lg:leading-[36px] font-normal
+                  border border-global-3 rounded-lg px-3 py-2 outline-none
+                  focus:border-purple-400"
+                >
+                  <option value="">Select a category...</option>
+                  <option value="Academic">Academic</option>
+                  <option value="Workshop">Workshop</option>
+                  <option value="Networking">Networking</option>
+                  <option value="Music">Music</option>
+                  <option value="Sports">Sports</option>
+                  <option value="Environmental">Environmental</option>
+                  <option value="Social">Social</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
               {/* Image Upload Section */}

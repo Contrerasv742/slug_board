@@ -7,7 +7,7 @@ export class EventService {
       const { data, error } = await supabase
         .from('Events')
         .select('*')
-        .order('start_time', { ascending: true }); // Use start_time instead of created_at
+        .order('created_at', { ascending: false }); // Show newest events first
 
       if (error) throw error;
       
@@ -241,7 +241,7 @@ export class EventService {
         .from('Events')
         .select('*')
         .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
-        .order('start_time', { ascending: true }); // Use start_time instead of created_at
+        .order('created_at', { ascending: false }); // Show newest events first
 
       if (error) throw error;
       
@@ -281,7 +281,7 @@ export class EventService {
         .from('Events')
         .select('*')
         .eq('college_tag', category) // Use college_tag instead of category
-        .order('start_time', { ascending: true }); // Use start_time instead of created_at
+        .order('created_at', { ascending: false }); // Show newest events first
 
       if (error) throw error;
       

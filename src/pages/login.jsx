@@ -255,7 +255,7 @@ const Login = () => {
 
           {/* Social Login Buttons */}
           <div className="flex flex-row justify-center items-center gap-[8px]">
-            {['Google', 'LinkedIn', 'Apple'].map((provider) => (
+            {['Google'].map((provider) => (
                 <button
                     key={provider}
                     onClick={() => handleSocialLogin(provider)}
