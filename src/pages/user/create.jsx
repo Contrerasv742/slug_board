@@ -48,9 +48,14 @@ const UserCreationPage = () => {
     'Economics', 'History', 'Political Science'
   ];
 
-  const graduationYears = ['2024', '2025', '2026', '2027', '2028'];
+  const graduationYears = [
+    '2017', '2018', '2019',
+    '2020', '2021', '2022',
+    '2023', '2024', '2025',
+    '2026', '2027', '2028'
+  ];
 
-  // Password verification function
+  // Password Verification 
   const verifyPasswords = () => {
     if (formData.password !== formData.confirmPassword) {
       setPasswordError('Passwords do not match');

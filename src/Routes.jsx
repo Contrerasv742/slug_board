@@ -1,14 +1,18 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-// Import page components
-import LoginPage from './pages/login.jsx';
-import HomePage from './pages/home.jsx';
-import CreatePostPage from './pages/create-post.jsx';
-import MapPage from './pages/map.jsx';
-import UserProfilePage from './pages/profile.jsx';
-import PostDetailPage from './pages/post.jsx';
-import UserCreationPage from './pages/user-creation.jsx';
+// Import General Pages
+import LoginPage from './pages/general/login.jsx';
+import HomePage from './pages/general/home.jsx';
+import MapPage from './pages/general/map.jsx';
+
+// Import User Pages
+import UserCreationPage from './pages/user/create.jsx';
+import UserProfilePage from './pages/user/profile.jsx';
+
+// Import Post Pages
+import CreatePostPage from './pages/post/create.jsx';
+import PostDetailPage from './pages/post/view.jsx';
 
 const AppRoutes = () => {
   return (
@@ -26,7 +30,7 @@ const AppRoutes = () => {
 
         /* User Interactable */
         <Route path="/profile" element={<UserProfilePage/>} />
-        <Route path="/creation" element={<UserCreationPage/>} />
+        <Route path="/create-new-user" element={<UserCreationPage/>} />
 
         /* Other */
         <Route path="/login" element={<LoginPage />} />

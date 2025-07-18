@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/common/Header.jsx';
-import Sidebar from '../components/common/Sidebar.jsx';
-import UpVoteSection from '../components/ui/Vote-Buttons.jsx';
-import ActionButton from '../components/ui/Action-Button.jsx';
+import Header from '../../components/common/Header.jsx';
+import Sidebar from '../../components/common/Sidebar.jsx';
+import UpVoteSection from '../../components/ui/Vote-Buttons.jsx';
+import ActionButton from '../../components/ui/Action-Button.jsx';
 
-import '../styles/home.css'
-import '../styles/create-post.css'
+import '../../styles/home.css'
+import '../../styles/create-post.css'
 
 const CreatePostPage = () => {
   const [postTitle, setPostTitle] = useState('');
@@ -83,7 +83,7 @@ const CreatePostPage = () => {
     setSelectedInterests(prev => prev.filter(i => i !== interest));
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field) => {
     // Clear validation errors when user types
     if (validationErrors[field]) {
       setValidationErrors(prev => ({

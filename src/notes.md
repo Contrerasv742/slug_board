@@ -16,6 +16,4 @@
 
 + Check database for username and email
 
-+ Add a button to view the password
-
 

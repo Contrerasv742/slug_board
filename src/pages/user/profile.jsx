@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Header from '../components/common/Header.jsx';
-import Sidebar from '../components/common/Sidebar.jsx';
+import Header from '../../components/common/Header.jsx';
+import Sidebar from '../../components/common/Sidebar.jsx';
 
 const UserProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);

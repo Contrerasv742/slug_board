@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import Header from '../components/common/Header.jsx';
-import Sidebar from '../components/common/Sidebar.jsx';
-import UpVotesSection from '../components/ui/Vote-Buttons.jsx';
-import ActionButton from '../components/ui/Action-Button.jsx';
-import '../styles/home.css'
+import Header from '../../components/common/Header.jsx';
+import Sidebar from '../../components/common/Sidebar.jsx';
+import UpVotesSection from '../../components/ui/Vote-Buttons.jsx';
+import ActionButton from '../../components/ui/Action-Button.jsx';
+import '../../styles/home.css'
 
 const HomePage = () => {
   const feedPosts = [

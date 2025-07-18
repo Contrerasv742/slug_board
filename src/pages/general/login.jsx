@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Button from '../components/ui/Button';
-import EditText from '../components/ui/EditText';
+import Button from '../../components/ui/Button';
+import EditText from '../../components/ui/EditText';
 
 const Login = () => {
   const [email, setEmail] = useState('');

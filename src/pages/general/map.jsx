@@ -1,5 +1,5 @@
-import Header from '../components/common/Header.jsx';
-import Sidebar from '../components/common/Sidebar.jsx';
+import Header from '../../components/common/Header.jsx';
+import Sidebar from '../../components/common/Sidebar.jsx';
 
 const MapPage = () => {
   return (
@@ -16,7 +16,7 @@ const MapPage = () => {
       {/* Main Content Container */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <Sidebar onMenuClick={handleMenuClick} />
+        <Sidebar/>
         
         {/* Map Container */}
         <div className="flex-1 relative">

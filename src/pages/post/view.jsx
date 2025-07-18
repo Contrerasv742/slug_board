@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import Header from '../components/common/Header.jsx';
-import Sidebar from '../components/common/Sidebar.jsx';
-import ExpandableComment from '../components/ui/Add-Comment.jsx';
-import CommentSection from '../components/ui/Comments-Section.jsx';
-import UpVotesSection from '../components/ui/Vote-Buttons.jsx';
-import ActionButton from '../components/ui/Action-Button.jsx';
+import Header from '../../components/common/Header.jsx';
+import Sidebar from '../../components/common/Sidebar.jsx';
+import ExpandableComment from '../../components/ui/Add-Comment.jsx';
+import CommentSection from '../../components/ui/Comments-Section.jsx';
+import UpVotesSection from '../../components/ui/Vote-Buttons.jsx';
+import ActionButton from '../../components/ui/Action-Button.jsx';
 
 const PostDetailPage = () => {
   const [newComment, setNewComment] = useState('');
