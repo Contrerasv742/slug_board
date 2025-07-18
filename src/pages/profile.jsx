@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import Header from '../components/common/Header.jsx';
 import Sidebar from '../components/common/Sidebar.jsx';
+import { EventService } from '../services/eventService';
 
 const UserProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -10,6 +11,8 @@ const UserProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [userEvents, setUserEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const navigate = useNavigate();
   
   // State for form fields
@@ -21,6 +24,50 @@ const UserProfilePage = () => {
 
   // Store original values for cancel functionality
   const [originalValues, setOriginalValues] = useState({});
+
+  // Helper function to format time ago
+  const formatTimeAgo = (dateString) => {
+    const now = new Date();
+    const eventDate = new Date(dateString);
+    const diffInMs = now.getTime() - eventDate.getTime();
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+    const diffInWeeks = diffInDays / 7;
+
+    if (diffInHours < 1) {
+      return 'Just now';
+    } else if (diffInHours < 24) {
+      const hours = Math.floor(diffInHours);
+      return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+    } else if (diffInDays < 7) {
+      const days = Math.floor(diffInDays);
+      return `${days} day${days === 1 ? '' : 's'} ago`;
+    } else if (diffInWeeks < 4) {
+      const weeks = Math.floor(diffInWeeks);
+      return `${weeks} week${weeks === 1 ? '' : 's'} ago`;
+    } else {
+      return eventDate.toLocaleDateString();
+    }
+  };
+
+  // Fetch user events
+  const fetchUserEvents = async (userId) => {
+    try {
+      setEventsLoading(true);
+      const { data, error } = await EventService.getEventsByUser(userId);
+      
+      if (error) {
+        console.error('Error fetching user events:', error);
+        return;
+      }
+      
+      setUserEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching user events:', error);
+    } finally {
+      setEventsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -83,6 +130,9 @@ const UserProfilePage = () => {
               class_year: createdProfile.class_year || '',
               username: createdProfile.username || ''
             });
+            
+            // Fetch user events for the new profile
+            fetchUserEvents(createdProfile.id);
             return; // Exit early since we've handled the profile creation
           } else {
             throw error; // Re-throw other errors
@@ -104,6 +154,9 @@ const UserProfilePage = () => {
             class_year: data.class_year || '',
             username: data.username || ''
           });
+          
+          // Fetch user events for the existing profile
+          fetchUserEvents(data.id);
         }
       } catch (error) {
         setError(error.message);
@@ -217,27 +270,6 @@ const UserProfilePage = () => {
 
   const interests = [
     'Technology', 'Design', 'Photography', 'Music', 'Gaming', 'Art'
-  ];
-
-  const recentPosts = [
-    {
-      title: 'Campus Hackathon 2024',
-      description: 'Join us for the biggest hackathon of the year!',
-      timeAgo: '2 days ago',
-      upvotes: 45
-    },
-    {
-      title: 'Study Group - Advanced Algorithms',
-      description: 'Looking for study partners for CS 130',
-      timeAgo: '1 week ago',
-      upvotes: 23
-    },
-    {
-      title: 'Photography Club Meeting',
-      description: 'Monthly meetup for photography enthusiasts',
-      timeAgo: '2 weeks ago',
-      upvotes: 67
-    }
   ];
 
   if (loading) {
@@ -423,27 +455,53 @@ const UserProfilePage = () => {
                     </button>
                   </div>
                   
-                  <div className="space-y-4">
-                    {recentPosts.map((post, index) => (
-                      <div key={index} className="bg-global-3 rounded-[20px] p-4 lg:p-5">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="text-global-1 text-lg lg:text-[20px] font-normal">{post.title}</h4>
-                          <span className="text-gray-400 text-xs lg:text-[12px] flex-shrink-0 ml-4">{post.timeAgo}</span>
-                        </div>
-                        <p className="text-global-1 text-sm lg:text-[16px] lg:leading-[20px] mb-3">{post.description}</p>
-                        
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1 bg-global-2 rounded-[10px] px-3 py-1">
-                            <img src="/images/img_arrow.png" alt="upvote" className="w-4 h-4" />
-                            <span className="text-global-1 text-sm lg:text-[16px]">{post.upvotes}</span>
+                  {eventsLoading ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400">Loading events...</p>
+                    </div>
+                  ) : userEvents.length > 0 ? (
+                    <div className="space-y-4">
+                      {userEvents.slice(0, 3).map((event, index) => (
+                        <div key={event.id || index} className="bg-global-3 rounded-[20px] p-4 lg:p-5">
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="text-global-1 text-lg lg:text-[20px] font-normal">{event.title}</h4>
+                            <span className="text-gray-400 text-xs lg:text-[12px] flex-shrink-0 ml-4">{formatTimeAgo(event.created_at)}</span>
                           </div>
-                          <button className="text-purple-400 hover:text-purple-300 text-sm lg:text-[14px]">
-                            View Post
-                          </button>
+                          <p className="text-global-1 text-sm lg:text-[16px] lg:leading-[20px] mb-3">
+                            {event.description || 'No description provided'}
+                          </p>
+                          
+                          <div className="flex items-center gap-4">
+                            {event.location && (
+                              <div className="flex items-center gap-1 text-gray-400 text-sm">
+                                <span>📍</span>
+                                <span>{event.location}</span>
+                              </div>
+                            )}
+                            {event.start_time && (
+                              <div className="flex items-center gap-1 text-gray-400 text-sm">
+                                <span>🗓️</span>
+                                <span>{new Date(event.start_time).toLocaleDateString()}</span>
+                              </div>
+                            )}
+                            <button className="text-purple-400 hover:text-purple-300 text-sm lg:text-[14px]">
+                              View Event
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400 mb-4">No events posted yet</p>
+                      <button 
+                        onClick={() => navigate('/create-post')}
+                        className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-[15px] transition-colors duration-200"
+                      >
+                        Create Your First Event
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Personality Traits */}

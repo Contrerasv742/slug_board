@@ -316,6 +316,46 @@ export class EventService {
     }
   }
 
+  // Get events created by a specific user
+  static async getEventsByUser(userId) {
+    try {
+      const { data, error } = await supabase
+        .from('Events')
+        .select('*')
+        .eq('host_id', userId) // Filter by host_id to get events created by this user
+        .order('created_at', { ascending: false }); // Show newest events first
+
+      if (error) throw error;
+      
+      // Fetch user data for the events (though it should be the same user)
+      if (data && data.length > 0) {
+        const eventsWithUsers = await Promise.all(
+          data.map(async (event) => {
+            if (event.host_id) {
+              const { data: userData } = await supabase
+                .from('Profiles')
+                .select('id, name, email')
+                .eq('id', event.host_id)
+                .single();
+              
+              return {
+                ...event,
+                users: userData || null
+              };
+            }
+            return event;
+          })
+        );
+        
+        return { data: eventsWithUsers, error: null };
+      }
+      
+      return { data: data || [], error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  }
+
   // Get upcoming events
   static async getUpcomingEvents() {
     try {
