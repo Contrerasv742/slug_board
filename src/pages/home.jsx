@@ -21,6 +21,7 @@ const HomePage = () => {
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const [visibleComments, setVisibleComments] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
   const { signOut } = useAuth();
 
   useEffect(() => {
@@ -96,25 +97,40 @@ const HomePage = () => {
   };
 
   const handleSearchChange = (e) => {
+    console.log('Search value changed:', e.target.value);
     setSearchValue(e.target.value);
   };
 
   const handleSearch = async () => {
+    console.log('handleSearch called with searchValue:', searchValue);
     if (!searchValue.trim()) {
+      console.log('Search value is empty, fetching all events');
+      setIsSearching(false);
       fetchEvents();
       return;
     }
     
     try {
       setLoading(true);
+      setIsSearching(true);
+      console.log('Searching for events with term:', searchValue);
       const { data, error } = await EventService.searchEvents(searchValue);
+      console.log('Search results:', data, 'Error:', error);
       if (error) throw error;
+      console.log('Setting events to search results, count:', data?.length || 0);
       setEvents(data || []);
     } catch (error) {
+      console.error('Search error:', error);
       setError(error.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const clearSearch = () => {
+    setSearchValue('');
+    setIsSearching(false);
+    fetchEvents();
   };
 
   const VoteButton = ({ type, onClick, className = "" }) => (
@@ -191,12 +207,48 @@ const HomePage = () => {
         {/* Main Page */}
         <main className="flex-1 p-6 sm:p-6 lg:p-[24px_28px]">
           <div className="max-w-4xl mx-auto">
+            {/* Search Status and Sort Info */}
+            <div className="mb-6 flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <span className="text-global-1 text-sm">
+                  📅 Sorted by creation time (newest first)
+                </span>
+                {isSearching && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-global-1 text-sm">
+                      🔍 Searching for: "{searchValue}"
+                    </span>
+                    <button
+                      onClick={clearSearch}
+                      className="text-global-1 hover:text-global-3 text-sm underline"
+                    >
+                      Clear search
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            
             {/* Events Feed */}
             <div className="space-y-6">
           {loading && <p className="text-global-1 text-center">Loading events...</p>}
           {error && <p className="text-red-500 text-center">Error fetching events: {error}</p>}
           {!loading && !error && events.length === 0 && (
-            <p className="text-global-1 text-center">No events found. Create the first event!</p>
+            <div className="text-center text-global-1">
+              {isSearching ? (
+                <div>
+                  <p>No events found matching "{searchValue}"</p>
+                  <button
+                    onClick={clearSearch}
+                    className="mt-2 text-global-3 hover:text-global-5 underline"
+                  >
+                    View all events
+                  </button>
+                </div>
+              ) : (
+                <p>No events found. Create the first event!</p>
+              )}
+            </div>
           )}
           {!loading && !error && events.map((event) => (
             <article key={event.id} className="bg-global-2 rounded-[25px] p-6 lg:p-[24px]">

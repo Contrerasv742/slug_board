@@ -234,15 +234,17 @@ export class EventService {
     }
   }
 
-  // Search events
+  // Search events by title and description
   static async searchEvents(searchTerm) {
     try {
+      console.log('EventService.searchEvents called with term:', searchTerm);
       const { data, error } = await supabase
         .from('Events')
         .select('*')
         .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
         .order('created_at', { ascending: false }); // Show newest events first
 
+      console.log('Supabase search query result - Data:', data, 'Error:', error);
       if (error) throw error;
       
       // If we have events, fetch user data for each event
