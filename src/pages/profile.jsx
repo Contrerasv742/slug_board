@@ -13,6 +13,9 @@ const UserProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const [userEvents, setUserEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  // Profile picture upload states
+  const [uploading, setUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(null);
   const navigate = useNavigate();
   
   // State for form fields
@@ -43,6 +46,74 @@ const UserProfilePage = () => {
     'Health', 'Mental Health', 'Wellness', 'Meditation',
     'Other'
   ];
+
+  // Profile picture upload function
+  const uploadAvatar = async (file) => {
+    try {
+      setUploading(true);
+      setError(null);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user found');
+
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('File size must be less than 5MB');
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('File must be an image');
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}-${Math.random()}.${fileExt}`;
+
+      // Upload file to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const publicUrl = data.publicUrl;
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('Profiles')
+        .update({ avatar_url: publicUrl, updated_at: new Date() })
+        .eq('id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // Update local state
+      setAvatarUrl(publicUrl);
+      setProfile(prev => ({ ...prev, avatar_url: publicUrl }));
+
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      setError(error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Handle avatar file selection
+  const handleAvatarUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      uploadAvatar(file);
+    }
+  };
 
   // Helper function to format time ago
   const formatTimeAgo = (dateString) => {
@@ -143,6 +214,7 @@ const UserProfilePage = () => {
             setClassYear(createdProfile.class_year || '');
             setUsername(createdProfile.username || '');
             setUserInterests(createdProfile.interests || []);
+            setAvatarUrl(createdProfile.avatar_url || null);
             setOriginalValues({
               full_name: createdProfile.name || '',
               bio: createdProfile.bio || '',
@@ -168,6 +240,7 @@ const UserProfilePage = () => {
           setClassYear(data.class_year || '');
           setUsername(data.username || '');
           setUserInterests(data.interests || []);
+          setAvatarUrl(data.avatar_url || null);
           // Initialize original values for cancel functionality
           setOriginalValues({
             full_name: data.name || '',
@@ -325,7 +398,7 @@ const UserProfilePage = () => {
         searchPlaceholder="Search Posts"
         userName={profile?.name || "John Doe"}
         userHandle={`@${profile?.username || 'johndoe'}`}
-        userAvatar="/images/default-avatar.png"
+        userAvatar={avatarUrl || "/images/default-avatar.png"}
       />
 
       {/* Main Content */}
@@ -352,7 +425,7 @@ const UserProfilePage = () => {
                         rounded-full flex items-center justify-center
                         overflow-hidden">
                         <img
-                          src="/images/user-avatar.png"
+                          src={avatarUrl || "/images/user-avatar.png"}
                           alt="User Avatar"
                           className="w-full h-full object-cover"
                           onError={(e) => {
@@ -370,6 +443,29 @@ const UserProfilePage = () => {
                       <div className="absolute bottom-1 right-1 w-5 h-5
                         bg-green-500 rounded-full border-3
                         border-global-2"></div>
+                      
+                      {/* Upload Button */}
+                      <input
+                        type="file"
+                        id="avatar-upload"
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => document.getElementById('avatar-upload').click()}
+                        disabled={uploading}
+                        className="absolute bottom-0 right-0 w-8 h-8 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-400 rounded-full flex items-center justify-center text-white text-sm transition-colors duration-200"
+                        title="Upload profile picture"
+                      >
+                        {uploading ? (
+                          <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        )}
+                      </button>
                     </div>
 
                     {/* Profile Info */}
