@@ -1,0 +1,6 @@
+/* home.css */
+
+.header-search img[src*="search"] {
+  width: 24px !important;
+  height: 24px !important;
+}

@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html>
+    
+<head>
+	<meta charset="utf-8">
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-131157910-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+
+		function gtag() {
+			dataLayer.push(arguments);
+		}
+		gtag('js', new Date());
+
+		gtag('config', 'UA-131157910-1');
+	</script>
+
+	<link rel="shortcut icon" type="image/x-icon" href="./favicon.ico" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="Description" content="The official interactive webmap of the University of California, Santa Cruz- created and maintained by campus staff. Search for buildings, transit information, recreational opportunities and more! Check back often for the latest and greatest content. Send an email to maps@ucsc.edu for questions, comments, or general opinions about your experience with the map.">
+
+	<meta name="google-site-verification" content="-aFo-1oVHoMXc9RrXzD0S4gsiDvI4LWdV5FIxoVm8mo" />
+
+	<title>UCSC | Interactive Map</title>
+
+	<link href='https://fonts.googleapis.com/css?family=Oswald|Roboto+Condensed|Roboto|Questrial|Raleway' rel='stylesheet'>
+	<link href="https://fonts.googleapis.com/css?family=Oswald:200,300&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="css/calcite-web.min.css">
+
+	<link rel="stylesheet" href="https://js.arcgis.com/4.9/dijit/themes/claro/claro.css">
+	<link rel="stylesheet" href="https://js.arcgis.com/4.9/esri/css/main.css">
+
+	<link rel="stylesheet" href="css/w3.css">
+	<!--link rel="stylesheet" href="css/app_styles.css"-->
+	<link rel="stylesheet" href="css/layout.css">
+	
+	<script src="js/calcite-web.min.js"></script>
+	
+	<script src="https://js.arcgis.com/4.9/"></script>
+	<!--script src="https://js.arcgis.com/4.30/"></script-->
+	
+	<!-- NEW  -->
+	<script type="module" src="https://js.arcgis.com/calcite-components/2.11.1/calcite.esm.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.11.1/calcite.css" />
+
+	<!--link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css"-->
+	
+	<script>
+		function filterBuildings() {
+				input = document.getElementById("bldg-search");
+				textFilter = input.value.toUpperCase();
+				all_bldgs = document.getElementById("bldg-list");
+				bldg_list = all_bldgs.getElementsByClassName("bldg");
+				for (i = 0; i < bldg_list.length; i++) {
+					ps = bldg_list[i].getElementsByTagName("p")[0];
+					txtValue = ps.textContent || ps.innerText;
+					if (txtValue.toUpperCase().indexOf(textFilter) > -1) {
+						bldg_list[i].style.display = "";
+					} else {
+						bldg_list[i].style.display = "none";
+					}
+				}
+			}
+	</script>
+	
+	<style>
+		
+		#map-help-btn {
+			padding:8px 16px;
+			background-color: #C89933;
+			color:white;
+			
+		}
+
+		#layer-list::-webkit-scrollbar {
+			width: 12px;
+			background-color: #eff1f5;
+		}
+
+		#layer-list::-webkit-scrollbar-track{
+			border-radius: 3px;
+			background-color: transparent;
+		}
+
+		#layer-list::-webkit-scrollbar-thumb{
+			border-radius:5px;
+			background-color:#515769;
+			border:2px solid #eff1f5
+		}
+		
+		aside.side-nav > h4 > span > img:nth-child(1) {
+		}
+		
+		aside.side-nav > nav > a > img {
+			margin-right: 6px;
+		}
+		
+		#bldg-list {
+			display:flex;
+			flex-direction: column;
+			padding:1em;
+			gap:20px
+		}
+		
+		.bldg {
+			padding:10px 20px;
+			border:1px solid #ededed;
+			box-shadow: -1px 2px 0px rgba(0,0,0,0.15)
+		}
+		
+		.bldg > p {
+			margin-bottom:0
+		}
+		
+		.nametag {
+			font-size: 1.4em;
+			color: #336389;
+		}
+		
+		.caan {
+		}
+		
+		.depts {
+			font-size: 0.8em
+		}
+		
+		#news {
+			padding:4px;
+			width:98%;
+			font-size: 0.8em
+		}
+		
+		.layer-info {
+			background-color: #d8e3f0;
+			background-color: #F2F0E4;
+			box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+		}
+		
+		.layer-info p {
+			margin:0;
+			color:#336389;
+		}
+		
+		.layer-info a {
+			color:#336389;
+			text-decoration: underline
+		}
+		
+		.impact-level {
+			margin-right:0.8em;
+			border-radius:3px;
+			padding:0.12em 0.4em;
+			color:white;
+			background-color:#ededed;
+			font-weight:500
+		}
+		
+		.Low {
+			background-color:#EDD72F
+		}
+		
+		.Medium {
+			background-color:#E3BB2D
+		}
+		
+		.High {
+			background-color:#D66865
+		}
+		
+	</style>
+
+</head>
+
+<body>
+	<div id="help-modal" class="modal">
+		<a href="#" class="modal__close">&times;</a>
+		<div class="modal__content">
+			<h1>Interactive Map Help</h1>
+
+			<p>
+				Tips and tricks to get the most out of this map.
+			</p>
+			<hr>
+			<h2>
+				Map Layers
+			</h2>
+			<ul>
+			<p>
+				<li>Layers are grouped into related categories. Click the group title to turn on/off all layers in that group.
+				<p>ex: <img src="images/layer-group-title.PNG" alt="Layer Group Title"></p>
+				</li>
+				<li>A check-marked box will appear before any visible layers.</li>
+				<li>When any layers are turned on, the 'clear layers' icon will appear in the upper right corner. Tap it to turn off all visible layers with a single click.
+				<p>ex: <img style="height:3em" src="images/clear-layers.PNG" alt="Layer Group Title"></p>
+				</li>
+			</p>
+				
+			</ul>
+			<hr>
+			<h2>
+				Map Tools
+			</h2>
+			<h3>The Search Bar</h3>
+			We're working on improving the search bar functionality. Thanks for you patience.
+			<ul><p>
+				<li>For now, the best way to search for a facility or parking lot is to begin typing your search terms in the search bar and select an option from the suggestions that appear.</li>
+				<li>This will pan and zoom the map to your selection. From there, you can clear the search bar and click the feature to view any associated information in the pop-up.</li>
+				<li>You don't need to search for the official building name to locate a facility. We have tried to include aliases and common searches to return facilities as well.
+				<p>ex: search for parking permits to return the West Entrance Kiosk</p>
+				</li>
+				</p>
+			</ul>
+			<h3>Location</h3>
+				<ul>
+				<p>
+				<li>Tap the crosshairs icon in the upper left hand of the map to drop a pin at your current location
+				<p>ex: <img style="height: 2em" src="images/crosshairs.PNG" alt="Crosshairs"></p>
+				</li>
+				<li class="hide">To use Google Maps for directions to a facility, click the pop-up and tap 'Get Directions'. A new tab will open with the selected building as the destination and your current location as the origin.
+				<p>ex: <img src="images/get-directions.PNG" alt="Get Directions"></p>
+				</li>
+				
+			</p>
+				
+			</ul>
+			<h3>The Pop-Up Window</h3>
+			<p>Building popups contain a few additional features.</p>
+			<ul>
+				<p>
+					<li>The Asset Number is in the upper left corner of the pop-up title, along with the facility name</li>
+					<li>To use Google Maps for directions to a facility, tap 'Get Directions'. A new tab will open with the selected building as the destination and your current location as the origin.
+					<p>ex: <img src="images/get-directions.PNG" alt="Get DIrections"></p>
+					</li>
+					<li>Use the url under 'Share Building Location via Webmap' to load the webmap panned and zoomed to a particular building.
+					<p>ex: <img src="images/share-building-location.PNG" alt="Share Building Location"></p>
+					</li>
+				</p>
+			</ul>
+			<hr>
+			<div class="modal__footer">
+				Feel free to reach out to the maps team at <a href="https://mailto:maps@ucsc.edu" target="_blank">maps@ucsc.edu</a>.
+			</div>
+
+			
+		</div>
+	</div>
+	
+	<div id="bldg-modal" class="modal">
+		<a href="#" class="modal__close">&times;</a>
+		<div class="modal__content">
+			<h1>Campus Buildings</h1>
+			<div class="modal__footer">
+				Feel free to reach out to the maps team at <a href="https://mailto:maps@ucsc.edu" target="_blank">maps@ucsc.edu</a>.
+			</div>
+			<hr>
+			<input id="bldg-search" onkeyup="filterBuildings()" placeholder="Filter by building keyword" title="searchbar" type="text">
+			<div id="bldg-list">
+			</div>
+			<div class="modal__footer">
+				Feel free to reach out to the maps team at <a href="https://mailto:maps@ucsc.edu" target="_blank">maps@ucsc.edu</a>.
+			</div>
+
+			
+		</div>
+	</div>
+	
+	<div id="announcement-modal" class="modal">
+		<a href="#" class="modal__close">&times;</a>
+		<div class="modal__content pdf-modal-content">
+			<embed src="https://dining.ucsc.edu/eat/images/dining-map-04-2024.jpg" height="100%" width="100%">
+		</div>
+	</div>
+	
+	<div class="loading"></div>
+	
+  	<div id="main-grid">
+		<header id="mobile-search-bar" class="third-nav phone-show">
+			<div id="menu-icon-div">
+				<i id="menu-icon" class="icon-ui-layer-list desktop-hide"></i>
+				<i id="close-menu-icon" class="icon-ui-close desktop-hide"></i>
+			</div>
+			<div id="map-options-footer" class="phone-show hide">
+				<div id="basemaps-icon" class="phone-show map-options-icon">
+					<i class="icon-ui-basemap"></i>Cartographic
+				</div>
+			</div>
+		</header>
+		<div id="main-content">
+			<div id="side-bar" class="phone-hide">
+				<a href="https://ucsc.edu"><img src="images/logos/UC%20Santa%20Cruz%20Logo%20-%20Blue%20RGB.png" id="ucsc-logo"></a>
+				
+				<div id="navigation">
+					<ul id="nav-list">
+						<li>
+							<div class="nav-box"><a class="third-nav-link" href="home/">
+									<div class="icon-box"><calcite-icon icon="home" scale="l"></calcite-icon></div>
+									<p>Maps Home</p>
+								</a></div>
+						</li>
+						<li>
+							<div class="nav-box"><a class="third-nav-link" href="printable-maps/" target="_blank">
+									<div class="icon-box"><div class="icon-box"><calcite-icon icon="print" scale="l"></calcite-icon></div></div>
+									<p>Printable Maps</p>
+								</a></div>
+						</li>
+						<li>
+							<div class="nav-box"><a class="third-nav-link" href="detailed-directions/" target="_blank">
+									<div class="icon-box"><div class="icon-box"><calcite-icon icon="map" scale="l"></calcite-icon></div></div>
+									<p>Detailed Directions</p>
+								</a></div>
+						</li>
+					</ul>
+				</div>
+				
+				
+				<div id="layer-list">
+					
+					<aside class="side-nav" aria-role="complementary">
+						<style>
+							.ac-label {
+								font-weight: 500;
+							}
+							
+							.layer-info {
+								background-color: #fff;
+								border:1px solid #ededed;
+								padding:0.5em 1em
+							}
+							
+							.layer-info p {
+								color:#444;
+								font-size:0.9em
+							}
+						</style>
+						
+						<nav role="navigation" aria-labelledby="sidenav">
+							<div class="ac">
+								<input class="ac-input" id="dining-m" name="dining-m" type="checkbox" />
+								<label class="ac-label" for="dining-m">
+								
+								<img width="24" height="24" src="https://img.icons8.com/material/24/CC3535/hamburger--v1.png" alt="hamburger--v1"/>
+								Dining
+								<calcite-icon class="vis" icon="view-hide"></calcite-icon>
+								</label>
+								<article class="ac-text">
+									<div>
+									<div class="layer-info">
+										<a href="#announcement-modal">
+											<img src="https://img.icons8.com/small/16/003c6c/image.png"/>
+											Dining Locations Map
+										</a>
+									</div>
+									
+									<div class="layer-info">
+										<a href="https://dining.ucsc.edu/eat/index.html">On-Campus Locations, Hours & Menus</a>
+										<p>Learn more about food and drink options</p>
+									</div>
+																				
+										<div class="layer-info">
+											<a href="https://financial.ucsc.edu/Pages/Food_Trucks.aspx">UCSC Food Finder</a>
+											<p>information about Cafes, Food Trucks and Pop-Ups</p>
+										</div>
+									</div>
+								</article>
+							</div>
+							
+							
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/CC3535/restaurant.png"/>Restaurants and Cafes
+							  <input type="checkbox" onclick="changeVisibility(cafes_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CC3535/coffee-to-go.png"/>The Perk Coffee Shops
+							  <input type="checkbox" onclick="changeVisibility(perks_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CC3535/empty-tray.png"/>College Dining Halls
+							  <input type="checkbox" onclick="changeVisibility(dining_halls_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CC3535/food-truck.png"/>Food Trucks and pop-ups
+							  <input type="checkbox" onclick="changeVisibility(food_trucks_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+						</nav>						
+						<nav role="navigation" aria-labelledby="sidenav">
+						<div class="ac">
+							<input class="ac-input" id="transportation" name="transportation" type="checkbox" /> <label class="ac-label" for="transportation">
+							<img width="24" height="24" src="https://img.icons8.com/material/24/CB972F/bus2--v1.png" alt="bus2--v1"/>Transportation
+							<calcite-icon class="vis" icon="view-hide"></calcite-icon></label>
+							<article class="ac-text">
+								<div>
+									<div class="layer-info">
+										<a href="https://taps.ucsc.edu">Transportation and Parking Services website</a>
+										<p>Learn more about transportation on campus</p>
+									</div>
+									<div class="layer-info">
+										<a href="https://rt.scmetro.org/home">Santa Cruz METRO Real Time</a>
+										<p>information about where your vehicle is right now and when it will arrive at your stop</p>
+									</div>
+								</div>
+							</article>
+						</div>
+						</nav>
+						
+						<nav class="" role="navigation" aria-labelledby="sidenav">
+														
+							<label class="container"><img src="https://img.icons8.com/small/24/CB972F/bicycle.png"/>BCycle Dock Locations <span class="new-tag">NEW</span>
+							  <input type="checkbox" onclick="changeVisibility(bikeshare_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CB972F/food-truck.png"/>Transit Stops and Routes
+							  <input type="checkbox" onclick="changeVisibility(shuttles_lyr);changeVisibility(metro_bus_lyr);changeVisibility(bus_route_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CB972F/car.png"/>Parking Lots
+							  <input type="checkbox" onclick="changeVisibility(parking_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CB972F/bicycle.png"/>Bike Parking
+							  <input type="checkbox" onclick="changeVisibility(bike_parking_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CB972F/bicycle.png"/>Bike Repair FixIt Stations
+							  <input type="checkbox" onclick="changeVisibility(bike_repair_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+						</nav>		
+										
+						<div class="ac">
+							<input class="ac-input" id="student_life" name="student_life" type="checkbox" /> 
+							<label class="ac-label" for="student_life"><img width="24" height="24" src="https://img.icons8.com/material/24/6301CB/book--v3.png" alt="book--v3"/>Campus Life
+							<calcite-icon class="vis" icon="view-hide"></calcite-icon></label>
+							<article class="ac-text">
+								<div>
+									<div class="layer-info">
+										<a href="https://advising.ucsc.edu/success/support.html">Student Success Support Services website</a>
+										<p>Learn more about Student Support programs available on campus</p>
+									</div>
+									<div class="layer-info">
+										<a href="https://studentsuccess.ucsc.edu/community/spaces/">Division of Student Affairs and Success - Campus Living Rooms</a>
+										<p>Learn more about the study, social, and gathering spaces designed to meet the diverse needs of our students.</p>
+									</div>
+								</div>
+							</article>
+						</div>
+						
+						<nav class="" role="navigation" aria-labelledby="sidenav">
+														
+							<label class="container"><img src="https://img.icons8.com/small/24/6301CB/building.png"/>Colleges
+							  <input type="checkbox" onclick="changeVisibility(colleges_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/6301CB/library.png"/>Libraries
+							  <input type="checkbox" onclick="changeVisibility(libraries_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/6301CB/service.png"/>Student Support Services
+							  <input type="checkbox" onclick="changeVisibility(support_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label style="display:none" class="container"><img src="https://img.icons8.com/small/24/6301CB/room.png"/>Student Spaces
+							  <input type="checkbox" onclick="changeVisibility(student_spaces_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							
+						</nav>						
+						<div class="ac">
+							<input class="ac-input" id="facilities" name="facilities" type="checkbox" /> <label class="ac-label" for="facilities">
+							<img width="24" height="24" src="https://img.icons8.com/material/24/339999/connectivity-and-help.png" alt="connectivity-and-help"/>Health, Safety & Facilities
+							<calcite-icon class="vis" icon="view-hide"></calcite-icon></label>
+							<article class="ac-text">
+								<div class="">
+									<div class="layer-info">
+										<a href="#bldg-modal">Building Lookup Tool</a>
+										<p>Get building names, addresses, and CAANs</p>
+									</div>
+									<div class="layer-info">
+										<a href="https://ppdo.ucsc.edu/construction/construction-maintenance-schedule.html">Active Projects List</a>
+										<p>Learn more about PPDO Projects and their construction impacts</p>
+									</div>
+								</div>
+							</article>
+						</div>
+						
+						<nav class="" role="navigation" aria-labelledby="sidenav">
+														
+							<label class="container">
+						  		<img src="https://img.icons8.com/small/24/339999/engineer.png"/>Construction Impacts
+							  	<input type="checkbox" onclick="changeVisibility(construction_impacts_lyr)">
+							  	<span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/339999/phone.png"/>Emergency Blue Light Phones
+							  <input type="checkbox" onclick="changeVisibility(emergency_phones_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/339999/toilet-bowl.png"/>All-Gender Restrooms
+							  <input type="checkbox" onclick="changeVisibility(genderinclusive_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/339999/breastfeeding.png"/>Lactation Spaces
+							  <input type="checkbox" onclick="changeVisibility(lactation_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/339999/recycling.png"/>Recycling Locations
+							  <input type="checkbox" onclick="changeVisibility(recycling_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/339999/pdf.png"/>Printable Map Extents
+							  <input type="checkbox" onclick="changeVisibility(pdf_extents_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label style="display:none" class="container"><img src="https://img.icons8.com/external-outline-agus-raharjo/24/339999/external-accessible-disability-outline-agus-raharjo-2.png"/>Accessibility Related Information
+							  <input type="checkbox" onclick="changeVisibility(accessible_doors_lyr);changeVisibility(accessible_paths_lyr);changeVisibility(accessible_info_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							
+						</nav>						
+						<div class="ac">
+							<input class="ac-input" id="recreation" name="recreation" type="checkbox" /> <label class="ac-label" for="recreation"><img width="24" height="24" src="https://img.icons8.com/material/24/34CC02/trampoline-park.png" alt="trampoline-park"/>Recreation
+							<calcite-icon class="vis" icon="view-hide"></calcite-icon></label>
+							<article class="ac-text">
+								<div>
+									<div class="layer-info">
+										<a href="https://recreation.ucsc.edu/">Athletics and Recreation website</a>
+										<p>Learn more about recreation opportunities on campus</p>
+									</div>
+								</div>
+							</article>
+						</div>
+						
+						<nav class="" role="navigation" aria-labelledby="sidenav">
+														
+							<label class="container"><img src="https://img.icons8.com/small/24/34CC02/walking.png"/>Trails, Courts and Atheltic Facilities
+							  <input type="checkbox" onclick="changeVisibility(rec_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/34CC02/leaf.png"/>Garden Spaces
+							  <input type="checkbox" onclick="changeVisibility(gardens_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/34CC02/information.png"/>Places of Interest
+							  <input type="checkbox" onclick="changeVisibility(poi_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+						</nav>
+						
+
+					</aside>
+					
+				</div>
+				<div id="map-options" style="display: none">
+						<h3>MAP OPTIONS</h3>
+						<div id="fieldsets" class="phone-hide">
+							<div>
+								<fieldset id="building-label-selector" class="radio-group">
+									<legend class="radio-group-title"><i class="icon-ui-labels"></i>Building Labels</legend>
+									<input class="radio-group-input" type="radio" id="On" value="on" name="building-label-toggle" />
+									<label class="radio-group-label" for="On">
+										<p>On</p>
+									</label>
+									<input class="radio-group-input" type="radio" id="Off" value="off" name="building-label-toggle" checked />
+									<label class="radio-group-label" for="Off">Off</label>
+								</fieldset>
+							</div>
+							<div>
+								<fieldset id="basemap-selector" class="radio-group">
+									<legend class="radio-group-title"><i class="icon-ui-basemap"></i>Choose your basemap</legend>
+									<input class="radio-group-input" type="radio" id="satellite" value="satellite" name="basemap-selector">
+									<label class="radio-group-label" for="satellite">Satellite</label>
+									<input class="radio-group-input" type="radio" id="carto" value="carto" name="basemap-selector" checked />
+									<label class="radio-group-label" for="carto">Carto</label>
+									<input class="radio-group-input" type="radio" id="hybrid" value="hybrid" name="basemap-selector" />
+									<label class="radio-group-label" for="hybrid">Hybrid</label>
+								</fieldset>
+							</div>
+						</div>
+					</div>
+				<div id="admin-div">
+					
+					<div id="buttons">
+						<a href="mailto:maps@ucsc.edu">
+							<i class="icon-ui-user"></i>
+							Contact the Maps Team
+						</a>
+						<a href="#help-modal" id="map-help-btn"><img style="margin-right:6px"  src="https://img.icons8.com/small/20/ffffff/help.png"/>Help</a>						
+					</div>
+					<style>
+						#announcements {
+							height: 100%;
+							width: 100%;
+							position:relative;
+						}
+
+						#announcements p {
+							font-size:15px;
+							line-height: 1.5em;
+						}
+						
+						#announcements img {
+							height:2em;
+							position:absolute;
+							top:0;
+							bottom:0;
+							margin:auto;
+							right:1em;
+						}
+						
+						#announcements a, #announcements a:visited {
+							color:var(--smooth-blue)
+						}
+					</style>
+					<div id="announcements" class="news-block hide">
+						<p><strong>Welcome back slugs!</strong><br>
+						<a href="https://taps.ucsc.edu/pdf/move-in-impacts-2024-sept-23-25.pdf" target="_blank">Move-In Traffic Impact Map</a>
+						<p>
+							Move-in Info for <strong><a href="https://taps.ucsc.edu/parking/event-parking/move-in-students.html" target="_blank">Students</a> | <a href="https://taps.ucsc.edu/parking/event-parking/move-in-employees.html" target="_blank">Employees</a></strong>
+						</p>
+						<p><img src="https://taps.ucsc.edu/images/taps-logo-rgb.png" alt="TAPS logo"></p>
+						<p style="display:none"><img src="https://mediafiles.ucsc.edu/ppc/logos/ppdo-logo.png" alt="PPDO logo"></p>
+					</div>
+				</div>
+				
+			</div>
+			<div id="main-wrapper">
+				<div id="mobile-menu">
+					<div id="admin-div">
+					
+						<div id="buttons">
+							<a href="mailto:maps@ucsc.edu">
+								<i class="icon-ui-user"></i>
+								Contact the Maps Team
+							</a>
+							<a class="hide" href="#help-modal" id="map-help-btn"><img style="margin-right:6px"  src="https://img.icons8.com/small/20/ffffff/help.png"/>Help</a>
+
+						</div>
+					
+					</div>
+					<div id="announcements" class="news-block hide">
+						<p><strong>Welcome back slugs!</strong><br>
+						<a href="https://taps.ucsc.edu/pdf/move-in-impacts-2024-sept-19-22.pdf" target="_blank">Move-In Traffic Impact Map</a>
+						</p>
+						<p>
+							Move-in Info for <a href="https://taps.ucsc.edu/parking/event-parking/move-in-students.html" target="_blank">Students</a> | <a href="https://taps.ucsc.edu/parking/event-parking/move-in-employees.html" target="_blank">Employees</a>
+						</p>
+						<p><img src="https://taps.ucsc.edu/images/taps-logo-rgb.png" alt="TAPS logo"></p>
+					</div>
+					<aside class="side-nav" aria-role="complementary">
+						<style>
+							.ac-label {
+								font-weight: 500;
+							}
+							
+							.layer-info {
+								background-color: #fff;
+								border:1px solid #ededed;
+								padding:1em 2em
+							}
+							
+							.layer-info p {
+								color:#444;
+								font-size:0.9em
+							}
+						</style>
+
+						<nav class="hide" role="navigation" aria-labelledby="sidenav">
+							<a href="#" class="side-nav-link" onclick="changeVisibility(cafes_lyr)">
+								<i class="icon-ui-checkbox-unchecked"></i>
+								<img src="https://img.icons8.com/small/16/CC3535/restaurant.png"/>Restaurants and Cafes
+							</a>
+							<a href="#" class="side-nav-link" onclick="changeVisibility(perks_lyr)">
+								<i class="icon-ui-checkbox-unchecked"></i>
+								<img src="https://img.icons8.com/small/16/CC3535/coffee-to-go.png"/>The Perk Coffee Shops
+							</a>
+							<a href="#" class="side-nav-link" onclick="changeVisibility(dining_halls_lyr)">
+								<i class="icon-ui-checkbox-unchecked"></i>
+								<img src="https://img.icons8.com/small/16/CC3535/empty-tray.png"/>College Dining Halls
+							</a>
+							<a href="#" class="side-nav-link" onclick="changeVisibility(food_trucks_lyr)">
+								<i class="icon-ui-checkbox-unchecked"></i>
+								<img src="https://img.icons8.com/small/16/CC3535/food-truck.png"/>Food Trucks and pop-ups
+							</a>
+						</nav>
+						
+						
+						<nav role="navigation" aria-labelledby="sidenav">
+							<div class="ac">
+								<input class="ac-input" id="dining" name="dining" type="checkbox" />
+								<label class="ac-label" for="dining">
+									<img width="24" height="24" src="https://img.icons8.com/material/24/CC3535/hamburger--v1.png" alt="hamburger--v1"/>
+									Dining
+								</label>
+								<article class="ac-text">
+									<div>
+									<div class="layer-info">
+										<a href="#announcement-modal">
+											<img src="https://img.icons8.com/small/16/003c6c/image.png"/>
+											Dining Locations Map
+										</a>
+									</div>
+									
+									<div class="layer-info">
+										<a href="https://dining.ucsc.edu/eat/index.html">On-Campus Locations, Hours & Menus</a>
+										<p>Learn more about food and drink options</p>
+									</div>
+																				
+										<div class="layer-info">
+											<a href="https://financial.ucsc.edu/Pages/Food_Trucks.aspx">UCSC Food Finder</a>
+											<p>information about Cafes, Food Trucks and Pop-Ups</p>
+										</div>
+									</div>
+								</article>
+							</div>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/CC3535/restaurant.png"/>Restaurants and Cafes
+							  <input type="checkbox" onclick="changeVisibility(cafes_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CC3535/coffee-to-go.png"/>The Perk Coffee Shops
+							  <input type="checkbox" onclick="changeVisibility(perks_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CC3535/empty-tray.png"/>College Dining Halls
+							  <input type="checkbox" onclick="changeVisibility(dining_halls_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CC3535/food-truck.png"/>Food Trucks and pop-ups
+							  <input type="checkbox" onclick="changeVisibility(food_trucks_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+						</nav>
+						
+						<div class="ac">
+							<input class="ac-input" id="transportation-m" name="transportation-m" type="checkbox" /> <label class="ac-label" for="transportation-m"><img width="24" height="24" src="https://img.icons8.com/material/24/CB972F/bus2--v1.png" alt="bus2--v1"/>Transportation</label>
+							<article class="ac-text">
+								<div>
+									<div class="layer-info">
+										<a href="https://taps.ucsc.edu">Transportation and Parking Services website</a>
+										<p>Learn more about transportation on campus</p>
+									</div>
+									<div class="layer-info">
+										<a href="https://rt.scmetro.org/home">Santa Cruz METRO Real Time</a>
+										<p>information about where your vehicle is right now and when it will arrive at your stop</p>
+									</div>
+								</div>
+							</article>
+						</div>
+						<nav class="" role="navigation" aria-labelledby="sidenav">
+							<label class="container"><img src="https://img.icons8.com/small/24/CB972F/bicycle.png"/>BCycle Dock Locations <span class="new-tag">NEW</span>
+							  <input type="checkbox" onclick="changeVisibility(bikeshare_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CB972F/food-truck.png"/>Transit Stops and Routes
+							  <input type="checkbox" onclick="changeVisibility(shuttles_lyr);changeVisibility(metro_bus_lyr);changeVisibility(bus_route_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CB972F/car.png"/>Parking Lots
+							  <input type="checkbox" onclick="changeVisibility(parking_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CB972F/bicycle.png"/>Bike Parking
+							  <input type="checkbox" onclick="changeVisibility(bike_parking_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/CB972F/bicycle.png"/>Bike Repair FixIt Stations
+							  <input type="checkbox" onclick="changeVisibility(bike_repair_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+						</nav>
+						
+						<div class="ac">
+							<input class="ac-input" id="student_life-m" name="student_life-m" type="checkbox" /> 
+							<label class="ac-label" for="student_life-m"><img width="24" height="24" src="https://img.icons8.com/material/24/6301CB/book--v3.png" alt="book--v3"/>Campus Life</label>
+							<article class="ac-text">
+								<div>
+									<div class="layer-info">
+										<a href="https://advising.ucsc.edu/success/support.html">Student Success Support Services website</a>
+										<p>Learn more about Student Support programs available on campus</p>
+									</div>
+								</div>
+							</article>
+						</div>
+						<nav class="" role="navigation" aria-labelledby="sidenav">
+							<label class="container"><img src="https://img.icons8.com/small/24/6301CB/building.png"/>Colleges
+							  <input type="checkbox" onclick="changeVisibility(colleges_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/6301CB/library.png"/>Libraries
+							  <input type="checkbox" onclick="changeVisibility(libraries_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							<label class="container"><img src="https://img.icons8.com/small/24/6301CB/service.png"/>Student Support Services
+							  <input type="checkbox" onclick="changeVisibility(support_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+						</nav>
+						
+						<nav class="" role="navigation" aria-labelledby="sidenav">
+							<div class="ac">
+								<input class="ac-input" id="facilities-m" name="facilities-m" type="checkbox" /> <label class="ac-label" for="facilities-m"><img width="24" height="24" src="https://img.icons8.com/material/24/339999/connectivity-and-help.png" alt="connectivity-and-help"/>Health, Safety &amp; Facilities</label>
+								<article class="ac-text">
+								<div class="">
+									<div class="layer-info">
+										<a href="#bldg-modal">Building Lookup Tool</a>
+										<p>Get building names, addresses, and CAANs</p>
+									</div>
+									<div class="layer-info">
+										<a href="https://ppdo.ucsc.edu/construction/construction-maintenance-schedule.html">Active Projects List</a>
+										<p>Learn more about PPDO Projects and their construction impacts</p>
+									</div>
+								</div>
+							</article>
+							</div>
+							<label class="container">
+						  		<img src="https://img.icons8.com/small/24/339999/engineer.png"/>Construction Impacts
+							  	<input type="checkbox" onclick="changeVisibility(construction_impacts_lyr)">
+							  	<span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/339999/phone.png"/>Emergency Blue Light Phones
+							  <input type="checkbox" onclick="changeVisibility(emergency_phones_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/339999/toilet-bowl.png"/>All-Gender Restrooms
+							  <input type="checkbox" onclick="changeVisibility(genderinclusive_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/339999/breastfeeding.png"/>Lactation Spaces
+							  <input type="checkbox" onclick="changeVisibility(lactation_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/339999/recycling.png"/>Recycling Locations
+							  <input type="checkbox" onclick="changeVisibility(recycling_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/339999/pdf.png"/>Printable Map Extents
+							  <input type="checkbox" onclick="changeVisibility(pdf_extents_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+						</nav>
+
+						<div class="ac">
+							<input class="ac-input" id="recreation-m" name="recreation-m" type="checkbox" /> <label class="ac-label" for="recreation-m"><img width="24" height="24" src="https://img.icons8.com/material/24/34CC02/trampoline-park.png" alt="trampoline-park"/>Recreation</label>
+							<article class="ac-text">
+								<div>
+									<div class="layer-info">
+										<a href="https://recreation.ucsc.edu/">Athletics and Recreation website</a>
+										<p>Learn more about recreation opportunities on campus</p>
+									</div>
+								</div>
+							</article>
+						</div>
+						
+						<nav class="" role="navigation" aria-labelledby="sidenav">
+							<label class="container"><img src="https://img.icons8.com/small/24/34CC02/walking.png"/>Trails, Courts and Atheltic Facilities
+							  <input type="checkbox" onclick="changeVisibility(rec_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/34CC02/leaf.png"/>Garden Spaces
+							  <input type="checkbox" onclick="changeVisibility(gardens_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+							
+							<label class="container"><img src="https://img.icons8.com/small/24/34CC02/information.png"/>Places of Interest
+							  <input type="checkbox" onclick="changeVisibility(poi_lyr)">
+							  <span class="checkmark"></span>
+							</label>
+						</nav>
+					</aside>
+				</div>
+				<div id="viewDiv">
+					<div id="clear-layers-icon">
+						<i id="clear-layers-icon" class="icon-ui phone-show"></i>
+						<img src="https://img.icons8.com/ios-glyphs/22/ffffff/refresh.png"/>
+					</div>
+					<div id="help-icon">
+						<a href="#help-modal">
+							<i class="icon-ui phone-show"></i>
+							<img src="https://img.icons8.com/small/22/ffffff/help.png"/>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<header id="mobile-nav" class="third-nav phone-show">
+			
+			<div class="third-nav-container">
+				<nav class="break" role="navigation" aria-labelledby="thirdnav">
+					<div id="mobile-nav-icon-div">
+						<ul id="nav-list">
+						<li>
+							<div class="nav-box"><a class="third-nav-link" href="home/">
+									<div class="icon-box"><calcite-icon icon="home" scale="s"></calcite-icon></div>
+									<p>Maps Home</p>
+								</a></div>
+						</li>
+						<li>
+							<div class="nav-box"><a class="third-nav-link" href="printable-maps/" target="_blank">
+									<div class="icon-box"><calcite-icon icon="print" scale="s"></calcite-icon></div>
+									<p>Printable Maps</p>
+								</a></div>
+						</li>
+						<li>
+							<div class="nav-box"><a class="third-nav-link" href="detailed-directions/" target="_blank">
+									<div class="icon-box"><calcite-icon icon="map" scale="s"></calcite-icon></div>
+									<p>Detailed Directions</p>
+								</a></div>
+						</li>
+					</ul>
+					</div>
+				</nav>
+			</div>
+		</header>
+	</div>
+	
+	<script src="js/main.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+
+</body></html>
