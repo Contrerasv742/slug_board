@@ -49,8 +49,22 @@ const CreatePostPage = () => {
   };
 
   const handlePostSubmit = async () => {
-    if (!postTitle.trim() || !postDescription.trim()) {
-      setError("Please fill in both the title and description.");
+    // Debug: Log current form values
+    console.log('Form validation check:', {
+      title: `"${postTitle}"`,
+      titleTrimmed: `"${postTitle.trim()}"`,
+      description: `"${postDescription}"`, 
+      descriptionTrimmed: `"${postDescription.trim()}"`,
+      startTime: `"${startTime}"`
+    });
+
+    if (!postTitle.trim()) {
+      setError("Please enter an event title.");
+      return;
+    }
+
+    if (!postDescription.trim()) {
+      setError("Please enter an event description.");
       return;
     }
 
@@ -59,19 +73,80 @@ const CreatePostPage = () => {
       return;
     }
 
+    if (!user?.id) {
+      setError("User not authenticated. Please sign in and try again.");
+      return;
+    }
+
+    // Validate datetime format before starting
+    let startTimeISO, endTimeISO;
+    try {
+      startTimeISO = new Date(startTime).toISOString();
+      if (isNaN(Date.parse(startTime))) {
+        throw new Error('Invalid start time');
+      }
+      
+      if (endTime) {
+        endTimeISO = new Date(endTime).toISOString();
+        if (isNaN(Date.parse(endTime))) {
+          throw new Error('Invalid end time');
+        }
+      } else {
+        endTimeISO = null;
+      }
+    } catch (dateError) {
+      setError("Invalid date format. Please check your start and end times.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
+      // First, ensure the user exists in the users table
+      const { data: existingUser, error: userCheckError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (userCheckError && userCheckError.code === 'PGRST116') {
+        // User doesn't exist in users table, create them
+        console.log('Creating user record in users table...');
+        const { error: userCreateError } = await supabase
+          .from('users')
+          .insert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0],
+            provider: user.app_metadata?.provider || 'email'
+          });
+
+        if (userCreateError) {
+          console.error('Failed to create user record:', userCreateError);
+          setError("Failed to set up user account. Please try again.");
+          setLoading(false);
+          return;
+        }
+      }
+
       const eventData = {
         title: postTitle,
         description: postDescription,
-        start_time: startTime,
-        end_time: endTime || null,
+        start_time: startTimeISO,
+        end_time: endTimeISO,
         location: location || null,
         college_tag: collegeTag || null,
         host_id: user.id
       };
+
+      console.log('Creating event with data:', eventData);
+      console.log('Data types:', {
+        title: typeof eventData.title,
+        description: typeof eventData.description,
+        start_time: typeof eventData.start_time,
+        host_id: typeof eventData.host_id
+      });
 
       const { data, error } = await EventService.createEvent(eventData);
 
@@ -79,7 +154,27 @@ const CreatePostPage = () => {
 
       navigate('/home');
     } catch (error) {
-      setError(error.message);
+      console.error('Event creation error:', error);
+      
+      // Provide specific error messages for common issues
+      if (error.message?.includes('row-level security policy')) {
+        setError("Permission denied. Please make sure you're signed in and the database policies are configured correctly.");
+      } else if (error.message?.includes('violates not-null constraint')) {
+        // Extract which column is null from the error message
+        const columnMatch = error.message.match(/column "([^"]+)"/);
+        const columnName = columnMatch ? columnMatch[1] : 'unknown field';
+        setError(`Missing required field: ${columnName}. Please fill in all required information.`);
+      } else if (error.message?.includes('foreign key constraint')) {
+        setError("User account not found in database. Please sign out and sign back in.");
+      } else if (error.message?.includes('duplicate key')) {
+        setError("An event with this information already exists.");
+      } else if (error.message?.includes('invalid input syntax')) {
+        setError("Invalid data format. Please check your date/time entries.");
+      } else if (error.message?.includes('violates')) {
+        setError("Database constraint violation. Please check your input and try again.");
+      } else {
+        setError(error.message || "Failed to create event. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
