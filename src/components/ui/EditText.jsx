@@ -11,7 +11,10 @@ const EditText = ({
   className = '',
   ...props 
 }) => {
-  const baseClasses = 'w-full rounded-[14px] bg-edittext-1 text-edittext-1 font-ropa text-base sm:text-lg md:text-xl lg:text-[30px] leading-[33px] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
+  const baseClasses = 'w-full rounded-[14px] bg-edittext-1 text-edittext-1 \
+    font-ropa text-base sm:text-lg md:text-xl lg:text-[30px] leading-[33px] \
+  transition-colors duration-200 focus:outline-none focus:ring-2 \
+  focus:ring-offset-2 focus:ring-blue-500';
   
   const paddingClasses = leftIcon 
     ? 'pt-2 pr-4 pb-2 pl-9 sm:pt-2.5 sm:pr-5 sm:pb-2.5 sm:pl-11 md:pt-3 md:pr-6 md:pb-3 md:pl-14 lg:pt-[10px] lg:pr-[18px] lg:pb-[10px] lg:pl-[42px]'

@@ -1,37 +1,35 @@
-import React from 'react';
+import Header from '../components/common/Header.jsx';
+import Sidebar from '../components/common/Sidebar.jsx';
 
 const MapPage = () => {
   return (
-    <div className="w-full h-screen bg-global-1 font-ropa">
+    <div className="flex flex-col h-screen bg-global-1 font-ropa">
       {/* Header */}
-      <header className="bg-global-1 border-b-2 border-white border-opacity-60 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-global-2 rounded-sm">
-              <img
-                src="/images/standing-sammy.png"
-                className="w-full h-full object-contain"
-                alt="Slug mascot"
-              />
-            </div>
-            <h1 className="text-global-4 font-ropa text-xl font-normal ml-3">
-              Campus Map
-            </h1>
-          </div>
-          <button className="bg-global-2 hover:bg-global-3 px-4 py-2 rounded-lg">
-            Back to Feed
-          </button>
-        </div>
-      </header>
-      
-      {/* Embedded Map */}
-      <iframe 
-        src="https://maps.ucsc.edu/"
-        width="100%" 
-        height="100%"
-        title="UCSC Interactive Map"
-        className="border-none"
+      <Header 
+        showSearch={true}
+        searchPlaceholder="Search Posts"
+        userName="John Doe"
+        userHandle="@johndoe"
+        userAvatar="/images/default-avatar.png"
       />
+      
+      {/* Main Content Container */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <Sidebar onMenuClick={handleMenuClick} />
+        
+        {/* Map Container */}
+        <div className="flex-1 relative">
+          <iframe 
+            src="https://maps.ucsc.edu/"
+            width="100%" 
+            height="100%"
+            title="UCSC Interactive Map"
+            className="border-none absolute inset-0"
+            loading="lazy"
+          />
+        </div>
+      </div>
     </div>
   );
 };

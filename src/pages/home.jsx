@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import CompleteNavigation from '../components/common/CompleteNavigation';
 import '../styles/home.css'
 import { supabase } from '../supabaseClient';
@@ -11,7 +11,6 @@ import { EventService } from '../services/eventService';
 
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo('en-US')
-
 
 const HomePage = () => {
   const [searchValue, setSearchValue] = useState('');
@@ -44,23 +43,6 @@ const HomePage = () => {
 
     return () => clearTimeout(timeoutId);
   }, [searchValue]);
-
-  // Close user menu when clicking outside
-  // useEffect(() => {
-  //   const handleClickOutside = (event) => {
-  //     if (showUserMenu && !event.target.closest('.user-menu-container')) {
-  //       setShowUserMenu(false);
-  //     }
-  //     if (showMobileMenu && !event.target.closest('.mobile-menu-container')) {
-  //       setShowMobileMenu(false);
-  //     }
-  //   };
-
-  //   document.addEventListener('mousedown', handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener('mousedown', handleClickOutside);
-  //   };
-  // }, [showUserMenu, showMobileMenu]);
 
   const fetchEvents = async () => {
     try {
@@ -133,8 +115,6 @@ const HomePage = () => {
       setLoading(false);
     }
   };
-
-
 
   const VoteButton = ({ type, onClick, className = "" }) => (
     <button 
@@ -307,6 +287,19 @@ const HomePage = () => {
           ))}
         </div>
       </CompleteNavigation>
+
+      {/* Create Events Button - keeping from UI version */}
+      <Link
+        to="/create-post"
+        className="fixed bottom-6 right-6 w-[50px] h-[50px] rounded-full 
+        bg-global-2 hover:bg-global-3 transition-all duration-200 
+        shadow-lg hover:shadow-xl transform hover:scale-105
+        flex items-center justify-center z-50 no-underline"
+      >
+        <span className="text-5xl font-bold leading-none text-starship-animated">
+          +
+        </span>
+      </Link>
     </div>
   );
 };
