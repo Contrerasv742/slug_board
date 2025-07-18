@@ -30,12 +30,16 @@ const UserCreationPage = () => {
     }
   });
 
-  const [newInterest, setNewInterest] = useState('');
   const [newGoal, setNewGoal] = useState('');
+  const [interestSearch, setInterestSearch] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [validationErrors, setValidationErrors] = useState({});
 
   const predefinedInterests = [
     'Photography', 'Coding', 'Music', 'Sports', 'Art', 'Reading',
-    'Gaming', 'Travel', 'Food', 'Fitness', 'Movies', 'Nature'
+    'Gaming', 'Travel', 'Food', 'Fitness', 'Movies', 'Nature',
+    'Dancing', 'Writing', 'Cooking', 'Science', 'Technology', 'Fashion',
+    'Theater', 'Volunteering', 'Hiking', 'Meditation', 'Languages', 'History'
   ];
 
   const majors = [
@@ -46,11 +50,74 @@ const UserCreationPage = () => {
 
   const graduationYears = ['2024', '2025', '2026', '2027', '2028'];
 
+  // Password verification function
+  const verifyPasswords = () => {
+    if (formData.password !== formData.confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      return false;
+    }
+    setPasswordError('');
+    return true;
+  };
+
+  // Validation functions
+  const validateStep1 = () => {
+    const errors = {};
+    
+    if (!formData.firstName.trim()) errors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) errors.lastName = 'Last name is required';
+    if (!formData.email.trim()) errors.email = 'Email is required';
+    if (!formData.password) errors.password = 'Password is required';
+    if (!formData.confirmPassword) errors.confirmPassword = 'Confirm password is required';
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0 && verifyPasswords();
+  };
+
+  const validateStep2 = () => {
+    const errors = {};
+    
+    if (!formData.major) errors.major = 'Major is required';
+    if (!formData.graduationYear) errors.graduationYear = 'Graduation year is required';
+    if (!formData.handle.trim()) errors.handle = 'Username handle is required';
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateStep3 = () => {
+    const errors = {};
+    
+    if (formData.interests.length < 5) {
+      errors.interests = 'Please select at least 5 interests';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+    
+    // Clear validation errors when user types
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
+    }
+    
+    // Clear password error when user types
+    if (field === 'password' || field === 'confirmPassword') {
+      setPasswordError('');
+    }
   };
 
   const handlePersonalityChange = (trait, value) => {
@@ -69,8 +136,15 @@ const UserCreationPage = () => {
         ...prev,
         interests: [...prev.interests, interest]
       }));
+      
+      // Clear interests validation error when adding
+      if (validationErrors.interests) {
+        setValidationErrors(prev => ({
+          ...prev,
+          interests: undefined
+        }));
+      }
     }
-    setNewInterest('');
   };
 
   const removeInterest = (interest) => {
@@ -97,8 +171,27 @@ const UserCreationPage = () => {
     }));
   };
 
+  // Filter interests based on search
+  const filteredInterests = predefinedInterests.filter(interest =>
+    interest.toLowerCase().includes(interestSearch.toLowerCase()) &&
+    !formData.interests.includes(interest)
+  );
+
   const nextStep = () => {
-    if (currentStep < 4) {
+    let isValid = false;
+    
+    // Validate current step
+    if (currentStep === 1) {
+      isValid = validateStep1();
+    } else if (currentStep === 2) {
+      isValid = validateStep2();
+    } else if (currentStep === 3) {
+      isValid = validateStep3();
+    } else {
+      isValid = true;
+    }
+    
+    if (isValid && currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -110,6 +203,24 @@ const UserCreationPage = () => {
   };
 
   const handleSubmit = () => {
+    // Validate all steps before submission
+    const step1Valid = validateStep1();
+    const step2Valid = validateStep2();
+    const step3Valid = validateStep3();
+    
+    if (!step1Valid) {
+      setCurrentStep(1);
+      return;
+    }
+    if (!step2Valid) {
+      setCurrentStep(2);
+      return;
+    }
+    if (!step3Valid) {
+      setCurrentStep(3);
+      return;
+    }
+    
     console.log('User data:', formData);
     // Handle form submission
     alert('Account created successfully!');
@@ -151,79 +262,121 @@ const UserCreationPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-700 text-sm font-medium mb-2">
+          <label className="text-gray-700 text-sm font-medium mb-2 flex items-center gap-2">
             First Name
+            <span className="w-2 h-2 bg-purple-400/80 rounded-full
+              animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+              relative z-10"></span>
           </label>
           <input
             type="text"
             value={formData.firstName}
             onChange={(e) => handleInputChange('firstName', e.target.value)}
-            className="w-full px-4 py-3 bg-global-2 border border-gray-200
-            rounded-[15px] focus:outline-none focus:ring-2
-            focus:ring-purple-500"
+            className={`w-full px-4 py-3 bg-global-2 border rounded-[15px] 
+            focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              validationErrors.firstName ? 'border-red-500' : 'border-gray-200'
+            }`}
             placeholder="Enter your first name"
           />
+          {validationErrors.firstName && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.firstName}</p>
+          )}
         </div>
         <div>
-          <label className="block text-gray-700 text-sm font-medium mb-2">
+          <label className="text-gray-700 text-sm font-medium mb-2 flex items-center gap-2">
             Last Name
+            <span className="w-2 h-2 bg-purple-400/80 rounded-full
+              animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+              relative z-10"></span>
           </label>
           <input
             type="text"
             value={formData.lastName}
             onChange={(e) => handleInputChange('lastName', e.target.value)}
-            className="w-full px-4 py-3 bg-global-2 border border-gray-200
-            rounded-[15px] focus:outline-none focus:ring-2
-            focus:ring-purple-500"
+            className={`w-full px-4 py-3 bg-global-2 border rounded-[15px] 
+            focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              validationErrors.lastName ? 'border-red-500' : 'border-gray-200'
+            }`}
             placeholder="Enter your last name"
           />
+          {validationErrors.lastName && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.lastName}</p>
+          )}
         </div>
       </div>
 
       <div>
-        <label className="block text-gray-700 text-sm font-medium mb-2">
+        <label className="text-gray-700 text-sm font-medium mb-2 flex items-center gap-2">
           Email
+          <span className="w-2 h-2 bg-purple-400/80 rounded-full
+            animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+            relative z-10"></span>
         </label>
         <input
           type="email"
           value={formData.email}
           onChange={(e) => handleInputChange('email', e.target.value)}
-          className="w-full px-4 py-3 bg-global-2 border border-gray-200
-          rounded-[15px] focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className={`w-full px-4 py-3 bg-global-2 border rounded-[15px] 
+          focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+            validationErrors.email ? 'border-red-500' : 'border-gray-200'
+          }`}
           placeholder="Enter your email address"
         />
+        {validationErrors.email && (
+          <p className="text-red-500 text-xs mt-1">{validationErrors.email}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-700 text-sm font-medium mb-2">
+          <label className="text-gray-700 text-sm font-medium mb-2 flex items-center gap-2">
             Password
+            <span className="w-2 h-2 bg-purple-400/80 rounded-full
+              animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+              relative z-10"></span>
           </label>
           <input
             type="password"
             value={formData.password}
             onChange={(e) => handleInputChange('password', e.target.value)}
-            className="w-full px-4 py-3 bg-global-2 border border-gray-200
-            rounded-[15px] focus:outline-none focus:ring-2
-            focus:ring-purple-500"
+            className={`w-full px-4 py-3 bg-global-2 border rounded-[15px] 
+            focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              validationErrors.password ? 'border-red-500' : 'border-gray-200'
+            }`}
             placeholder="Create a password"
           />
+          {validationErrors.password && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.password}</p>
+          )}
         </div>
         <div>
-          <label className="block text-gray-700 text-sm font-medium mb-2">
+          <label className="text-gray-700 text-sm font-medium mb-2 flex items-center gap-2">
             Confirm Password
+            <span className="w-2 h-2 bg-purple-400/80 rounded-full
+              animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+              relative z-10"></span>
           </label>
           <input
             type="password"
             value={formData.confirmPassword}
             onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-            className="w-full px-4 py-3 bg-global-2 border border-gray-200
-            rounded-[15px] focus:outline-none focus:ring-2
-            focus:ring-purple-500"
+            className={`w-full px-4 py-3 bg-global-2 border rounded-[15px] 
+            focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              validationErrors.confirmPassword ? 'border-red-500' : 'border-gray-200'
+            }`}
             placeholder="Confirm your password"
           />
+          {validationErrors.confirmPassword && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.confirmPassword}</p>
+          )}
         </div>
       </div>
+      
+      {passwordError && (
+        <div className="text-red-500 text-sm mt-2 text-center">
+          {passwordError}
+        </div>
+      )}
     </div>
   );
 
@@ -238,57 +391,78 @@ const UserCreationPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-700 text-sm font-medium mb-2">
+          <label className="text-gray-700 text-sm font-medium mb-2 flex items-center gap-2">
             Major
+            <span className="w-2 h-2 bg-purple-400/80 rounded-full
+              animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+              relative z-10"></span>
           </label>
           <select
             value={formData.major}
             onChange={(e) => handleInputChange('major', e.target.value)}
-            className="w-full px-4 py-3 bg-global-2 border border-gray-200
-            rounded-[15px] focus:outline-none focus:ring-2
-            focus:ring-purple-500"
+            className={`w-full px-4 py-3 bg-global-2 border rounded-[15px] 
+            focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              validationErrors.major ? 'border-red-500' : 'border-gray-200'
+            }`}
           >
             <option value="">Select your major</option>
             {majors.map(major => (
               <option key={major} value={major}>{major}</option>
             ))}
           </select>
+          {validationErrors.major && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.major}</p>
+          )}
         </div>
         <div>
-          <label className="block text-gray-700 text-sm font-medium mb-2">
+          <label className="text-gray-700 text-sm font-medium mb-2 flex items-center gap-2">
             Graduation Year
+            <span className="w-2 h-2 bg-purple-400/80 rounded-full
+              animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+              relative z-10"></span>
           </label>
           <select
             value={formData.graduationYear}
             onChange={(e) => handleInputChange('graduationYear', e.target.value)}
-            className="w-full px-4 py-3 bg-global-2 border border-gray-200
-            rounded-[15px] focus:outline-none focus:ring-2
-            focus:ring-purple-500"
+            className={`w-full px-4 py-3 bg-global-2 border rounded-[15px] 
+            focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              validationErrors.graduationYear ? 'border-red-500' : 'border-gray-200'
+            }`}
           >
             <option value="">Select graduation year</option>
             {graduationYears.map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
+          {validationErrors.graduationYear && (
+            <p className="text-red-500 text-xs mt-1">{validationErrors.graduationYear}</p>
+          )}
         </div>
       </div>
 
       <div>
-        <label className="block text-gray-700 text-sm font-medium mb-2">
+        <label className="text-gray-700 text-sm font-medium mb-2 flex items-center gap-2">
           Username Handle
+          <span className="w-2 h-2 bg-purple-400/80 rounded-full
+            animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+            relative z-10"></span>
         </label>
-        <div className="relative"> <span className="absolute left-4 top-1/2
-          transform -translate-y-1/2 text-gray-500">@</span>
+        <div className="relative">
+          <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">@</span>
           <input
             type="text"
             value={formData.handle}
             onChange={(e) => handleInputChange('handle', e.target.value)}
-            className="w-full pl-8 pr-4 py-3 bg-global-2 border border-gray-200
-            rounded-[15px] focus:outline-none focus:ring-2
-            focus:ring-purple-500"
+            className={`w-full pl-8 pr-4 py-3 bg-global-2 border rounded-[15px] 
+            focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+              validationErrors.handle ? 'border-red-500' : 'border-gray-200'
+            }`}
             placeholder="your-username"
           />
         </div>
+        {validationErrors.handle && (
+          <p className="text-red-500 text-xs mt-1">{validationErrors.handle}</p>
+        )}
       </div>
 
       <div>
@@ -318,42 +492,35 @@ const UserCreationPage = () => {
       </div>
 
       <div>
-        <label className="block text-gray-700 text-sm font-medium mb-2">
-          Interests
+        <label className="text-gray-700 text-sm font-medium mb-2 flex items-center gap-2">
+          Find Interests
+          <span className="w-2 h-2 bg-purple-400/80 rounded-full
+            animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+            relative z-10"></span>
+          <span className="text-xs text-gray-500">(minimum 5 required)</span>
         </label>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {predefinedInterests.map(interest => (
+        <input
+          type="text"
+          value={interestSearch}
+          onChange={(e) => setInterestSearch(e.target.value)}
+          className="w-full px-4 py-3 bg-global-2 border border-gray-200
+          rounded-[15px] focus:outline-none focus:ring-2
+          focus:ring-purple-500 mb-3"
+          placeholder="Search for interests..."
+        />
+        
+        <div className="flex flex-wrap gap-2 mb-4 max-h-32 overflow-y-auto">
+          {filteredInterests.map(interest => (
             <button
               key={interest}
               onClick={() => addInterest(interest)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                formData.interests.includes(interest)
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
+              className="px-3 py-1 rounded-full text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
             >
-              {interest}
+              + {interest}
             </button>
           ))}
         </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newInterest}
-            onChange={(e) => setNewInterest(e.target.value)}
-            className="flex-1 px-4 py-2 bg-global-2 border border-gray-200
-            rounded-[15px] focus:outline-none focus:ring-2
-            focus:ring-purple-500"
-            placeholder="Add custom interest..."
-          />
-          <button
-            onClick={() => addInterest(newInterest)}
-            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500
-            text-white rounded-[15px] hover:opacity-90"
-          >
-            Add
-          </button>
-        </div>
+        
         <div className="flex flex-wrap gap-2 mt-3">
           {formData.interests.map(interest => (
             <span
@@ -371,6 +538,14 @@ const UserCreationPage = () => {
               </button>
             </span>
           ))}
+        </div>
+        
+        {validationErrors.interests && (
+          <p className="text-red-500 text-xs mt-2">{validationErrors.interests}</p>
+        )}
+        
+        <div className="text-xs text-gray-500 mt-2">
+          Selected: {formData.interests.length}/5 minimum
         </div>
       </div>
 
@@ -398,7 +573,7 @@ const UserCreationPage = () => {
         </div>
         <div className="space-y-2">
           {formData.goals.map((goal, index) => (
-            <div key={index} className="flex items-center gap-3 bg-global-1 p-3
+            <div key={index} className="flex items-center gap-3 bg-global-2 p-3
               rounded-[15px]">
               <div className="w-2 h-2 bg-purple-500 rounded-full
                 flex-shrink-0"></div>
@@ -432,19 +607,41 @@ const UserCreationPage = () => {
               <span className="text-gray-700 capitalize">{trait}</span>
               <span className="text-gray-500">{value}/10</span>
             </div>
-            <input
-              type="range"
-              min="1"
-              max="10"
-              value={value}
-              onChange={(e) => handlePersonalityChange(trait, parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none
-              cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, #8b5cf6 0%, #3b82f6
-                             ${value * 10}%, #e5e7eb ${value * 10}%, #e5e7eb 100%)`
-              }}
-            />
+            <div className="relative">
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={value}
+                onChange={(e) => handlePersonalityChange(trait, parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                style={{
+                  background: `linear-gradient(to right, #8b5cf6 0%, #3b82f6
+                               ${value * 10 - 20}%, #e5e7eb ${value * 10}%, #e5e7eb 100%)`
+                }}
+              />
+              <style>{`
+                .slider::-webkit-slider-thumb {
+                  appearance: none;
+                  width: 20px;
+                  height: 20px;
+                  border-radius: 50%;
+                  background: linear-gradient(45deg, #8b5cf6, #3b82f6);
+                  cursor: pointer;
+                  border: 2px solid white;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                }
+                .slider::-moz-range-thumb {
+                  width: 20px;
+                  height: 20px;
+                  border-radius: 50%;
+                  background: linear-gradient(45deg, #8b5cf6, #3b82f6);
+                  cursor: pointer;
+                  border: 2px solid white;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                }
+              `}</style>
+            </div>
           </div>
         ))}
       </div>
@@ -479,7 +676,7 @@ const UserCreationPage = () => {
         <div className="bg-white rounded-[35px] p-8 shadow-lg">
           {renderStepIndicator()}
           
-          <div className="min-h-[500px]">
+          <div className="">
             {renderCurrentStep()}
           </div>
 

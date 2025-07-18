@@ -185,7 +185,7 @@ const UserProfilePage = () => {
               </div>
 
               {/* Right Content Area */}
-              <div className="lg:col-span-8 space-y-6 h-full">
+              <div className="lg:col-span-8 space-y-[40px] h-full">
 
                 {/* Recent Activity */}
                 <div className="bg-global-2 rounded-[25px] p-6 lg:p-[32px]">

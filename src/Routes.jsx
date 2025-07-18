@@ -14,16 +14,23 @@ const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        /* Feeds */
         <Route path="/" element={<HomePage/>} />
         <Route path="/home" element={<HomePage/>} />
         <Route path="/explore" element={<HomePage/>} />
         <Route path="/popular" element={<HomePage/>} />
+
+        /* Post Pages */
         <Route path="/post" element={<PostDetailPage/>} />
         <Route path="/create-post" element={<CreatePostPage/>} />
-        <Route path="/map" element={<MapPage/>} />
+
+        /* User Interactable */
         <Route path="/profile" element={<UserProfilePage/>} />
         <Route path="/creation" element={<UserCreationPage/>} />
+
+        /* Other */
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/map" element={<MapPage/>} />
       </Routes>
     </Router>
   );
