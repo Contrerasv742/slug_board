@@ -10,10 +10,6 @@ import { EventService } from '../services/eventService';
 const CreatePostPage = () => {
   const [postTitle, setPostTitle] = useState('');
   const [postDescription, setPostDescription] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [location, setLocation] = useState('');
-  const [collegeTag, setCollegeTag] = useState('');
   const [relatedInterests, setRelatedInterests] = useState([]);
   const [showMoreInterests, setShowMoreInterests] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -101,31 +97,6 @@ const CreatePostPage = () => {
       return;
     }
 
-    // Validate datetime format only if provided
-    let startTimeISO, endTimeISO;
-    try {
-      if (startTime) {
-        startTimeISO = new Date(startTime).toISOString();
-        if (isNaN(Date.parse(startTime))) {
-          throw new Error('Invalid start time');
-        }
-      } else {
-        startTimeISO = null;
-      }
-      
-      if (endTime) {
-        endTimeISO = new Date(endTime).toISOString();
-        if (isNaN(Date.parse(endTime))) {
-          throw new Error('Invalid end time');
-        }
-      } else {
-        endTimeISO = null;
-      }
-    } catch (dateError) {
-      setError("Invalid date format. Please check your start and end times.");
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
@@ -162,19 +133,13 @@ const CreatePostPage = () => {
         description: postDescription.trim(),
         related_interests: relatedInterests,
         host_id: user.id,
-        event_type: 'community', // Explicitly mark as community event
-        // Only include optional fields if they have values
-        ...(startTimeISO && { start_time: startTimeISO }),
-        ...(endTimeISO && { end_time: endTimeISO }),
-        ...(location?.trim() && { location: location.trim() }),
-        ...(collegeTag?.trim() && { college_tag: collegeTag.trim() })
+        event_type: 'community' // Explicitly mark as community event
       };
 
       console.log('Creating event with data:', eventData);
       console.log('Data types:', {
         title: typeof eventData.title,
         description: typeof eventData.description,
-        start_time: typeof eventData.start_time,
         host_id: typeof eventData.host_id,
         related_interests: typeof eventData.related_interests,
         related_interests_array: eventData.related_interests,
@@ -220,10 +185,6 @@ const CreatePostPage = () => {
       // Clear form
       setPostTitle('');
       setPostDescription('');
-      setStartTime('');
-      setEndTime('');
-      setLocation('');
-      setCollegeTag('');
       setRelatedInterests([]);
       setSelectedImage(null);
       setImagePreview(null);
@@ -249,7 +210,7 @@ const CreatePostPage = () => {
       } else if (error.message?.includes('duplicate key')) {
         setError("An event with this title already exists. Please use a different title.");
       } else if (error.message?.includes('invalid input syntax')) {
-        setError("Invalid data format. Please check your date/time entries.");
+        setError("Invalid data format. Please check your entries.");
       } else if (error.message?.includes('column') && error.message?.includes('does not exist')) {
         setError("Database configuration issue. Please contact support or try again later.");
       } else {
@@ -373,10 +334,11 @@ const CreatePostPage = () => {
                 before:bg-gradient-to-br before:from-white/[0.08]
                 before:to-transparent before:opacity-0 before:hover:opacity-100
                 before:transition-opacity before:duration-300">
-                <h1 className="text-[rgba(147,122,250,0.9)] text-2xl
-                  sm:text-3xl lg:text-[38px] lg:leading-tight font-light
-                  drop-shadow-lg relative z-10">
-                  Create an event below
+                <h1 className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 
+                  bg-clip-text text-transparent text-2xl sm:text-3xl lg:text-[38px] 
+                  lg:leading-tight font-bold drop-shadow-lg relative z-10
+                  animate-gradient-shift">
+                  Create a post below
                 </h1>
               </div>
               <div>
@@ -471,151 +433,104 @@ const CreatePostPage = () => {
                 />
               </div>
 
-              {/* Start Time Input */}
-              <div className="mb-3 lg:mb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-global-1 text-sm sm:text-base
-                    lg:text-lg lg:leading-[36px] font-normal">
-                    Start Time (Optional)
+              {/* Related Interests Section */}
+              <div className="mb-4 lg:mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-global-1 text-base sm:text-lg 
+                    lg:text-[32px] lg:leading-[36px] font-normal">
+                    Related Interests
+                  </span>
+                  <span className="w-2 h-2 bg-purple-400/80 rounded-full 
+                    animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)] 
+                    relative z-10"></span>
+                  <span className="text-global-1 text-sm lg:text-lg opacity-70">
+                    (Select at least 3)
                   </span>
                 </div>
-                <input
-                  type="datetime-local"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="w-full bg-global-2 text-global-1 text-sm
-                  sm:text-base lg:text-lg lg:leading-[36px] font-normal
-                  border border-global-3 rounded-lg px-3 py-2 outline-none
-                  focus:border-purple-400"
-                />
-              </div>
 
-              {/* End Time Input */}
-              <div className="mb-3 lg:mb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-global-1 text-sm sm:text-base
-                    lg:text-lg lg:leading-[36px] font-normal">
-                    End Time (Optional)
-                  </span>
+                {/* Main Interests */}
+                <div className="mb-4">
+                  <div className="flex flex-wrap gap-2">
+                    {mainInterests.map((interest) => (
+                      <button
+                        key={interest}
+                        onClick={() => toggleInterest(interest)}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 
+                          ${relatedInterests.includes(interest)
+                            ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md' 
+                            : 'bg-global-3 text-global-1 hover:bg-purple-600/20'}`}
+                      >
+                        {interest}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <input
-                  type="datetime-local"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  className="w-full bg-global-2 text-global-1 text-sm
-                  sm:text-base lg:text-lg lg:leading-[36px] font-normal
-                  border border-global-3 rounded-lg px-3 py-2 outline-none
-                  focus:border-purple-400"
-                />
-              </div>
 
-              {/* Location Input */}
-              <div className="mb-3 lg:mb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-global-1 text-sm sm:text-base
-                    lg:text-lg lg:leading-[36px] font-normal">
-                    Location (Optional)
-                  </span>
+                {/* Show More Button */}
+                <div className="mb-4">
+                  <button
+                    onClick={() => setShowMoreInterests(!showMoreInterests)}
+                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 
+                      hover:from-purple-600 hover:to-blue-600 text-white rounded-full 
+                      text-base font-medium transition-all duration-300 ease-out
+                      shadow-[0_4px_16px_rgba(147,122,250,0.4)] 
+                      hover:shadow-[0_6px_24px_rgba(147,122,250,0.6)]
+                      transform hover:scale-105 relative overflow-hidden
+                      before:absolute before:inset-0 before:rounded-full
+                      before:bg-gradient-to-r before:from-white/[0.1] 
+                      before:to-transparent before:opacity-0 
+                      before:hover:opacity-100 before:transition-opacity 
+                      before:duration-300"
+                  >
+                    <span className="relative z-10">
+                      {showMoreInterests ? 'Show Less' : 'More Interests'}
+                    </span>
+                  </button>
                 </div>
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Where is this event taking place?"
-                  className="w-full bg-transparent text-global-1 text-sm
-                  sm:text-base lg:text-lg lg:leading-[36px] font-normal
-                  border-none outline-none placeholder-gray-400
-                  focus:placeholder-gray-500"
-                />
-              </div>
 
-              {/* College Tag Input */}
-              <div className="mb-3 lg:mb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-global-1 text-sm sm:text-base
-                    lg:text-lg lg:leading-[36px] font-normal">
-                    Event Category (Optional)
-                  </span>
-                </div>
-                <select
-                  value={collegeTag}
-                  onChange={(e) => setCollegeTag(e.target.value)}
-                  className="w-full bg-global-2 text-global-1 text-sm
-                  sm:text-base lg:text-lg lg:leading-[36px] font-normal
-                  border border-global-3 rounded-lg px-3 py-2 outline-none
-                  focus:border-purple-400"
-                >
-                  <option value="">Select a category...</option>
-                  <option value="Academic">Academic</option>
-                  <option value="Workshop">Workshop</option>
-                  <option value="Networking">Networking</option>
-                  <option value="Music">Music</option>
-                  <option value="Sports">Sports</option>
-                  <option value="Environmental">Environmental</option>
-                  <option value="Social">Social</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
+                {/* More Interests */}
+                {showMoreInterests && (
+                  <div className="mb-4">
+                    <div className="flex flex-wrap gap-2">
+                      {moreInterests.map((interest) => (
+                        <button
+                          key={interest}
+                          onClick={() => toggleInterest(interest)}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 
+                            ${relatedInterests.includes(interest)
+                              ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md' 
+                              : 'bg-global-3 text-global-1 hover:bg-purple-600/20'}`}
+                        >
+                          {interest}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                             {/* Related Interests Section */}
-               <div className="mb-3 lg:mb-4">
-                 <div className="flex items-center gap-2 mb-3">
-                   <span className="text-global-1 text-sm sm:text-base
-                     lg:text-lg lg:leading-[36px] font-normal">
-                     Related Interests
-                   </span>
-                   <span className="w-2 h-2 bg-purple-400/80 rounded-full
-                     animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
-                     relative z-10"></span>
-                   <span className="text-gray-400 text-sm">
-                     (minimum 3 required)
-                   </span>
-                 </div>
-                 
-                 <div className="flex flex-wrap gap-2 mb-3">
-                   {mainInterests.map(interest => (
-                     <button
-                       key={interest}
-                       onClick={() => toggleInterest(interest)}
-                       className={`px-3 py-2 rounded-full text-sm font-medium transition-colors
-                         ${relatedInterests.includes(interest) 
-                           ? 'bg-purple-600 text-white' 
-                           : 'bg-white text-gray-700 border border-gray-300 hover:border-purple-400'}`}
-                     >
-                       + {interest}
-                     </button>
-                   ))}
-                   
-                   <button
-                     onClick={() => setShowMoreInterests(!showMoreInterests)}
-                     className="px-4 py-2 bg-purple-600 text-white rounded-full text-sm font-medium
-                       hover:bg-purple-700 transition-colors"
-                   >
-                     More Interests
-                   </button>
-                 </div>
-                 
-                 {showMoreInterests && (
-                   <div className="flex flex-wrap gap-2 mb-3">
-                     {moreInterests.map(interest => (
-                       <button
-                         key={interest}
-                         onClick={() => toggleInterest(interest)}
-                         className={`px-3 py-2 rounded-full text-sm font-medium transition-colors
-                           ${relatedInterests.includes(interest) 
-                             ? 'bg-purple-600 text-white' 
-                             : 'bg-white text-gray-700 border border-gray-300 hover:border-purple-400'}`}
-                       >
-                         + {interest}
-                       </button>
-                     ))}
-                   </div>
-                 )}
-                 
-                 <div className="text-gray-500 text-sm">
-                   Selected: {relatedInterests.length}/3 minimum
-                 </div>
-               </div>
+                {/* Selected Interests Display */}
+                {relatedInterests.length > 0 && (
+                  <div className="mb-4">
+                    <p className="text-global-1 text-sm mb-2">
+                      Selected Interests ({relatedInterests.length}/∞):
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {relatedInterests.map((interest) => (
+                        <span
+                          key={interest}
+                          onClick={() => toggleInterest(interest)}
+                          className="px-3 py-1 bg-gradient-to-r from-purple-600 to-purple-700 
+                            text-white rounded-full text-sm cursor-pointer hover:opacity-80 
+                            transition-opacity flex items-center gap-1"
+                        >
+                          {interest}
+                          <span className="ml-1 text-xs">×</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Image Upload Section */}
               <div className="mb-3 lg:mb-[20px]">

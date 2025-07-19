@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LoginPage from './pages/general/login.jsx';
 import SignupPage from './pages/signup.jsx';
 import HomePage from './pages/general/home.jsx';
-import CreatePostPage from './pages/post/create.jsx';
+import CreatePostPage from './pages/create-post.jsx';
 import MapPage from './pages/general/map.jsx';
 import UserProfilePage from './pages/user/profile.jsx';
 import ResetPasswordPage from './pages/reset-password.jsx';
