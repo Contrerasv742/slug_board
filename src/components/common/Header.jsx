@@ -4,16 +4,13 @@ import SearchView from '../ui/SearchView';
 
 const Header = ({ 
   showSearch = true, 
-  searchPlaceholder = "Search Posts",
+  searchPlaceholder = "Search events by title...",
   userName = "John Doe",
   userHandle = "@johndoe",
-  userAvatar = "/images/default-avatar.png"
+  userAvatar = "/images/default-avatar.png",
+  searchValue = "",
+  onSearchChange = () => {}
 }) => {
-  const [searchValue, setSearchValue] = useState('');
-
-  const handleSearchChange = (e) => {
-    setSearchValue(e.target.value);
-  };
 
   return (
     <header className="bg-global-1 border-b-2 border-white border-opacity-60
@@ -45,7 +42,7 @@ const Header = ({
             <SearchView
               placeholder={searchPlaceholder}
               value={searchValue}
-              onChange={handleSearchChange}
+              onChange={onSearchChange}
               leftIcon="/images/img_search.png"
               className="text-sm sm:text-base md:text-lg lg:text-xl
               lg:leading-[10px] py-[2px] sm:py-[4px] lg:py-[2px] lg:pl-[45px] w-full h-[40px]"
