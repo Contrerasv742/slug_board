@@ -1,53 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header.jsx';
 import Sidebar from '../components/common/Sidebar.jsx';
-import '../styles/home.css';
-import { supabase } from '../supabaseClient';
-import { useAuth } from '../contexts/AuthContext';
-import { EventService } from '../services/eventService';
+import UpVoteSection from '../components/ui/Vote-Buttons.jsx';
+import ActionButton from '../components/ui/Action-Button.jsx';
+
+import '../styles/home.css'
+import '../styles/create-post.css'
 
 const CreatePostPage = () => {
+  const navigate = useNavigate();
   const [postTitle, setPostTitle] = useState('');
   const [postDescription, setPostDescription] = useState('');
-  const [relatedInterests, setRelatedInterests] = useState([]);
-  const [showMoreInterests, setShowMoreInterests] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-  const { user: authUser } = useAuth();
+  const [selectedInterests, setSelectedInterests] = useState([]);
+  const [interestSearch, setInterestSearch] = useState('');
+  const [validationErrors, setValidationErrors] = useState({});
+  const [showMoreInterests, setShowMoreInterests] = useState(false);
 
-  // Define interest categories
-  const mainInterests = ['Photography', 'Coding', 'Music', 'Sports', 'Art'];
-  const moreInterests = [
-    'Academic', 'Workshop', 'Networking', 'Technology', 'Food', 'Gaming', 
-    'Health', 'Business', 'Literature', 'Science', 'Politics', 'Travel', 
-    'Volunteer', 'Career', 'Culture', 'Entertainment', 'Fashion', 'Finance'
+  const predefinedInterests = [
+    'Photography', 'Coding', 'Music', 'Sports', 'Art', 'Reading',
+    'Gaming', 'Travel', 'Food', 'Fitness', 'Movies', 'Nature',
+    'Dancing', 'Writing', 'Cooking', 'Science', 'Technology', 'Fashion',
+    'Theater', 'Volunteering', 'Hiking', 'Meditation', 'Languages', 'History',
+    'Economics', 'Business', 'Politics', 'Philosophy', 'Psychology', 'Health'
   ];
 
-  // Handle interest selection
-  const toggleInterest = (interest) => {
-    setRelatedInterests(prev => {
-      const newInterests = prev.includes(interest) 
-        ? prev.filter(i => i !== interest)
-        : [...prev, interest];
-      
-      console.log('Interest toggled:', interest);
-      console.log('New interests array:', newInterests);
-      return newInterests;
-    });
-  };
+  // Get interests to display based on current state
+  const getDisplayedInterests = () => {
+    const availableInterests = predefinedInterests.filter(interest => 
+      !selectedInterests.includes(interest)
+    );
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    fetchUser();
-  }, []);
+    // If searching, show filtered results
+    if (interestSearch.trim()) {
+      return availableInterests.filter(interest =>
+        interest.toLowerCase().includes(interestSearch.toLowerCase())
+      );
+    }
+
+    // If not searching, show based on expansion state
+    if (showMoreInterests) {
+      return availableInterests.slice(0, 15);
+    } else {
+      return availableInterests.slice(0, 5);
+    }
+  };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -67,250 +66,78 @@ const CreatePostPage = () => {
     document.getElementById('image-upload-input').click();
   };
 
-  const handlePostSubmit = async () => {
-    // Debug: Log current form values
-    console.log('Form validation check:', {
-      title: `"${postTitle}"`,
-      titleTrimmed: `"${postTitle.trim()}"`,
-      description: `"${postDescription}"`, 
-      descriptionTrimmed: `"${postDescription.trim()}"`,
-      relatedInterests: relatedInterests
-    });
-
-    if (!postTitle.trim()) {
-      setError("Please enter an event title.");
-      return;
-    }
-
-    if (!postDescription.trim()) {
-      setError("Please enter an event description.");
-      return;
-    }
-
-    if (relatedInterests.length < 3) {
-      setError("Please select at least 3 related interests for your event.");
-      return;
-    }
-
-    if (!user?.id) {
-      setError("User not authenticated. Please sign in and try again.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      // First, ensure the user exists in the Profiles table
-      const { data: existingUser, error: userCheckError } = await supabase
-        .from('Profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
-
-      if (userCheckError && userCheckError.code === 'PGRST116') {
-        // User doesn't exist in Profiles table, create them
-        console.log('Creating user record in Profiles table...');
-        const { error: userCreateError } = await supabase
-          .from('Profiles')
-          .insert({
-            id: user.id,
-            email: user.email,
-            full_name: user.user_metadata?.full_name || user.email?.split('@')[0],
-            provider: user.app_metadata?.provider || 'email'
-          });
-
-        if (userCreateError) {
-          console.error('Failed to create user record:', userCreateError);
-          setError("Failed to set up user account. Please try again.");
-          setLoading(false);
-          return;
-        }
-      }
-
-      const eventData = {
-        title: postTitle.trim(),
-        description: postDescription.trim(),
-        related_interests: relatedInterests,
-        host_id: user.id,
-        event_type: 'community' // Explicitly mark as community event
-      };
-
-      console.log('Creating event with data:', eventData);
-      console.log('Data types:', {
-        title: typeof eventData.title,
-        description: typeof eventData.description,
-        host_id: typeof eventData.host_id,
-        related_interests: typeof eventData.related_interests,
-        related_interests_array: eventData.related_interests,
-        related_interests_length: eventData.related_interests?.length
-      });
-
-      console.log('About to call EventService.createEvent with:', eventData);
+  const addInterest = (interest) => {
+    if (interest && !selectedInterests.includes(interest)) {
+      setSelectedInterests(prev => [...prev, interest]);
       
-      // Test if EventService is accessible
-      if (!EventService) {
-        console.error('❌ EventService is not imported or accessible');
-        throw new Error('EventService not available');
+      // Clear validation error when adding
+      if (validationErrors.interests) {
+        setValidationErrors(prev => ({
+          ...prev,
+          interests: undefined
+        }));
       }
-      
-      if (!EventService.createEvent) {
-        console.error('❌ EventService.createEvent method not found');
-        throw new Error('EventService.createEvent method missing');
-      }
-      
-      console.log('✅ EventService is accessible, calling createEvent...');
-      const { data, error } = await EventService.createEvent(eventData);
-
-      console.log('EventService.createEvent response:', { data, error });
-
-      if (error) {
-        console.error('❌ Detailed error from EventService:', error);
-        console.error('Error type:', typeof error);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-        throw error;
-      }
-
-      if (!data) {
-        console.error('❌ No data returned from EventService');
-        throw new Error('Event creation failed - no data returned');
-      }
-
-      console.log('Event created successfully:', data);
-      
-      // Show success message
-      alert(`✅ Event "${data.title}" created successfully! Redirecting to home page...`);
-      
-      // Clear form
-      setPostTitle('');
-      setPostDescription('');
-      setRelatedInterests([]);
-      setSelectedImage(null);
-      setImagePreview(null);
-
-      // Navigate to home page to see the new event
-      navigate('/home');
-    } catch (error) {
-      console.error('Event creation error:', error);
-      
-      // Provide specific error messages for common issues
-      if (error.message?.includes('row-level security policy')) {
-        setError("Permission denied. Please make sure you're signed in and try again.");
-      } else if (error.message?.includes('violates not-null constraint')) {
-        const columnMatch = error.message.match(/column "([^"]+)"/);
-        const columnName = columnMatch ? columnMatch[1] : 'unknown field';
-        if (columnName === 'related_interests') {
-          setError("Please select at least 3 interest tags for your event.");
-        } else {
-          setError(`Missing required field: ${columnName}. Please fill in all required information.`);
-        }
-      } else if (error.message?.includes('foreign key constraint')) {
-        setError("Account setup issue. Please sign out and sign back in, then try again.");
-      } else if (error.message?.includes('duplicate key')) {
-        setError("An event with this title already exists. Please use a different title.");
-      } else if (error.message?.includes('invalid input syntax')) {
-        setError("Invalid data format. Please check your entries.");
-      } else if (error.message?.includes('column') && error.message?.includes('does not exist')) {
-        setError("Database configuration issue. Please contact support or try again later.");
-      } else {
-        setError(error.message || "Failed to create event. Please try again.");
-      }
-    } finally {
-      setLoading(false);
     }
   };
 
-  const VoteButton = ({ type, onClick, className = "" }) => (
-    <button
-      onClick={onClick}
-      className={`flex justify-center items-center w-6 h-6 sm:w-8 sm:h-8
-                  lg:w-[40px] lg:h-[40px] rounded-[10px] lg:rounded-[20px] border-none
-                  cursor-pointer bg-global-3 hover:bg-global-5 transition-colors ${className}`}
-    >
-      <img
-        src="/images/img_arrow.png"
-        alt={type === 'up' ? 'upvote' : 'downvote'}
-        className={`w-4 h-4 lg:w-5 lg:h-5 ${type === 'down' ? 'rotate-180' : ''}`}
-      />
-    </button>
-  );
+  const removeInterest = (interest) => {
+    setSelectedInterests(prev => prev.filter(i => i !== interest));
+  };
 
-  const ActionButton = ({ type, onClick, children, className = "", disabled = false }) => {
-    const baseClasses = "flex justify-center items-center text-global-1 text-sm sm:text-base lg:text-[18px] lg:leading-[20px] font-normal";
+  const handleInputChange = (field) => {
+    // Clear validation errors when user types
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
+    }
+  };
 
-    if (type === 'comment') {
-      return (
-        <button
-          onClick={onClick}
-          disabled={disabled}
-          className={`${baseClasses} bg-global-3 hover:bg-global-5 w-10 h-8
-                      sm:w-12 sm:h-10 lg:w-[50px] lg:h-[40px] rounded-[15px] lg:rounded-[20px] p-1
-                      lg:p-[3px] ${className}`}
-        >
-          <img
-            src="/images/img_speech_bubble.png"
-            alt="comment"
-            className="w-4 h-4 lg:w-5 lg:h-5"
-          />
-          {children}
-        </button>
-      );
+  const validPost = () => {
+    const errors = {};
+    
+    if (!postTitle.trim()) errors.postTitle = 'Post title is required';
+    if (!postDescription.trim()) errors.postDescription = 'Post description is required';
+    if (selectedInterests.length < 3) {
+      errors.interests = 'Please select at least 3 interests';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handlePostSubmit = () => {
+    if (!validPost()) {
+      return;
     }
 
-    if (type === 'share') {
-      return (
-        <button
-          onClick={onClick}
-          disabled={disabled}
-          className={`${baseClasses} gap-1 lg:gap-[4px] px-2 py-2 sm:px-3 lg:px-4 lg:py-[3px] rounded-[15px] lg:rounded-[22px] bg-global-3 hover:bg-global-5 ${className}`}
-        >
-          <img
-            src="/images/share_arrow.png"
-            alt="share"
-            className="w-4 h-4 lg:w-5 lg:h-5"
-          />
-          {children}
-        </button>
-      );
-    }
+    const postData = {
+      title: postTitle,
+      description: postDescription,
+      image: selectedImage,
+      interests: selectedInterests
+    };
 
-    if (type === 'post-event') {
-      return (
-        <button
-          onClick={onClick}
-          disabled={disabled}
-          className={`${baseClasses} gap-1 lg:gap-[4px] px-2 py-2 sm:px-3
-                      lg:px-4 lg:py-[3px] rounded-[15px] lg:rounded-[22px]
-                    ${className || 'bg-global-3 hover:bg-global-5'}`
-          }
-          >
-          <img
-            src="/images/img_speech_bubble.png"
-            alt="post event"
-            className="w-4 h-4 lg:w-5 lg:h-5"
-          />
-          {children}
-        </button>
-      );
-    }
-
-    return null;
+    console.log('Post data:', postData);
+    alert('Post created successfully!');
+    navigate('/');
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-global-1 font-ropa">
+
       {/* Header */}
       <Header 
         showSearch={true}
         searchPlaceholder="Search Posts"
-        userName={user?.email || "John Doe"}
-        userHandle={`@${user?.email?.split('@')[0] || 'johndoe'}`}
+        userName="John Doe"
+        userHandle="@johndoe"
         userAvatar="/images/default-avatar.png"
       />
 
       {/* Main Content */}
-      <div className="flex">
+      <div className="flex flex-1">
         {/* Sidebar */}
         <Sidebar/>
 
@@ -322,45 +149,20 @@ const CreatePostPage = () => {
 
             {/* Page Information */}
             <div className="mb-0 lg:mb-0 text-center">
-              <div className="inline-block px-4 py-2 rounded-[40px] mb-3
-                lg:mb-2 bg-gradient-to-br from-white/[0.15] to-white/[0.05]
-                border border-white/[0.18]
-                shadow-[0_8px_32px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.2)]
-                hover:from-white/[0.18] hover:to-white/[0.08]
-                hover:border-white/[0.25]
-                hover:shadow-[0_12px_40px_rgba(255,255,255,0.15),inset_0_1px_0_rgba(255,255,255,0.3)]
-                transition-all duration-300 ease-out relative overflow-hidden
-                before:absolute before:inset-0 before:rounded-[40px]
-                before:bg-gradient-to-br before:from-white/[0.08]
-                before:to-transparent before:opacity-0 before:hover:opacity-100
-                before:transition-opacity before:duration-300">
-                <h1 className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 
-                  bg-clip-text text-transparent text-2xl sm:text-3xl lg:text-[38px] 
-                  lg:leading-tight font-bold drop-shadow-lg relative z-10
-                  animate-gradient-shift">
+              <div className="create-post-title">
+                <h1 className="text-white text-2xl sm:text-3xl lg:text-[38px]
+                  lg:leading-tight font-light drop-shadow-lg relative z-10">
                   Create a post below
                 </h1>
               </div>
               <div>
-                <div className="inline-flex items-center gap-2 px-4 py-2
-                  rounded-full bg-gradient-to-br from-white/[0.12]
-                  to-white/[0.04] border border-white/[0.15]
-                  shadow-[0_6px_24px_rgba(255,255,255,0.08),inset_0_1px_0_rgba(255,255,255,0.15)]
-                  hover:from-white/[0.15] hover:to-white/[0.06]
-                  hover:border-white/[0.20]
-                  hover:shadow-[0_8px_32px_rgba(255,255,255,0.12),inset_0_1px_0_rgba(255,255,255,0.25)]
-                  transition-all duration-300 ease-out relative overflow-hidden
-                  before:absolute before:inset-0 before:rounded-full
-                  before:bg-gradient-to-br before:from-white/[0.06]
-                  before:to-transparent before:opacity-0
-                  before:hover:opacity-100 before:transition-opacity
-                  before:duration-300">
-                  <span className="w-2 h-2 bg-purple-400/80 rounded-full
-                    animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
+                <div className="create-post-subtitle">
+                  <span className="w-2 h-2 bg-purple-400 rounded-full
+                    animate-pulse shadow-[0_0_12px_rgba(147,122,250,0.8)]
                     relative z-10"></span>
-                  <p className="text-white/70 text-sm lg:text-base
+                  <p className="text-white/90 text-sm lg:text-base font-medium
                     drop-shadow-md relative z-10">
-                    Title, description, and 3+ interests required
+                    Fill in all required information
                   </p>
                 </div>
               </div>
@@ -378,7 +180,7 @@ const CreatePostPage = () => {
                   lg:gap-[12px] flex-wrap">
                   <span className="text-global-1 text-sm sm:text-base
                     lg:text-[24px] lg:leading-[26px] font-normal">
-                    {user?.email || 'User Name'} •
+                    User Name •
                   </span>
                   <span className="text-global-2 text-sm sm:text-base
                     lg:text-[24px] lg:leading-[26px] font-normal">
@@ -387,12 +189,12 @@ const CreatePostPage = () => {
                 </div>
               </div>
 
-              {/* Event Title Input */}
+              {/* Post Title Input */}
               <div className="mb-2 lg:mb-3">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-global-1 text-base sm:text-lg
                     lg:text-[32px] lg:leading-[36px] font-normal">
-                    Event Title
+                    Post Title
                   </span>
                   <span className="w-2 h-2 bg-purple-400/80 rounded-full
                     animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
@@ -401,13 +203,21 @@ const CreatePostPage = () => {
                 <input
                   type="text"
                   value={postTitle}
-                  onChange={(e) => setPostTitle(e.target.value)}
-                  placeholder="Enter your event title here..."
-                  className="w-full bg-global-2 text-global-1 text-base
+                  onChange={(e) => {
+                    setPostTitle(e.target.value);
+                    handleInputChange('postTitle', e.target.value);
+                  }}
+                  placeholder="Enter your post title here..."
+                  className={`w-full bg-global-2 text-global-1 text-base
                   sm:text-lg lg:text-[32px] lg:leading-[36px] font-normal
                   border-none outline-none placeholder-gray-400
-                  focus:placeholder-gray-500 shadow-transparent"
+                  focus:placeholder-gray-500 shadow-transparent ${
+                    validationErrors.postTitle ? 'border-b-2 border-red-500' : ''
+                  }`}
                 />
+                {validationErrors.postTitle && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.postTitle}</p>
+                )}
               </div>
 
               {/* Post Description Input */}
@@ -415,121 +225,120 @@ const CreatePostPage = () => {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-global-1 text-sm sm:text-base
                     lg:text-lg lg:leading-[36px] font-normal">
-                    Event Description
+                    Post Description
                   </span>
                   <span className="w-2 h-2 bg-purple-400/80 rounded-full
                     animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
                     relative z-10"></span>
                 </div>
-                <textarea
+                <input
+                  type="text"
                   value={postDescription}
-                  onChange={(e) => setPostDescription(e.target.value)}
-                  placeholder="Describe your event..."
-                  rows="3"
-                  className="w-full bg-transparent text-global-1 text-sm
+                  onChange={(e) => {
+                    setPostDescription(e.target.value);
+                    handleInputChange('postDescription', e.target.value);
+                  }}
+                  placeholder="Describe your post..."
+                  className={`w-full bg-transparent text-global-1 text-sm
                   sm:text-base lg:text-lg lg:leading-[36px] font-normal
                   border-none outline-none placeholder-gray-400
-                  focus:placeholder-gray-500 resize-none"
+                  focus:placeholder-gray-500 ${
+                    validationErrors.postDescription ? 'border-b-2 border-red-500' : ''
+                  }`}
                 />
+                {validationErrors.postDescription && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.postDescription}</p>
+                )}
               </div>
 
-              {/* Related Interests Section */}
-              <div className="mb-4 lg:mb-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-global-1 text-base sm:text-lg 
-                    lg:text-[32px] lg:leading-[36px] font-normal">
+              {/* Interests Section */}
+              <div className="mb-3 lg:mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-global-1 text-sm sm:text-base
+                    lg:text-lg lg:leading-[36px] font-normal">
                     Related Interests
                   </span>
-                  <span className="w-2 h-2 bg-purple-400/80 rounded-full 
-                    animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)] 
+                  <span className="w-2 h-2 bg-purple-400/80 rounded-full
+                    animate-pulse shadow-[0_0_8px_rgba(147,122,250,0.6)]
                     relative z-10"></span>
-                  <span className="text-global-1 text-sm lg:text-lg opacity-70">
-                    (Select at least 3)
-                  </span>
+                  <span className="text-xs text-gray-500">(minimum 3 required)</span>
+                </div>
+                
+                {/* Search input - only show when expanded or searching */}
+                {(showMoreInterests || interestSearch.trim()) && (
+                  <input
+                    type="text"
+                    value={interestSearch}
+                    onChange={(e) => setInterestSearch(e.target.value)}
+                    className="w-full px-3 py-2 bg-global-3 border border-gray-300
+                    rounded-2xl lg:rounded-3xl focus:outline-none focus:ring-2
+                    focus:ring-purple-500 mb-3 text-sm lg:text-base"
+                    placeholder="Search for interests..."
+                  />
+                )}
+                
+                {/* Display interests */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {getDisplayedInterests().map(interest => (
+                    <button
+                      key={interest}
+                      onClick={() => addInterest(interest)}
+                      className="px-3 py-1 rounded-full text-sm lg:text-base
+                      bg-global-3 text-global-1 hover:bg-global-2
+                      transition-colors border border-gray-300"
+                    >
+                      + {interest}
+                    </button>
+                  ))}
                 </div>
 
-                {/* Main Interests */}
-                <div className="mb-4">
-                  <div className="flex flex-wrap gap-2">
-                    {mainInterests.map((interest) => (
-                      <button
-                        key={interest}
-                        onClick={() => toggleInterest(interest)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 
-                          ${relatedInterests.includes(interest)
-                            ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md' 
-                            : 'bg-global-3 text-global-1 hover:bg-purple-600/20'}`}
-                      >
-                        {interest}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Show More Button */}
-                <div className="mb-4">
+                {/* More Interests Button */}
+                {!showMoreInterests && !interestSearch.trim() && (
                   <button
-                    onClick={() => setShowMoreInterests(!showMoreInterests)}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 
-                      hover:from-purple-600 hover:to-blue-600 text-white rounded-full 
-                      text-base font-medium transition-all duration-300 ease-out
-                      shadow-[0_4px_16px_rgba(147,122,250,0.4)] 
-                      hover:shadow-[0_6px_24px_rgba(147,122,250,0.6)]
-                      transform hover:scale-105 relative overflow-hidden
-                      before:absolute before:inset-0 before:rounded-full
-                      before:bg-gradient-to-r before:from-white/[0.1] 
-                      before:to-transparent before:opacity-0 
-                      before:hover:opacity-100 before:transition-opacity 
-                      before:duration-300"
+                    onClick={() => setShowMoreInterests(true)}
+                    className="px-3 py-2 mb-3 bg-gradient-to-r from-purple-500
+                    to-blue-500 text-white rounded-full text-sm lg:text-base
+                    hover:from-purple-600 hover:to-blue-600 transition-all
+                    duration-200 shadow-md hover:shadow-lg"
                   >
-                    <span className="relative z-10">
-                      {showMoreInterests ? 'Show Less' : 'More Interests'}
-                    </span>
+                    More Interests
                   </button>
+                )}
+
+                {/* Show fewer button when expanded */}
+                {showMoreInterests && !interestSearch.trim() && (
+                  <button
+                    onClick={() => setShowMoreInterests(false)}
+                    className="px-3 py-1 mb-3 bg-gray-500 text-white
+                    rounded-full text-sm lg:text-base hover:bg-gray-600
+                    transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    Show Fewer
+                  </button>
+                )}
+                
+                {/* Selected interests */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {selectedInterests.map(interest => (
+                    <button
+                      key={interest}
+                      onClick={() => removeInterest(interest)}
+                      className="bg-gradient-to-r from-purple-500 to-blue-500
+                      text-white px-3 py-1 rounded-full flex items-center
+                      gap-1 hover:text-red-200 text-sm lg:text-base"
+                    >
+                      {interest} ×
+                    </button>
+                  ))}
                 </div>
-
-                {/* More Interests */}
-                {showMoreInterests && (
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-2">
-                      {moreInterests.map((interest) => (
-                        <button
-                          key={interest}
-                          onClick={() => toggleInterest(interest)}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 
-                            ${relatedInterests.includes(interest)
-                              ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-md' 
-                              : 'bg-global-3 text-global-1 hover:bg-purple-600/20'}`}
-                        >
-                          {interest}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                
+                {validationErrors.interests && (
+                  <p className="text-red-500 text-xs mt-1">{validationErrors.interests}</p>
                 )}
-
-                {/* Selected Interests Display */}
-                {relatedInterests.length > 0 && (
-                  <div className="mb-4">
-                    <p className="text-global-1 text-sm mb-2">
-                      Selected Interests ({relatedInterests.length}/∞):
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {relatedInterests.map((interest) => (
-                        <span
-                          key={interest}
-                          onClick={() => toggleInterest(interest)}
-                          className="px-3 py-1 bg-gradient-to-r from-purple-600 to-purple-700 
-                            text-white rounded-full text-sm cursor-pointer hover:opacity-80 
-                            transition-opacity flex items-center gap-1"
-                        >
-                          {interest}
-                          <span className="ml-1 text-xs">×</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                
+                <div className="text-xs text-gray-500 mt-1">
+                  Selected: {selectedInterests.length}/3 minimum
+                </div>
               </div>
 
               {/* Image Upload Section */}
@@ -591,22 +400,11 @@ const CreatePostPage = () => {
                 </button>
               </div>
 
-              {/* Error Message */}
-              {error && <p className="text-red-500 text-center text-sm mb-2">{error}</p>}
-
               {/* Post Actions */}
               <div className="flex items-center gap-2 sm:gap-3 lg:gap-[12px]
                 flex-wrap">
                 {/* Upvote Section */}
-                <div className="flex items-center gap-1 lg:gap-0 p-1 lg:p-0
-                  bg-global-3 rounded-[15px] lg:rounded-[22px]">
-                  <VoteButton type="up" onClick={() => console.log('upvote')} />
-                  <span className="text-global-1 text-xs sm:text-sm
-                    lg:text-[24px] lg:leading-[26px] font-normal px-2">
-                    0 
-                  </span>
-                  <VoteButton type="down" onClick={() => console.log('downvote')} />
-                </div>
+                <UpVoteSection/>
 
                 {/* Comment Button */}
                 <ActionButton 
@@ -616,18 +414,17 @@ const CreatePostPage = () => {
 
                 {/* Post Event Button */}
                 <ActionButton 
-                  type="post-event" 
+                  type="share"
                   onClick={handlePostSubmit}
-                  className="bg-purple-600 hover:bg-purple-700 text-white"
-                  disabled={loading}
                 >
-                  {loading ? 'Posting...' : 'Post Event'}
+                  Post Event
                 </ActionButton>
               </div>
             </article>
           </div>
         </main>
       </div>
+
     </div>
   );
 };
