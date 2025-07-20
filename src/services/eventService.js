@@ -18,7 +18,7 @@ export class EventService {
             if (event.host_id) { // Use host_id instead of user_id
               const { data: userData } = await supabase
                 .from('Profiles')
-                .select('id, full_name, email')
+                .select('id, full_name, name, email, avatar_url, username')
                 .eq('id', event.host_id)
                 .single();
               
@@ -56,7 +56,7 @@ export class EventService {
       if (data && data.host_id) { // Use host_id instead of user_id
         const { data: userData } = await supabase
           .from('Profiles')
-          .select('id, full_name, email')
+          .select('id, full_name, name, email, avatar_url, username')
           .eq('id', data.host_id)
           .single();
         
@@ -186,7 +186,7 @@ export class EventService {
             if (rsvp.user_id) {
               const { data: userData } = await supabase
                 .from('Profiles')
-                .select('id, full_name, email')
+                .select('id, full_name, name, email, avatar_url, username')
                 .eq('id', rsvp.user_id)
                 .single();
               
@@ -267,7 +267,7 @@ export class EventService {
             if (event.host_id) { // Use host_id instead of user_id
               const { data: userData } = await supabase
                 .from('Profiles')
-                .select('id, full_name, email')
+                .select('id, full_name, name, email, avatar_url, username')
                 .eq('id', event.host_id)
                 .single();
               
@@ -307,7 +307,7 @@ export class EventService {
             if (event.host_id) { // Use host_id instead of user_id
               const { data: userData } = await supabase
                 .from('Profiles')
-                .select('id, full_name, email')
+                .select('id, full_name, name, email, avatar_url, username')
                 .eq('id', event.host_id)
                 .single();
               
@@ -347,7 +347,7 @@ export class EventService {
             if (event.host_id) {
               const { data: userData } = await supabase
                 .from('Profiles')
-                .select('id, full_name, email')
+                .select('id, full_name, name, email, avatar_url, username')
                 .eq('id', event.host_id)
                 .single();
               
@@ -387,7 +387,7 @@ export class EventService {
             if (event.host_id) { // Use host_id instead of user_id
               const { data: userData } = await supabase
                 .from('Profiles')
-                .select('id, full_name, email')
+                .select('id, full_name, name, email, avatar_url, username')
                 .eq('id', event.host_id)
                 .single();
               

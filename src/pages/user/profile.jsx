@@ -397,7 +397,7 @@ const UserProfilePage = () => {
         showSearch={true}
         searchPlaceholder="Search Posts"
         userName={profile?.name || "John Doe"}
-        userHandle={`@${profile?.username || 'johndoe'}`}
+        userHandle={profile?.email || 'johndoe'}
         userAvatar={avatarUrl || "/images/default-avatar.png"}
       />
 
@@ -475,7 +475,7 @@ const UserProfilePage = () => {
                           type="text" 
                           value={fullName} 
                           onChange={(e) => setFullName(e.target.value)} 
-                          className="bg-global-3 text-white text-2xl lg:text-[28px] rounded-[15px] p-2 mb-2 w-full text-center border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
+                          className="bg-global-3 text-black text-2xl lg:text-[28px] rounded-[15px] p-2 mb-2 w-full text-center border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
                           placeholder="Enter your full name"
                           maxLength={100}
                           required
@@ -491,7 +491,7 @@ const UserProfilePage = () => {
                           <textarea 
                             value={bio} 
                             onChange={(e) => setBio(e.target.value)} 
-                            className="bg-global-3 text-white text-lg lg:text-[18px] rounded-[15px] p-3 mb-1 w-full border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors resize-none" 
+                            className="bg-global-3 text-black text-lg lg:text-[18px] rounded-[15px] p-3 mb-1 w-full border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors resize-none" 
                             placeholder="Tell us about yourself..."
                             rows="3"
                             maxLength={500}
@@ -510,15 +510,15 @@ const UserProfilePage = () => {
                             type="text" 
                             value={location} 
                             onChange={(e) => setLocation(e.target.value)} 
-                            className="bg-global-3 text-white text-sm rounded-[15px] p-3 w-full border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
-                            placeholder="e.g., Santa Cruz, CA" 
+                            className="bg-global-3 text-black text-sm rounded-[15px] p-3 w-full border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
+                            placeholder="e.g., Santa Cruz, CA"  
                             maxLength={100}
                           />
                           <input 
                             type="text" 
                             value={classYear} 
                             onChange={(e) => setClassYear(e.target.value)} 
-                            className="bg-global-3 text-white text-sm rounded-[15px] p-3 w-full border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
+                            className="bg-global-3 text-black text-sm rounded-[15px] p-3 w-full border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
                             placeholder="e.g., Class of 2025" 
                             maxLength={50}
                           />
@@ -527,8 +527,8 @@ const UserProfilePage = () => {
                               type="text" 
                               value={username} 
                               onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))} 
-                              className="bg-global-3 text-white text-sm rounded-[15px] p-3 w-full pl-6 border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
-                              placeholder="username" 
+                              className="bg-global-3 text-black text-sm rounded-[15px] p-3 w-full pl-6 border-2 border-transparent focus:border-purple-500 focus:outline-none transition-colors" 
+                              placeholder="username"  
                               maxLength={30}
                               required
                             />

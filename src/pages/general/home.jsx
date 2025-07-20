@@ -179,8 +179,8 @@ const HomePage = () => {
       <Header 
         showSearch={true}
         searchPlaceholder="Search events..."
-        userName={user?.email || "John Doe"}
-        userHandle={`@${user?.email?.split('@')[0] || 'johndoe'}`}
+        userName={`${user?.userName || user?.email?.split('@')[0] || 'johndoe'}`}
+        userHandle={user?.email || 'John Doe'}
         userAvatar="/images/default-avatar.png"
         searchValue={searchValue}
         onSearchChange={handleSearchChange}

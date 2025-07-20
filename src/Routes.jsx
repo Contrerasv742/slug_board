@@ -11,6 +11,7 @@ import UpdatePasswordPage from './pages/update-password.jsx';
 import EventCardsDemo from './pages/general/event-cards-demo.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { useAuth } from './contexts/AuthContext';
+import ExplorePage from './pages/general/explore.jsx';
 
 const AppRoutes = () => {
   const { user } = useAuth();
@@ -43,10 +44,26 @@ const AppRoutes = () => {
           } 
         />
         <Route 
+          path="/explore" 
+          element={
+            <ProtectedRoute>
+              <ExplorePage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
           path="/map" 
           element={
             <ProtectedRoute>
               <MapPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <UserProfilePage />
             </ProtectedRoute>
           } 
         />
