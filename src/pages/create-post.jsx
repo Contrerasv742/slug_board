@@ -13,7 +13,7 @@ import '../styles/create-post.css'
 
 const CreatePostPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   const [postTitle, setPostTitle] = useState('');
   const [postDescription, setPostDescription] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
@@ -249,13 +249,27 @@ const CreatePostPage = () => {
               {/* Post Header */}
               <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-3
                 lg:mb-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-[56px]
-                  lg:h-[56px] bg-global-4 rounded-full flex-shrink-0"></div>
+                {/* Profile Picture */}
+                {userData?.avatar_url ? (
+                  <img 
+                    src={userData.avatar_url} 
+                    alt="Profile"
+                    className="w-10 h-10 sm:w-12 sm:h-12 lg:w-[56px]
+                      lg:h-[56px] rounded-full flex-shrink-0 object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-[56px]
+                    lg:h-[56px] bg-global-4 rounded-full flex-shrink-0 flex
+                    items-center justify-center text-global-1 font-medium">
+                    {userData?.full_name ? userData.full_name.charAt(0).toUpperCase() : 
+                     user?.email ? user.email.charAt(0).toUpperCase() : '?'}
+                  </div>
+                )}
                 <div className="flex items-center gap-2 sm:gap-2
                   lg:gap-[12px] flex-wrap">
                   <span className="text-global-1 text-sm sm:text-base
                     lg:text-[24px] lg:leading-[26px] font-normal">
-                    User Name •
+                    {userData?.full_name || user?.email?.split('@')[0] || 'Anonymous User'} •
                   </span>
                   <span className="text-global-2 text-sm sm:text-base
                     lg:text-[24px] lg:leading-[26px] font-normal">
