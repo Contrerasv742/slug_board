@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header.jsx';
 import Sidebar from '../components/common/Sidebar.jsx';
 import UpVoteSection from '../components/ui/Vote-Buttons.jsx';
 import ActionButton from '../components/ui/Action-Button.jsx';
+import { supabase } from '../supabaseClient';
+import { EventService } from '../services/eventService';
+import { useAuth } from '../contexts/AuthContext';
 
 import '../styles/home.css'
 import '../styles/create-post.css'
 
 const CreatePostPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [postTitle, setPostTitle] = useState('');
   const [postDescription, setPostDescription] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
@@ -18,6 +22,8 @@ const CreatePostPage = () => {
   const [interestSearch, setInterestSearch] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
   const [showMoreInterests, setShowMoreInterests] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   const predefinedInterests = [
     'Photography', 'Coding', 'Music', 'Sports', 'Art', 'Reading',
@@ -107,21 +113,90 @@ const CreatePostPage = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handlePostSubmit = () => {
+  const uploadImage = async (file) => {
+    if (!file) return null;
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `event-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('event-images')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        throw uploadError;
+      }
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('event-images')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  };
+
+  const handlePostSubmit = async () => {
     if (!validPost()) {
       return;
     }
 
-    const postData = {
-      title: postTitle,
-      description: postDescription,
-      image: selectedImage,
-      interests: selectedInterests
-    };
+    if (!user) {
+      setSubmitError('You must be logged in to create an event');
+      return;
+    }
 
-    console.log('Post data:', postData);
-    alert('Post created successfully!');
-    navigate('/');
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      let imageUrl = null;
+      
+      // Upload image if selected
+      if (selectedImage) {
+        imageUrl = await uploadImage(selectedImage);
+      }
+
+      // Prepare event data
+      const eventData = {
+        title: postTitle.trim(),
+        description: postDescription.trim(),
+        host_id: user.id,
+        event_type: 'community', // This will show as community events on home page
+        related_interests: selectedInterests,
+        image_url: imageUrl,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('Creating event with data:', eventData);
+
+      // Create the event in the database
+      const { data: createdEvent, error } = await EventService.createEvent(eventData);
+
+      if (error) {
+        console.error('Error creating event:', error);
+        throw error;
+      }
+
+      console.log('Event created successfully:', createdEvent);
+      
+      // Show success message and redirect
+      alert('Event created successfully!');
+      navigate('/home');
+      
+    } catch (error) {
+      console.error('Error creating event:', error);
+      setSubmitError(error.message || 'Failed to create event. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -400,6 +475,13 @@ const CreatePostPage = () => {
                 </button>
               </div>
 
+              {/* Error Display */}
+              {submitError && (
+                <div className="mb-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                  <p className="text-red-400 text-sm">{submitError}</p>
+                </div>
+              )}
+
               {/* Post Actions */}
               <div className="flex items-center gap-2 sm:gap-3 lg:gap-[12px]
                 flex-wrap">
@@ -416,8 +498,9 @@ const CreatePostPage = () => {
                 <ActionButton 
                   type="share"
                   onClick={handlePostSubmit}
+                  disabled={isSubmitting}
                 >
-                  Post Event
+                  {isSubmitting ? 'Creating Event...' : 'Post Event'}
                 </ActionButton>
               </div>
             </article>

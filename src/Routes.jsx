@@ -8,6 +8,7 @@ import MapPage from './pages/general/map.jsx';
 import UserProfilePage from './pages/user/profile.jsx';
 import ResetPasswordPage from './pages/reset-password.jsx';
 import UpdatePasswordPage from './pages/update-password.jsx';
+import EventCardsDemo from './pages/general/event-cards-demo.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { useAuth } from './contexts/AuthContext';
 
@@ -60,6 +61,14 @@ const AppRoutes = () => {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/update-password" element={<UpdatePasswordPage />} />
+        <Route 
+          path="/event-cards-demo" 
+          element={
+            <ProtectedRoute>
+              <EventCardsDemo />
+            </ProtectedRoute>
+          } 
+        />
         
         {/* Additional routes for complete navigation graph */}
         <Route 
