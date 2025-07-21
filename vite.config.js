@@ -12,16 +12,16 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve('./src'),
-      '@components': path.resolve('./src/components'),
-      '@pages': path.resolve('./src/pages'),
-      '@assets': path.resolve('./src/assets'),
-      '@constants': path.resolve('./src/constants'),
-      '@styles': path.resolve('./src/styles'),
+      '@': path.resolve(__dirname, './src'),
+      '@components': path.resolve(__dirname, './src/components'),
+      '@pages': path.resolve(__dirname, './src/pages'),
+      '@assets': path.resolve(__dirname, './src/assets'),
+      '@constants': path.resolve(__dirname, './src/constants'),
+      '@styles': path.resolve(__dirname, './src/styles'),
     },
   },
   server: {
-    port: "4028",
+    port: 4028,
     host: "0.0.0.0",
     strictPort: true,
     allowedHosts: ['.amazonaws.com', '.builtwithrocket.new']

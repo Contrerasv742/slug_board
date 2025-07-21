@@ -75,6 +75,7 @@ const Login = () => {
         {/* Form Fields */}
         <div className="space-y-[12px] mb-[10px]">
           <EditText
+            id={69}
             placeholder="Email"
             value={email}
             onChange={handleEmailChange}
@@ -85,6 +86,7 @@ const Login = () => {
 
           <div className="relative">
             <EditText
+              id={420}
               placeholder="Password"
               value={password}
               onChange={handlePasswordChange}

@@ -18,21 +18,21 @@ const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        /* Feeds */
+        {/* Feeds */}
         <Route path="/" element={<HomePage/>} />
         <Route path="/home" element={<HomePage/>} />
         <Route path="/explore" element={<HomePage/>} />
         <Route path="/popular" element={<HomePage/>} />
 
-        /* Post Pages */
+        {/* Post Pages */}
         <Route path="/post" element={<PostDetailPage/>} />
         <Route path="/create-post" element={<CreatePostPage/>} />
 
-        /* User Interactable */
+        {/* User Interactable */}
         <Route path="/profile" element={<UserProfilePage/>} />
         <Route path="/create-new-user" element={<UserCreationPage/>} />
 
-        /* Other */
+        {/* Other */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/map" element={<MapPage/>} />
       </Routes>
