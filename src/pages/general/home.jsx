@@ -76,16 +76,17 @@ const HomePage = () => {
                 {/* Post Header */}
                 <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-3
                   lg:mb-4">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-[56px]
-                    lg:h-[56px] bg-global-4 rounded-full flex-shrink-0"></div>
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14
+                    lg:h-14 bg-global-4 rounded-full flex-shrink-0">
+                  </div>
                   <div className="flex items-center gap-2 sm:gap-2
                     lg:gap-[12px] flex-wrap">
-                    <span className="text-global-1 text-sm sm:text-base
-                      lg:text-[24px] lg:leading-[26px] font-normal">
+                    <span className="text-global-1 text-base sm:text:lg
+                      lg:text-xl lg:leading-[26px] font-normal">
                       {post.userName} •
                     </span>
-                    <span className="text-global-2 text-sm sm:text-base
-                      lg:text-[24px] lg:leading-[26px] font-normal">
+                    <span className="text-global-2 text-base sm:text-lg
+                      lg:text-xl lg:leading-[26px] font-normal">
                       {post.timeAgo}
                     </span>
                   </div>
@@ -93,7 +94,7 @@ const HomePage = () => {
 
                 {/* Post Title */}
                 <h2 className="text-global-1 text-base sm:text-lg
-                  lg:text-[32px] lg:leading-[36px] font-normal mb-0
+                  lg:text-3xl lg:leading-[36px] font-normal mb-0
                   lg:mb-[0px]">
                   {post.title}
                 </h2>
@@ -105,7 +106,7 @@ const HomePage = () => {
                 </h4>
 
                 {/* Post Image */}
-                <div className="w-full h-32 sm:h-40 lg:h-[320px] bg-global-5
+                <div className="w-full h-32 sm:h-36 lg:h-80 bg-global-5
                   rounded-[20px] sm:rounded-[25px] lg:rounded-[35px] mb-3
                   lg:mb-[20px]">
                 </div>
