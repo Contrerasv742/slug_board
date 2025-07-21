@@ -57,12 +57,12 @@ const UserProfilePage = () => {
       />
 
       {/* Main Content */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 pt-16 sm:pt-18 lg:pt-24"> 
         {/* Sidebar */}
         <Sidebar/>
 
         {/* Profile Content */}
-        <main className="flex-1 p-6 sm:p-6 lg:p-[24px_28px]">
+        <main className="flex-1 p-6 sm:p-6 lg:pl-[16%] lg:p-[24px_28px]">
           <div className="max-w-7xl mx-auto">
 
             {/* Main Profile Layout */}
@@ -185,7 +185,7 @@ const UserProfilePage = () => {
               </div>
 
               {/* Right Content Area */}
-              <div className="lg:col-span-8 space-y-[40px] h-full">
+              <div className="lg:col-span-8 space-y-8 h-full">
 
                 {/* Recent Activity */}
                 <div className="bg-global-2 rounded-[25px] p-6 lg:p-[32px]">
@@ -236,7 +236,7 @@ const UserProfilePage = () => {
                 <div className="bg-global-2 rounded-[25px] p-6 lg:p-[32px]">
                   <h3 className="text-global-1 text-xl lg:text-[24px]
                     font-normal mb-4">Personality</h3>
-                  <div className="space-y-[23px]">
+                  <div className="space-y-[21px]">
                     {personalityTraits.map((trait, index) => (
                       <div key={index}>
                         <div className="flex justify-between mb-1">

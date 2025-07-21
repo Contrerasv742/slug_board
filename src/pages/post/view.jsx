@@ -154,7 +154,7 @@ const PostDetailPage = () => {
         />
 
         {/* Post Detail Content */}
-        <main className="flex-1 p-6 sm:p-6 lg:p-[44px_48px] flex justify-center">
+        <main className="mt-[80px] flex-1 p-6 sm:p-6 lg:p-[44px_48px] flex justify-center">
           <div className="w-[95%] sm:w-[85%] lg:w-[80%] max-w-[800px] mx-auto">
             
             {/* Back Button */}

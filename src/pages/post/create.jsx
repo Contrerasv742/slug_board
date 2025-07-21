@@ -136,12 +136,12 @@ const CreatePostPage = () => {
       />
 
       {/* Main Content */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 pt-16 sm:pt-18 lg:pt-24"> 
         {/* Sidebar */}
         <Sidebar/>
 
         {/* Main Page */}
-        <main className="flex-1 p-6 sm:p-6 lg:p-[24px_48px] flex
+        <main className="flex-1 p-6 sm:p-6 lg:pl-[16%] lg:p-[24px_48px] flex
           justify-center">
           <div className="flex flex-col gap-[20px] lg:gap-[20px] w-[95%]
             sm:w-[85%] lg:w-[80%] max-w-[800px] mx-auto">

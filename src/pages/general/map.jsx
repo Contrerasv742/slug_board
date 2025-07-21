@@ -3,7 +3,7 @@ import Sidebar from '../../components/common/Sidebar.jsx';
 
 const MapPage = () => {
   return (
-    <div className="flex flex-col h-screen bg-global-1 font-ropa">
+    <div className="flex flex-1 pt-16 sm:pt-18 lg:pt-20"> 
       {/* Header */}
       <Header 
         showSearch={true}

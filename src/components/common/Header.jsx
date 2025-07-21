@@ -17,7 +17,7 @@ const Header = ({
 
   return (
     <header className="bg-global-1 border-b-2 border-white border-opacity-60
-      p-4 sm:p-6 lg:p-[16px_32px]">
+      p-4 sm:p-6 lg:p-[16px_32px] w-[100%] fixed top-0 z-50">
       <div className="flex flex-row items-center justify-between w-full
         max-w-full mx-auto gap-4 sm:gap-6 lg:gap-8">
 

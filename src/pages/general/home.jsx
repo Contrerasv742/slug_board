@@ -50,7 +50,7 @@ const HomePage = () => {
       />
 
       {/* Main Content */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 pt-16 sm:pt-18 lg:pt-20"> 
         {/* Sidebar */}
         <Sidebar/>
 
@@ -66,8 +66,7 @@ const HomePage = () => {
         </button>
 
         {/* Feed Content */}
-        <main className="flex-1 p-6 sm:p-6 lg:p-[44px_48px] flex
-          justify-center">
+        <main className="flex-1 lg:pl-[16%] p-6 sm:p-6 lg:p-[44px_48px] flex justify-center">
           <div className="flex flex-col gap-4 lg:gap-[32px] w-[95%] sm:w-[85%]
             lg:w-[80%] max-w-[800px] mx-auto">
             {feedPosts.map((post) => (
