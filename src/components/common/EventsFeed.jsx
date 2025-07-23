@@ -2,20 +2,18 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase.js";
-import {
-  scrapeEventData,
-  validateScrapedEvent,
-} from "../../utils/improvedScraper.js";
+import { incrementField, decrementField } from "../../utils/databaseHelpers.js";
 import UpVotesSection from "../ui/Vote-Buttons.jsx";
 import ActionButton from "../ui/Action-Button.jsx";
 import RSVPButton from "../ui/RSVP-Button.jsx";
 import EventActions from "../ui/EventActions.jsx";
 
 const EventsFeed = ({
-  feedType = "all", // 'all', 'user', 'scraped', 'explore'
+  feedType = "all", // 'all', 'user', 'explore'
   limit = 50,
   autoRefresh = false,
   showCreateButton = true,
+  searchValue = "",
 }) => {
   const { user } = useAuth();
   const [events, setEvents] = useState([]);
@@ -105,9 +103,9 @@ const EventsFeed = ({
       setError("");
     } catch (error) {
       console.error("Error loading events:", error);
-      setError("Failed to load events");
-
-      // Fallback to sample events on error
+      setError("Failed to load events. Please try again.");
+      
+      // Fallback to sample events
       const sampleEvents = getSampleEvents();
       setEvents(sampleEvents);
     } finally {
@@ -232,6 +230,80 @@ const EventsFeed = ({
     loadEvents(true);
   };
 
+  // Handle event voting
+  const handleEventVote = async (eventId, voteType) => {
+    if (!user?.id) {
+      console.error("User must be logged in to vote");
+      return;
+    }
+
+    try {
+      // Check if user already voted on this event
+      const { data: existingVote, error: fetchError } = await supabase
+        .from("EventUpvotes")
+        .select("*")
+        .eq("event_id", eventId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (fetchError && fetchError.code !== "PGRST116") {
+        throw fetchError;
+      }
+
+      if (existingVote) {
+        if (existingVote.vote_type === voteType) {
+          // Remove vote
+          await supabase
+            .from("EventUpvotes")
+            .delete()
+            .eq("id", existingVote.id);
+
+          // Update event count
+          const updateField =
+            voteType === "upvote" ? "upvotes_count" : "downvotes_count";
+          await decrementField("Events", eventId, updateField);
+        } else {
+          // Switch vote type
+          await supabase
+            .from("EventUpvotes")
+            .update({ vote_type: voteType })
+            .eq("id", existingVote.id);
+
+          // Update event counts
+          const oldField =
+            existingVote.vote_type === "upvote"
+              ? "upvotes_count"
+              : "downvotes_count";
+          const newField =
+            voteType === "upvote" ? "upvotes_count" : "downvotes_count";
+
+          await decrementField("Events", eventId, oldField);
+          await incrementField("Events", eventId, newField);
+        }
+      } else {
+        // Create new vote
+        await supabase.from("EventUpvotes").insert([
+          {
+            event_id: eventId,
+            user_id: user.id,
+            vote_type: voteType,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+        // Update event count
+        const updateField =
+          voteType === "upvote" ? "upvotes_count" : "downvotes_count";
+        await incrementField("Events", eventId, updateField);
+      }
+
+      // Reload events to reflect changes
+      await loadEvents(true);
+    } catch (error) {
+      console.error("Error handling event vote:", error);
+    }
+  };
+
   const getEventTypeLabel = (eventType, source) => {
     if (eventType === "campus" && source === "scraped")
       return "🌐 Scraped Event";
@@ -291,7 +363,19 @@ const EventsFeed = ({
         </button>
       </div>
 
-      {events.map((post) => (
+      {events
+        .filter((event) => {
+          if (!searchValue) return true;
+          const searchLower = searchValue.toLowerCase();
+          return (
+            event.title.toLowerCase().includes(searchLower) ||
+            event.description.toLowerCase().includes(searchLower) ||
+            event.interests?.some(interest => 
+              interest.toLowerCase().includes(searchLower)
+            )
+          );
+        })
+        .map((post) => (
         <article
           key={post.id}
           className="bg-global-2 rounded-[35px] p-3
@@ -368,6 +452,9 @@ const EventsFeed = ({
             </div>
           )}
 
+          {/* Post Image */}
+          <div className="w-full h-32 sm:h-36 lg:h-80 bg-global-5 rounded-[20px] sm:rounded-[25px] lg:rounded-[35px] mb-3 lg:mb-[20px]"></div>
+
           {/* Post Actions */}
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-[12px] flex-wrap">
             {/* Upvote Section */}
@@ -377,6 +464,8 @@ const EventsFeed = ({
               eventId={post.eventId || post.id}
               userId={user?.id}
               light={true}
+              upvote_action={() => handleEventVote(post.eventId || post.id, "upvote")}
+              downvote_action={() => handleEventVote(post.eventId || post.id, "downvote")}
             />
 
             {/* RSVP Button */}

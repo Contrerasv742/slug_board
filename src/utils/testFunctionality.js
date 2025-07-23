@@ -1,13 +1,7 @@
 // Comprehensive functionality testing suite
-// This file tests all CRUD operations and scraping functionality
+// This file tests all CRUD operations and database functionality
 
 import { supabase } from "../lib/supabase.js";
-import {
-  scrapeEventData,
-  scrapeLiveEvents,
-  scrapeBatchEvents,
-  checkScrapingCapability,
-} from "./improvedScraper.js";
 import {
   incrementField,
   decrementField,
@@ -19,7 +13,6 @@ import {
 let testResults = {
   database: {},
   crud: {},
-  scraping: {},
   auth: {},
   summary: {},
 };
@@ -201,87 +194,6 @@ export const testEventCRUD = async () => {
   }
 };
 
-// Test Scraping Functionality
-export const testScrapingFunctionality = async () => {
-  console.log("🔍 Testing scraping functionality...");
-
-  try {
-    // Test single URL scraping
-    console.log("  Testing single URL scraping...");
-    const eventbriteUrl = "https://www.eventbrite.com/d/ca--santa-cruz/events/";
-    const singleEvents = await scrapeEventData(eventbriteUrl);
-
-    testResults.scraping.singleUrl = {
-      success: singleEvents.length > 0,
-      count: singleEvents.length,
-      events: singleEvents.slice(0, 2), // Store first 2 for verification
-    };
-
-    if (singleEvents.length > 0) {
-      console.log(
-        `  ✅ Single URL scraping successful (${singleEvents.length} events)`,
-      );
-    } else {
-      console.log("  ⚠️ Single URL scraping returned no events");
-    }
-
-    // Test live scraping
-    console.log("  Testing live scraping...");
-    const meetupUrl = "https://www.meetup.com/find/?location=Santa+Cruz%2C+CA";
-    const liveEvents = await scrapeLiveEvents(meetupUrl);
-
-    testResults.scraping.liveUrl = {
-      success: liveEvents.length > 0,
-      count: liveEvents.length,
-      events: liveEvents.slice(0, 2),
-    };
-
-    if (liveEvents.length > 0) {
-      console.log(
-        `  ✅ Live scraping successful (${liveEvents.length} events)`,
-      );
-    } else {
-      console.log("  ⚠️ Live scraping returned no events");
-    }
-
-    // Test batch scraping
-    console.log("  Testing batch scraping...");
-    const batchUrls = [
-      "https://www.eventbrite.com/d/ca--santa-cruz/events/",
-      "https://www.meetup.com/find/?location=Santa+Cruz%2C+CA",
-      "https://www.cityofsantacruz.com/community/special-events",
-    ];
-
-    const batchResults = await scrapeBatchEvents(batchUrls);
-    const successfulBatch = batchResults.filter((result) => result.success);
-
-    testResults.scraping.batchUrls = {
-      success: successfulBatch.length > 0,
-      totalUrls: batchUrls.length,
-      successfulUrls: successfulBatch.length,
-      results: batchResults,
-    };
-
-    console.log(
-      `  ✅ Batch scraping successful (${successfulBatch.length}/${batchUrls.length} URLs)`,
-    );
-
-    // Test scraping capability check
-    console.log("  Testing scraping capability check...");
-    const capability = await checkScrapingCapability(eventbriteUrl);
-
-    testResults.scraping.capability = capability;
-    console.log("  ✅ Scraping capability check successful");
-
-    console.log("✅ All scraping functionality tests completed");
-    return true;
-  } catch (error) {
-    console.error("❌ Scraping functionality test failed:", error.message);
-    testResults.scraping.error = error.message;
-    return false;
-  }
-};
-
 // Test Authentication
 export const testAuthentication = async () => {
   console.log("🔍 Testing authentication...");
@@ -320,7 +232,6 @@ export const runAllTests = async () => {
     databaseTables: await testDatabaseTables(),
     authentication: await testAuthentication(),
     eventCRUD: await testEventCRUD(),
-    scrapingFunctionality: await testScrapingFunctionality(),
   };
 
   // Generate summary

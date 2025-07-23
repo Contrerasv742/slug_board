@@ -228,7 +228,7 @@ const Header = ({
                       onClick={() => {
                         handleMenuClick('Sign Out');
                         // Add sign out logic here
-                        console.log('Sign out clicked');
+                        window.location.href = '/login';
                       }}
                       onMouseEnter={() => setHoveredItem('Sign Out')}
                       onMouseLeave={() => setHoveredItem(null)}

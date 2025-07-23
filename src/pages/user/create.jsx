@@ -1,7 +1,13 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../lib/supabase.js";
 
 const UserCreationPage = () => {
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     // Basic Info
     firstName: "",
@@ -247,7 +253,7 @@ const UserCreationPage = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate all steps before submission
     const step1Valid = validateStep1();
     const step2Valid = validateStep2();
@@ -266,9 +272,54 @@ const UserCreationPage = () => {
       return;
     }
 
-    console.log("User data:", formData);
-    // Handle form submission
-    alert("Account created successfully!");
+    setSubmitting(true);
+    try {
+      // Create account with Supabase
+      const { data, error } = await signUp(formData.email, formData.password, {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        full_name: `${formData.firstName} ${formData.lastName}`,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        // Create user profile with additional data
+        const profileData = {
+          id: data.user.id,
+          email: formData.email,
+          name: `${formData.firstName} ${formData.lastName}`,
+          username: formData.handle,
+          bio: formData.bio,
+          major: formData.major,
+          graduation_year: formData.graduationYear,
+          interests: formData.interests,
+          goals: formData.goals,
+          personality_traits: formData.personalityTraits,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        const { error: profileError } = await supabase
+          .from("Profiles")
+          .insert([profileData]);
+
+        if (profileError) {
+          console.error("Error creating profile:", profileError);
+          // Don't fail the whole process if profile creation fails
+        }
+
+        alert("Account created successfully! Please check your email for verification.");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Error creating account:", error);
+      alert(`Account creation failed: ${error.message}`);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const renderStepIndicator = () => (
@@ -827,11 +878,12 @@ const UserCreationPage = () => {
             ) : (
               <button
                 onClick={handleSubmit}
+                disabled={submitting}
                 className="px-6 py-3 bg-gradient-to-r from-green-500
                   to-blue-500 text-white rounded-[20px] hover:opacity-90
-                  transition-opacity"
+                  transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Create Account
+                {submitting ? "Creating Account..." : "Create Account"}
               </button>
             )}
           </div>

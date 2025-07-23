@@ -16,58 +16,26 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Safety timeout to avoid infinite loading loops if Supabase is unreachable
   useEffect(() => {
-    const safetyTimeout = setTimeout(() => {
-      setLoading(false);
-    }, 8000); // 8-second fallback
-
-    return () => clearTimeout(safetyTimeout);
-  }, []);
-
-  useEffect(() => {
-    // Helper to initialise auth with proper error handling
-    const initializeAuth = async () => {
-      try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error("Error getting session:", error);
-          setLoading(false);
-          return;
-        }
-
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-          await loadUserProfile(session.user.id);
+        loadUserProfile(session.user.id);
       } else {
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error("Error initializing auth:", err);
         setLoading(false);
       }
-    };
+    });
 
-    initializeAuth();
-
-    // Listen for auth changes with error handling
+    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      try {
       setUser(session?.user ?? null);
       if (session?.user) {
         await loadUserProfile(session.user.id);
       } else {
         setProfile(null);
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error("Error in auth state change:", err);
         setLoading(false);
       }
     });

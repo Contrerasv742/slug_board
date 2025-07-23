@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase.js";
+import { incrementField, decrementField } from "../../utils/databaseHelpers.js";
 import Header from "../../components/common/Header.jsx";
 import Sidebar from "../../components/common/Sidebar.jsx";
 import ExpandableComment from "../../components/ui/Add-Comment.jsx";
@@ -118,6 +119,80 @@ const PostDetailPage = () => {
     // Refresh the event to get updated comment count
     if (eventId) {
       loadEvent();
+    }
+  };
+
+  // Handle event voting
+  const handleEventVote = async (eventId, voteType) => {
+    if (!user?.id) {
+      console.error("User must be logged in to vote");
+      return;
+    }
+
+    try {
+      // Check if user already voted on this event
+      const { data: existingVote, error: fetchError } = await supabase
+        .from("EventUpvotes")
+        .select("*")
+        .eq("event_id", eventId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (fetchError && fetchError.code !== "PGRST116") {
+        throw fetchError;
+      }
+
+      if (existingVote) {
+        if (existingVote.vote_type === voteType) {
+          // Remove vote
+          await supabase
+            .from("EventUpvotes")
+            .delete()
+            .eq("id", existingVote.id);
+
+          // Update event count
+          const updateField =
+            voteType === "upvote" ? "upvotes_count" : "downvotes_count";
+          await decrementField("Events", eventId, updateField);
+        } else {
+          // Switch vote type
+          await supabase
+            .from("EventUpvotes")
+            .update({ vote_type: voteType })
+            .eq("id", existingVote.id);
+
+          // Update event counts
+          const oldField =
+            existingVote.vote_type === "upvote"
+              ? "upvotes_count"
+              : "downvotes_count";
+          const newField =
+            voteType === "upvote" ? "upvotes_count" : "downvotes_count";
+
+          await decrementField("Events", eventId, oldField);
+          await incrementField("Events", eventId, newField);
+        }
+      } else {
+        // Create new vote
+        await supabase.from("EventUpvotes").insert([
+          {
+            event_id: eventId,
+            user_id: user.id,
+            vote_type: voteType,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+        // Update event count
+        const updateField =
+          voteType === "upvote" ? "upvotes_count" : "downvotes_count";
+        await incrementField("Events", eventId, updateField);
+      }
+
+      // Reload event to reflect changes
+      await loadEvent();
+    } catch (error) {
+      console.error("Error handling event vote:", error);
     }
   };
 
@@ -261,6 +336,8 @@ const PostDetailPage = () => {
                   eventId={eventId || post.id}
                   userId={user?.id}
                   light={true}
+                  upvote_action={() => handleEventVote(eventId || post.id, "upvote")}
+                  downvote_action={() => handleEventVote(eventId || post.id, "downvote")}
                 />
 
                 {/* RSVP Button */}
