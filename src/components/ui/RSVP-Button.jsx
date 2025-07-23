@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase.js';
-import { incrementField, decrementField } from '../../utils/databaseHelpers.js';
+import React, { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabase.js";
+import { incrementField, decrementField } from "../../utils/databaseHelpers.js";
 
-const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) => {
+const RSVPButton = ({
+  eventId,
+  userId,
+  initialRsvpCount = 0,
+  className = "",
+}) => {
   const [rsvpStatus, setRsvpStatus] = useState(null); // null, 'going', 'interested', 'not_going'
   const [rsvpCount, setRsvpCount] = useState(initialRsvpCount);
   const [loading, setLoading] = useState(false);
@@ -17,14 +22,14 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
   const loadExistingRSVP = async () => {
     try {
       const { data, error } = await supabase
-        .from('RSVPs')
-        .select('status')
-        .eq('event_id', eventId)
-        .eq('user_id', userId)
+        .from("RSVPs")
+        .select("status")
+        .eq("event_id", eventId)
+        .eq("user_id", userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error loading existing RSVP:', error);
+      if (error && error.code !== "PGRST116") {
+        console.error("Error loading existing RSVP:", error);
         return;
       }
 
@@ -32,13 +37,13 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
         setRsvpStatus(data.status);
       }
     } catch (error) {
-      console.error('Error loading RSVP:', error);
+      console.error("Error loading RSVP:", error);
     }
   };
 
   const handleRSVP = async (newStatus) => {
     if (!eventId || !userId) {
-      console.error('Event ID or User ID missing');
+      console.error("Event ID or User ID missing");
       return;
     }
 
@@ -46,13 +51,13 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
     try {
       // Check if user already has an RSVP
       const { data: existingRSVP, error: fetchError } = await supabase
-        .from('RSVPs')
-        .select('*')
-        .eq('event_id', eventId)
-        .eq('user_id', userId)
+        .from("RSVPs")
+        .select("*")
+        .eq("event_id", eventId)
+        .eq("user_id", userId)
         .single();
 
-      if (fetchError && fetchError.code !== 'PGRST116') {
+      if (fetchError && fetchError.code !== "PGRST116") {
         throw fetchError;
       }
 
@@ -60,63 +65,61 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
         if (existingRSVP.status === newStatus) {
           // Remove RSVP if clicking the same status
           const { error: deleteError } = await supabase
-            .from('RSVPs')
+            .from("RSVPs")
             .delete()
-            .eq('id', existingRSVP.id);
+            .eq("id", existingRSVP.id);
 
           if (deleteError) throw deleteError;
 
           // Decrement RSVP count only if it was 'going'
-          if (existingRSVP.status === 'going') {
-            await decrementField('Events', eventId, 'rsvp_count');
-            setRsvpCount(prev => prev - 1);
+          if (existingRSVP.status === "going") {
+            await decrementField("Events", eventId, "rsvp_count");
+            setRsvpCount((prev) => prev - 1);
           }
 
           setRsvpStatus(null);
         } else {
           // Update existing RSVP
           const { error: updateError } = await supabase
-            .from('RSVPs')
-            .update({ 
+            .from("RSVPs")
+            .update({
               status: newStatus,
-              created_at: new Date().toISOString() // Update timestamp
+              created_at: new Date().toISOString(), // Update timestamp
             })
-            .eq('id', existingRSVP.id);
+            .eq("id", existingRSVP.id);
 
           if (updateError) throw updateError;
 
           // Update event count based on status changes
-          if (existingRSVP.status === 'going' && newStatus !== 'going') {
+          if (existingRSVP.status === "going" && newStatus !== "going") {
             // Was going, now not going - decrement
-            await decrementField('Events', eventId, 'rsvp_count');
-            setRsvpCount(prev => prev - 1);
-          } else if (existingRSVP.status !== 'going' && newStatus === 'going') {
+            await decrementField("Events", eventId, "rsvp_count");
+            setRsvpCount((prev) => prev - 1);
+          } else if (existingRSVP.status !== "going" && newStatus === "going") {
             // Wasn't going, now going - increment
-            await incrementField('Events', eventId, 'rsvp_count');
-            setRsvpCount(prev => prev + 1);
+            await incrementField("Events", eventId, "rsvp_count");
+            setRsvpCount((prev) => prev + 1);
           }
 
           setRsvpStatus(newStatus);
         }
       } else {
         // Create new RSVP
-        const { error: insertError } = await supabase
-          .from('RSVPs')
-          .insert([
-            {
-              event_id: eventId,
-              user_id: userId,
-              status: newStatus,
-              created_at: new Date().toISOString()
-            }
-          ]);
+        const { error: insertError } = await supabase.from("RSVPs").insert([
+          {
+            event_id: eventId,
+            user_id: userId,
+            status: newStatus,
+            created_at: new Date().toISOString(),
+          },
+        ]);
 
         if (insertError) throw insertError;
 
         // Increment RSVP count only if status is 'going'
-        if (newStatus === 'going') {
-          await incrementField('Events', eventId, 'rsvp_count');
-          setRsvpCount(prev => prev + 1);
+        if (newStatus === "going") {
+          await incrementField("Events", eventId, "rsvp_count");
+          setRsvpCount((prev) => prev + 1);
         }
 
         setRsvpStatus(newStatus);
@@ -124,7 +127,7 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
 
       setShowDropdown(false);
     } catch (error) {
-      console.error('Error handling RSVP:', error);
+      console.error("Error handling RSVP:", error);
     } finally {
       setLoading(false);
     }
@@ -132,14 +135,14 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
 
   const getButtonText = () => {
     switch (rsvpStatus) {
-      case 'going':
-        return '✓ Going';
-      case 'interested':
-        return '★ Interested';
-      case 'not_going':
-        return '✗ Can\'t Go';
+      case "going":
+        return "✓ Going";
+      case "interested":
+        return "★ Interested";
+      case "not_going":
+        return "✗ Can't Go";
       default:
-        return 'RSVP';
+        return "RSVP";
     }
   };
 
@@ -148,14 +151,14 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
       rounded-[15px] lg:rounded-[20px] text-sm lg:text-[16px] font-medium 
       transition-all duration-200 ease-out cursor-pointer border-none
       shadow-md hover:shadow-lg active:shadow-sm
-      transform hover:scale-105 active:scale-95 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`;
+      transform hover:scale-105 active:scale-95 ${loading ? "opacity-50 cursor-not-allowed" : ""}`;
 
     switch (rsvpStatus) {
-      case 'going':
+      case "going":
         return `${baseClasses} bg-green-500 hover:bg-green-600 text-white`;
-      case 'interested':
+      case "interested":
         return `${baseClasses} bg-yellow-500 hover:bg-yellow-600 text-white`;
-      case 'not_going':
+      case "not_going":
         return `${baseClasses} bg-red-500 hover:bg-red-600 text-white`;
       default:
         return `${baseClasses} bg-purple-500 hover:bg-purple-600 text-white`;
@@ -163,9 +166,21 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
   };
 
   const rsvpOptions = [
-    { status: 'going', label: '✓ Going', color: 'bg-green-500 hover:bg-green-600' },
-    { status: 'interested', label: '★ Interested', color: 'bg-yellow-500 hover:bg-yellow-600' },
-    { status: 'not_going', label: '✗ Can\'t Go', color: 'bg-red-500 hover:bg-red-600' }
+    {
+      status: "going",
+      label: "✓ Going",
+      color: "bg-green-500 hover:bg-green-600",
+    },
+    {
+      status: "interested",
+      label: "★ Interested",
+      color: "bg-yellow-500 hover:bg-yellow-600",
+    },
+    {
+      status: "not_going",
+      label: "✗ Can't Go",
+      color: "bg-red-500 hover:bg-red-600",
+    },
   ];
 
   return (
@@ -181,13 +196,18 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
             {rsvpCount}
           </span>
         )}
-        <svg 
-          className={`w-4 h-4 transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          className={`w-4 h-4 transition-transform duration-200 ${showDropdown ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
@@ -201,7 +221,7 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
                 disabled={loading}
                 className={`w-full text-left px-4 py-3 text-sm font-medium text-gray-700 
                   hover:bg-gray-100 transition-colors duration-150 first:rounded-t-[15px] 
-                  last:rounded-b-[15px] ${rsvpStatus === option.status ? 'bg-gray-100' : ''}`}
+                  last:rounded-b-[15px] ${rsvpStatus === option.status ? "bg-gray-100" : ""}`}
               >
                 <span className="flex items-center gap-2">
                   {option.label}
@@ -211,7 +231,7 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
                 </span>
               </button>
             ))}
-            
+
             {rsvpStatus && (
               <>
                 <hr className="my-2 border-gray-200" />
@@ -231,8 +251,8 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
 
       {/* Backdrop to close dropdown */}
       {showDropdown && (
-        <div 
-          className="fixed inset-0 z-40" 
+        <div
+          className="fixed inset-0 z-40"
           onClick={() => setShowDropdown(false)}
         />
       )}
@@ -240,4 +260,4 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
   );
 };
 
-export default RSVPButton; 
+export default RSVPButton;

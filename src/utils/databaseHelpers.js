@@ -1,5 +1,5 @@
 // Database helper functions to replace missing RPC functions
-import { supabase } from '../lib/supabase.js';
+import { supabase } from "../lib/supabase.js";
 
 // Increment a field in a table
 export const incrementField = async (tableName, rowId, fieldName) => {
@@ -7,7 +7,7 @@ export const incrementField = async (tableName, rowId, fieldName) => {
     const { data, error } = await supabase
       .from(tableName)
       .update({ [fieldName]: supabase.sql`${fieldName} + 1` })
-      .eq('event_id', rowId)
+      .eq("event_id", rowId)
       .select(fieldName)
       .single();
 
@@ -20,7 +20,7 @@ export const incrementField = async (tableName, rowId, fieldName) => {
       const { data: currentData, error: fetchError } = await supabase
         .from(tableName)
         .select(fieldName)
-        .eq('event_id', rowId)
+        .eq("event_id", rowId)
         .single();
 
       if (fetchError) throw fetchError;
@@ -29,12 +29,12 @@ export const incrementField = async (tableName, rowId, fieldName) => {
       const { error: updateError } = await supabase
         .from(tableName)
         .update({ [fieldName]: newValue })
-        .eq('event_id', rowId);
+        .eq("event_id", rowId);
 
       if (updateError) throw updateError;
       return newValue;
     } catch (fallbackError) {
-      console.error('Fallback increment failed:', fallbackError);
+      console.error("Fallback increment failed:", fallbackError);
       throw error;
     }
   }
@@ -46,7 +46,7 @@ export const decrementField = async (tableName, rowId, fieldName) => {
     const { data, error } = await supabase
       .from(tableName)
       .update({ [fieldName]: supabase.sql`GREATEST(${fieldName} - 1, 0)` })
-      .eq('event_id', rowId)
+      .eq("event_id", rowId)
       .select(fieldName)
       .single();
 
@@ -59,7 +59,7 @@ export const decrementField = async (tableName, rowId, fieldName) => {
       const { data: currentData, error: fetchError } = await supabase
         .from(tableName)
         .select(fieldName)
-        .eq('event_id', rowId)
+        .eq("event_id", rowId)
         .single();
 
       if (fetchError) throw fetchError;
@@ -68,12 +68,12 @@ export const decrementField = async (tableName, rowId, fieldName) => {
       const { error: updateError } = await supabase
         .from(tableName)
         .update({ [fieldName]: newValue })
-        .eq('event_id', rowId);
+        .eq("event_id", rowId);
 
       if (updateError) throw updateError;
       return newValue;
     } catch (fallbackError) {
-      console.error('Fallback decrement failed:', fallbackError);
+      console.error("Fallback decrement failed:", fallbackError);
       throw error;
     }
   }
@@ -81,24 +81,27 @@ export const decrementField = async (tableName, rowId, fieldName) => {
 
 // Check if database tables exist
 export const checkDatabaseTables = async () => {
-  const tables = ['Events', 'EventUpvotes', 'EventComments', 'RSVPs', 'Profiles'];
+  const tables = [
+    "Events",
+    "EventUpvotes",
+    "EventComments",
+    "RSVPs",
+    "Profiles",
+  ];
   const results = {};
 
   for (const table of tables) {
     try {
-      const { data, error } = await supabase
-        .from(table)
-        .select('*')
-        .limit(1);
+      const { data, error } = await supabase.from(table).select("*").limit(1);
 
       results[table] = {
         exists: !error,
-        error: error?.message || null
+        error: error?.message || null,
       };
     } catch (error) {
       results[table] = {
         exists: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -110,29 +113,30 @@ export const checkDatabaseTables = async () => {
 export const createSampleEvent = async (userId) => {
   try {
     const sampleEvent = {
-      title: 'Sample Event - Test',
-      description: 'This is a sample event for testing the application functionality.',
-      location: 'Santa Cruz, CA',
+      title: "Sample Event - Test",
+      description:
+        "This is a sample event for testing the application functionality.",
+      location: "Santa Cruz, CA",
       start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       end_time: new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString(),
       is_free: true,
       price_info: null,
       external_url: null,
-      category: 'General',
-      related_interests: ['Technology', 'Education'],
-      event_type: 'user_created',
-      source: 'manual',
+      category: "General",
+      related_interests: ["Technology", "Education"],
+      event_type: "user_created",
+      source: "manual",
       host_id: userId,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       upvotes_count: 0,
       downvotes_count: 0,
       comments_count: 0,
-      rsvp_count: 0
+      rsvp_count: 0,
     };
 
     const { data, error } = await supabase
-      .from('Events')
+      .from("Events")
       .insert([sampleEvent])
       .select()
       .single();
@@ -140,7 +144,7 @@ export const createSampleEvent = async (userId) => {
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error('Error creating sample event:', error);
+    console.error("Error creating sample event:", error);
     throw error;
   }
-}; 
+};

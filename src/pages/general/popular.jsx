@@ -1,10 +1,10 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import Header from '../../components/common/Header.jsx';
-import Sidebar from '../../components/common/Sidebar.jsx';
-import EventsFeed from '../../components/common/EventsFeed.jsx';
-import '../../styles/home.css'
+import React from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import Header from "../../components/common/Header.jsx";
+import Sidebar from "../../components/common/Sidebar.jsx";
+import EventsFeed from "../../components/common/EventsFeed.jsx";
+import "../../styles/home.css";
 
 const PopularPage = () => {
   const { user, profile, loading } = useAuth();
@@ -21,9 +21,11 @@ const PopularPage = () => {
     return (
       <div className="min-h-screen bg-global-1 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-white text-2xl mb-4">Please log in to continue</h2>
-          <Link 
-            to="/login" 
+          <h2 className="text-white text-2xl mb-4">
+            Please log in to continue
+          </h2>
+          <Link
+            to="/login"
             className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-[20px] transition-colors"
           >
             Go to Login
@@ -36,23 +38,25 @@ const PopularPage = () => {
   return (
     <div className="flex flex-col min-h-screen bg-global-1 font-ropa">
       {/* Header */}
-      <Header 
+      <Header
         showSearch={true}
         searchPlaceholder="Search Popular Events"
-        userName={profile?.name || profile?.username || 'John Doe'}
-        userHandle={profile?.username ? `@${profile.username}` : '@johndoe'}
+        userName={profile?.name || profile?.username || "John Doe"}
+        userHandle={profile?.username ? `@${profile.username}` : "@johndoe"}
         userAvatar={profile?.avatar_url || "/images/default-avatar.png"}
       />
 
       {/* Main Content */}
-      <div className="flex flex-1 pt-16 sm:pt-18 lg:pt-20"> 
+      <div className="flex flex-1 pt-16 sm:pt-18 lg:pt-20">
         {/* Sidebar */}
-        <Sidebar/>
+        <Sidebar />
 
         {/* Mobile Menu Button */}
-        <button className="block lg:hidden fixed top-4 left-4 z-50 p-3
+        <button
+          className="block lg:hidden fixed top-4 left-4 z-50 p-3
           bg-global-1 rounded-lg border border-white border-opacity-60
-          cursor-pointer">
+          cursor-pointer"
+        >
           <div className="w-6 h-6 flex flex-col justify-center items-center">
             <span className="block w-5 h-0.5 bg-sidebar-1 mb-1"></span>
             <span className="block w-5 h-0.5 bg-sidebar-1 mb-1"></span>
@@ -73,7 +77,7 @@ const PopularPage = () => {
               </p>
             </div>
 
-            <EventsFeed 
+            <EventsFeed
               feedType="all"
               limit={30}
               autoRefresh={false}
@@ -86,4 +90,4 @@ const PopularPage = () => {
   );
 };
 
-export default PopularPage; 
+export default PopularPage;

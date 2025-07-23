@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { supabase } from '../../lib/supabase.js';
-import { incrementField } from '../../utils/databaseHelpers.js';
+import { useState } from "react";
+import { supabase } from "../../lib/supabase.js";
+import { incrementField } from "../../utils/databaseHelpers.js";
 
 export default function ExpandableComment({ eventId, userId, onCommentAdded }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleCommentSubmit = async () => {
     if (!newComment.trim() || !eventId || !userId) {
-      console.error('Missing required fields for comment submission');
+      console.error("Missing required fields for comment submission");
       return;
     }
 
@@ -17,7 +17,7 @@ export default function ExpandableComment({ eventId, userId, onCommentAdded }) {
     try {
       // Insert new comment into database
       const { data, error } = await supabase
-        .from('EventComments')
+        .from("EventComments")
         .insert([
           {
             event_id: eventId,
@@ -27,23 +27,25 @@ export default function ExpandableComment({ eventId, userId, onCommentAdded }) {
             upvotes_count: 0,
             downvotes_count: 0,
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
+            updated_at: new Date().toISOString(),
+          },
         ])
-        .select(`
+        .select(
+          `
           *,
           profiles:user_id (
             name,
             username,
             avatar_url
           )
-        `)
+        `,
+        )
         .single();
 
       if (error) throw error;
 
       // Update event comments count
-      await incrementField('Events', eventId, 'comments_count');
+      await incrementField("Events", eventId, "comments_count");
 
       // Notify parent component about new comment
       if (onCommentAdded && data) {
@@ -51,12 +53,12 @@ export default function ExpandableComment({ eventId, userId, onCommentAdded }) {
       }
 
       // Reset form
-      setNewComment('');
+      setNewComment("");
       setIsExpanded(false);
 
-      console.log('Comment submitted successfully:', data);
+      console.log("Comment submitted successfully:", data);
     } catch (error) {
-      console.error('Error submitting comment:', error);
+      console.error("Error submitting comment:", error);
     } finally {
       setLoading(false);
     }
@@ -69,7 +71,7 @@ export default function ExpandableComment({ eventId, userId, onCommentAdded }) {
   if (!isExpanded) {
     // Collapsed state - shows the simple version
     return (
-      <div className="bg-white/10 rounded-[25px] p-0 lg:p-0 mb-6 border-white border-solid border"> 
+      <div className="bg-white/10 rounded-[25px] p-0 lg:p-0 mb-6 border-white border-solid border">
         <textarea
           className="text-gray-800 text-lg pl-4 lg:text-[22px] font-normal
           bg-transparent border-none outline-none resize-none
@@ -114,7 +116,7 @@ export default function ExpandableComment({ eventId, userId, onCommentAdded }) {
           lg:px-8 lg:py-3 rounded-[20px] transition-colors duration-200 text-sm
           lg:text-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Posting...' : 'Post Comment'}
+          {loading ? "Posting..." : "Post Comment"}
         </button>
       </div>
     </div>

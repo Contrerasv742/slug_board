@@ -1,28 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase.js';
-import { scrapeEventData, validateScrapedEvent } from '../../utils/eventScraper.js';
-import UpVotesSection from '../ui/Vote-Buttons.jsx';
-import ActionButton from '../ui/Action-Button.jsx';
-import RSVPButton from '../ui/RSVP-Button.jsx';
-import EventActions from '../ui/EventActions.jsx';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../lib/supabase.js";
+import {
+  scrapeEventData,
+  validateScrapedEvent,
+} from "../../utils/improvedScraper.js";
+import UpVotesSection from "../ui/Vote-Buttons.jsx";
+import ActionButton from "../ui/Action-Button.jsx";
+import RSVPButton from "../ui/RSVP-Button.jsx";
+import EventActions from "../ui/EventActions.jsx";
 
-const EventsFeed = ({ 
-  feedType = 'all', // 'all', 'user', 'scraped', 'explore'
+const EventsFeed = ({
+  feedType = "all", // 'all', 'user', 'scraped', 'explore'
   limit = 50,
   autoRefresh = false,
-  showCreateButton = true 
+  showCreateButton = true,
 }) => {
   const { user } = useAuth();
   const [events, setEvents] = useState([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadEvents();
-    
+
     // Auto-refresh every 30 seconds if enabled
     if (autoRefresh) {
       const interval = setInterval(loadEvents, 30000);
@@ -36,30 +39,32 @@ const EventsFeed = ({
     } else {
       setLoadingEvents(true);
     }
-    
+
     try {
       // Build query based on feed type
       let query = supabase
-        .from('Events')
-        .select(`
+        .from("Events")
+        .select(
+          `
           *,
           profiles:host_id (
             name,
             username,
             avatar_url
           )
-        `)
-        .order('created_at', { ascending: false })
+        `,
+        )
+        .order("created_at", { ascending: false })
         .limit(limit);
 
       // Filter by feed type
-      if (feedType === 'user') {
-        query = query.eq('event_type', 'user_created');
-      } else if (feedType === 'scraped') {
-        query = query.eq('event_type', 'campus');
-      } else if (feedType === 'explore') {
+      if (feedType === "user") {
+        query = query.eq("event_type", "user_created");
+      } else if (feedType === "scraped") {
+        query = query.eq("event_type", "campus");
+      } else if (feedType === "explore") {
         // For explore, prioritize diverse content
-        query = query.or('event_type.eq.campus,event_type.eq.user_created');
+        query = query.or("event_type.eq.campus,event_type.eq.user_created");
       }
 
       const { data, error } = await query;
@@ -67,9 +72,10 @@ const EventsFeed = ({
       if (error) throw error;
 
       // Transform ALL events to match original post format
-      const transformedEvents = data.map(event => ({
+      const transformedEvents = data.map((event) => ({
         id: event.event_id,
-        userName: event.profiles?.name || event.profiles?.username || 'Anonymous',
+        userName:
+          event.profiles?.name || event.profiles?.username || "Anonymous",
         timeAgo: formatTimeAgo(event.created_at),
         title: event.title,
         description: event.description,
@@ -80,12 +86,12 @@ const EventsFeed = ({
         // Database fields for functionality
         eventId: event.event_id,
         hostId: event.host_id,
-        eventType: event.event_type || 'user_created',
-        source: event.source || 'manual',
+        eventType: event.event_type || "user_created",
+        source: event.source || "manual",
         location: event.location,
         startTime: event.start_time,
         endTime: event.end_time,
-        interests: event.related_interests || []
+        interests: event.related_interests || [],
       }));
 
       // If no database events, add sample events for demo
@@ -96,11 +102,11 @@ const EventsFeed = ({
         setEvents(transformedEvents);
       }
 
-      setError('');
+      setError("");
     } catch (error) {
-      console.error('Error loading events:', error);
-      setError('Failed to load events');
-      
+      console.error("Error loading events:", error);
+      setError("Failed to load events");
+
       // Fallback to sample events on error
       const sampleEvents = getSampleEvents();
       setEvents(sampleEvents);
@@ -115,89 +121,91 @@ const EventsFeed = ({
     return [
       {
         id: "ASNJK-72800",
-        userName: 'User Name',
-        timeAgo: '2 days ago',
-        title: 'Post Name...',
-        description: 'Economics get money',
+        userName: "User Name",
+        timeAgo: "2 days ago",
+        title: "Post Name...",
+        description: "Economics get money",
         upvotes: 534,
         downvotes: 7,
         hasComments: true,
         canShare: true,
         eventId: "ASNJK-72800",
-        eventType: 'user_created',
-        source: 'sample',
-        location: 'Campus Library',
-        interests: ['Economics', 'Business'],
-        rsvpCount: 12
+        eventType: "user_created",
+        source: "sample",
+        location: "Campus Library",
+        interests: ["Economics", "Business"],
+        rsvpCount: 12,
       },
       {
         id: "ankNJK-72800",
-        userName: 'User Name',
-        timeAgo: '2 days ago',
-        title: 'General Meeting',
-        description: 'Stoners Unites',
+        userName: "User Name",
+        timeAgo: "2 days ago",
+        title: "General Meeting",
+        description: "Stoners Unites",
         upvotes: 420,
         downvotes: 12,
         hasComments: true,
         canShare: true,
         eventId: "ankNJK-72800",
-        eventType: 'user_created',
-        source: 'sample',
-        location: 'Student Center',
-        interests: ['Social', 'Community'],
-        rsvpCount: 45
+        eventType: "user_created",
+        source: "sample",
+        location: "Student Center",
+        interests: ["Social", "Community"],
+        rsvpCount: 45,
       },
       {
         id: "djskna-74938a",
-        userName: 'User Name',
-        timeAgo: '2 days ago',
-        title: 'Mission 101',
-        description: 'Learn about campus mission and values',
+        userName: "User Name",
+        timeAgo: "2 days ago",
+        title: "Mission 101",
+        description: "Learn about campus mission and values",
         upvotes: 69,
         downvotes: 3,
         hasComments: true,
         canShare: true,
         eventId: "djskna-74938a",
-        eventType: 'campus',
-        source: 'sample',
-        location: 'Administration Building',
-        interests: ['Academic', 'Learning'],
-        rsvpCount: 28
+        eventType: "campus",
+        source: "sample",
+        location: "Administration Building",
+        interests: ["Academic", "Learning"],
+        rsvpCount: 28,
       },
       {
         id: "santa-farmers-market",
-        userName: 'Santa Cruz Events',
-        timeAgo: '1 day ago',
-        title: 'Downtown Farmers\' Market',
-        description: 'Find your favorite Farmers\' Market vendors at its new site on Church and Cedar Streets in Downtown Santa Cruz. Featuring organic produce, artisan goods and more.',
+        userName: "Santa Cruz Events",
+        timeAgo: "1 day ago",
+        title: "Downtown Farmers' Market",
+        description:
+          "Find your favorite Farmers' Market vendors at its new site on Church and Cedar Streets in Downtown Santa Cruz. Featuring organic produce, artisan goods and more.",
         upvotes: 89,
         downvotes: 2,
         hasComments: true,
         canShare: true,
         eventId: "santa-farmers-market",
-        eventType: 'campus',
-        source: 'scraped',
-        location: 'Church and Cedar Streets, Santa Cruz',
-        interests: ['Food', 'Community', 'Health'],
-        rsvpCount: 67
+        eventType: "campus",
+        source: "scraped",
+        location: "Church and Cedar Streets, Santa Cruz",
+        interests: ["Food", "Community", "Health"],
+        rsvpCount: 67,
       },
       {
         id: "makers-market-sc",
-        userName: 'Santa Cruz Events',
-        timeAgo: '3 hours ago',
-        title: 'Santa Cruz Makers Market',
-        description: 'The Santa Cruz Makers Market featuring 40+ local artisan vendors on the 1100 block of Pacific Avenue between Cathcart and Lincoln Streets.',
+        userName: "Santa Cruz Events",
+        timeAgo: "3 hours ago",
+        title: "Santa Cruz Makers Market",
+        description:
+          "The Santa Cruz Makers Market featuring 40+ local artisan vendors on the 1100 block of Pacific Avenue between Cathcart and Lincoln Streets.",
         upvotes: 156,
         downvotes: 4,
         hasComments: true,
         canShare: true,
         eventId: "makers-market-sc",
-        eventType: 'campus',
-        source: 'scraped',
-        location: 'Downtown Pacific Avenue, Santa Cruz',
-        interests: ['Art', 'Shopping', 'Community'],
-        rsvpCount: 134
-      }
+        eventType: "campus",
+        source: "scraped",
+        location: "Downtown Pacific Avenue, Santa Cruz",
+        interests: ["Art", "Shopping", "Community"],
+        rsvpCount: 134,
+      },
     ];
   };
 
@@ -205,18 +213,18 @@ const EventsFeed = ({
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
+
+    if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours} hours ago`;
-    
+
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays === 1) return '1 day ago';
+    if (diffInDays === 1) return "1 day ago";
     if (diffInDays < 7) return `${diffInDays} days ago`;
-    
+
     const diffInWeeks = Math.floor(diffInDays / 7);
-    if (diffInWeeks === 1) return '1 week ago';
+    if (diffInWeeks === 1) return "1 week ago";
     if (diffInWeeks < 4) return `${diffInWeeks} weeks ago`;
-    
+
     return date.toLocaleDateString();
   };
 
@@ -225,17 +233,19 @@ const EventsFeed = ({
   };
 
   const getEventTypeLabel = (eventType, source) => {
-    if (eventType === 'campus' && source === 'scraped') return '🌐 Scraped Event';
-    if (eventType === 'campus') return '📍 Local Event';
-    if (source === 'sample') return '💡 Sample Event';
-    return '👤 User Post';
+    if (eventType === "campus" && source === "scraped")
+      return "🌐 Scraped Event";
+    if (eventType === "campus") return "📍 Local Event";
+    if (source === "sample") return "💡 Sample Event";
+    return "👤 User Post";
   };
 
   const getEventTypeColor = (eventType, source) => {
-    if (eventType === 'campus' && source === 'scraped') return 'bg-blue-500/20 text-blue-400';
-    if (eventType === 'campus') return 'bg-green-500/20 text-green-400';
-    if (source === 'sample') return 'bg-yellow-500/20 text-yellow-400';
-    return 'bg-purple-500/20 text-purple-400';
+    if (eventType === "campus" && source === "scraped")
+      return "bg-blue-500/20 text-blue-400";
+    if (eventType === "campus") return "bg-green-500/20 text-green-400";
+    if (source === "sample") return "bg-yellow-500/20 text-yellow-400";
+    return "bg-purple-500/20 text-purple-400";
   };
 
   if (loadingEvents) {
@@ -250,7 +260,7 @@ const EventsFeed = ({
     return (
       <div className="text-center py-12">
         <div className="text-red-400 text-lg mb-4">{error}</div>
-        <button 
+        <button
           onClick={() => loadEvents()}
           className="text-purple-400 hover:text-purple-300 underline"
         >
@@ -262,47 +272,53 @@ const EventsFeed = ({
 
   return (
     <div className="flex flex-col gap-4 lg:gap-[32px] w-[95%] sm:w-[85%] lg:w-[80%] max-w-[800px] mx-auto">
-      
       {/* Feed Header */}
       <div className="flex justify-between items-center text-white/70 text-sm">
         <div>
-          Showing {events.length} events • 
-          {feedType === 'all' && ' Mix of user posts, scraped events & local events'}
-          {feedType === 'user' && ' User-created posts only'}
-          {feedType === 'scraped' && ' Scraped & local events only'}
-          {feedType === 'explore' && ' Diverse content for exploration'}
+          Showing {events.length} events •
+          {feedType === "all" &&
+            " Mix of user posts, scraped events & local events"}
+          {feedType === "user" && " User-created posts only"}
+          {feedType === "scraped" && " Scraped & local events only"}
+          {feedType === "explore" && " Diverse content for exploration"}
         </div>
-        <button 
+        <button
           onClick={handleRefresh}
           disabled={refreshing}
           className="text-purple-400 hover:text-purple-300 transition-colors disabled:opacity-50"
         >
-          {refreshing ? '🔄' : '↻'} Refresh
+          {refreshing ? "🔄" : "↻"} Refresh
         </button>
       </div>
-      
+
       {events.map((post) => (
-        <article key={post.id} className="bg-global-2 rounded-[35px] p-3
-          sm:p-4 lg:p-[24px] w-full relative">
-          
+        <article
+          key={post.id}
+          className="bg-global-2 rounded-[35px] p-3
+          sm:p-4 lg:p-[24px] w-full relative"
+        >
           {/* Event Type Indicator */}
-          <div className={`absolute top-2 right-4 text-xs px-2 py-1 rounded-full ${getEventTypeColor(post.eventType, post.source)}`}>
+          <div
+            className={`absolute top-2 right-4 text-xs px-2 py-1 rounded-full ${getEventTypeColor(post.eventType, post.source)}`}
+          >
             {getEventTypeLabel(post.eventType, post.source)}
           </div>
 
           {/* Event Actions (Edit/Delete) for Event Owners */}
           <div className="absolute top-2 right-2">
-            <EventActions 
+            <EventActions
               eventId={post.eventId || post.id}
               hostId={post.hostId}
               userId={user?.id}
               onEventDeleted={() => {
                 // Remove event from local state
-                setEvents(prevEvents => prevEvents.filter(e => e.id !== post.id));
+                setEvents((prevEvents) =>
+                  prevEvents.filter((e) => e.id !== post.id),
+                );
               }}
             />
           </div>
-          
+
           {/* Post Header */}
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-3 lg:mb-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-global-4 rounded-full flex-shrink-0"></div>
@@ -342,7 +358,10 @@ const EventsFeed = ({
           {post.interests && post.interests.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2 mb-2">
               {post.interests.slice(0, 3).map((interest, index) => (
-                <span key={index} className="text-xs bg-global-3 text-global-1 px-2 py-1 rounded-full">
+                <span
+                  key={index}
+                  className="text-xs bg-global-3 text-global-1 px-2 py-1 rounded-full"
+                >
                   {interest}
                 </span>
               ))}
@@ -364,7 +383,7 @@ const EventsFeed = ({
             />
 
             {/* RSVP Button */}
-            <RSVPButton 
+            <RSVPButton
               eventId={post.eventId || post.id}
               userId={user?.id}
               initialRsvpCount={post.rsvpCount || 0}
@@ -380,8 +399,8 @@ const EventsFeed = ({
 
             {/* Share Button */}
             {post.canShare && (
-              <ActionButton 
-                type="share" 
+              <ActionButton
+                type="share"
                 onClick={() => {}}
                 eventId={post.eventId || post.id}
                 userId={user?.id}
@@ -393,11 +412,11 @@ const EventsFeed = ({
           </div>
         </article>
       ))}
-      
+
       {/* Load More Button for Pagination */}
       {events.length >= limit && (
         <div className="text-center py-6">
-          <button 
+          <button
             onClick={() => loadEvents()}
             className="text-purple-400 hover:text-purple-300 underline"
           >
@@ -415,11 +434,13 @@ const EventsFeed = ({
           shadow-lg hover:shadow-xl transform hover:scale-105
           flex items-center justify-center z-50 no-underline"
         >
-          <span className="text-5xl font-bold leading-none text-starship-animated">+</span>
+          <span className="text-5xl font-bold leading-none text-starship-animated">
+            +
+          </span>
         </Link>
       )}
     </div>
   );
 };
 
-export default EventsFeed; 
+export default EventsFeed;

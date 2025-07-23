@@ -1,11 +1,12 @@
 // Scraping service for backend integration
 // This service handles communication with the Python scraper backend
 
-import { supabase } from '../lib/supabase.js';
+import { supabase } from "../lib/supabase.js";
 
 class ScrapingService {
   constructor() {
-    this.baseUrl = process.env.REACT_APP_SCRAPING_API_URL || 'http://localhost:8000';
+    this.baseUrl =
+      process.env.REACT_APP_SCRAPING_API_URL || "http://localhost:8000";
   }
 
   /**
@@ -15,14 +16,14 @@ class ScrapingService {
   async scrapeSantaCruzEvents() {
     try {
       const response = await fetch(`${this.baseUrl}/api/scrape/santacruz`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          url: 'https://www.cityofsantacruz.com/community/special-events',
-          save_to_db: true
-        })
+          url: "https://www.cityofsantacruz.com/community/special-events",
+          save_to_db: true,
+        }),
       });
 
       if (!response.ok) {
@@ -32,8 +33,8 @@ class ScrapingService {
       const result = await response.json();
       return result.events || [];
     } catch (error) {
-      console.error('Santa Cruz scraping error:', error);
-      throw new Error('Failed to scrape Santa Cruz events');
+      console.error("Santa Cruz scraping error:", error);
+      throw new Error("Failed to scrape Santa Cruz events");
     }
   }
 
@@ -43,11 +44,11 @@ class ScrapingService {
   async scrapeGenericEvents(url) {
     try {
       const response = await fetch(`${this.baseUrl}/api/scrape/generic`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ url })
+        body: JSON.stringify({ url }),
       });
 
       if (!response.ok) {
@@ -57,35 +58,37 @@ class ScrapingService {
       const result = await response.json();
       return result.events || [];
     } catch (error) {
-      console.error('Generic scraping error:', error);
-      throw new Error('Failed to scrape events from provided URL');
+      console.error("Generic scraping error:", error);
+      throw new Error("Failed to scrape events from provided URL");
     }
   }
 
   /**
    * Get scraped events from database
    */
-  async getScrapedEvents(source = 'campus', limit = 10) {
+  async getScrapedEvents(source = "campus", limit = 10) {
     try {
       const { data, error } = await supabase
-        .from('Events')
-        .select(`
+        .from("Events")
+        .select(
+          `
           *,
           profiles:host_id (
             name,
             username,
             avatar_url
           )
-        `)
-        .eq('event_type', source)
-        .order('created_at', { ascending: false })
+        `,
+        )
+        .eq("event_type", source)
+        .order("created_at", { ascending: false })
         .limit(limit);
 
       if (error) throw error;
 
       return data || [];
     } catch (error) {
-      console.error('Database fetch error:', error);
+      console.error("Database fetch error:", error);
       return [];
     }
   }
@@ -96,7 +99,7 @@ class ScrapingService {
   async saveScrapedEvent(eventData, hostId = null) {
     try {
       const { data, error } = await supabase
-        .from('Events')
+        .from("Events")
         .insert([
           {
             title: eventData.title,
@@ -109,16 +112,16 @@ class ScrapingService {
             external_url: eventData.originalUrl || null,
             category: eventData.category || null,
             related_interests: eventData.interests || [],
-            event_type: 'campus',
-            source: eventData.source || 'scraped',
+            event_type: "campus",
+            source: eventData.source || "scraped",
             host_id: hostId,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             upvotes_count: 0,
             downvotes_count: 0,
             comments_count: 0,
-            rsvp_count: 0
-          }
+            rsvp_count: 0,
+          },
         ])
         .select()
         .single();
@@ -127,8 +130,8 @@ class ScrapingService {
 
       return data;
     } catch (error) {
-      console.error('Database save error:', error);
-      throw new Error('Failed to save event to database');
+      console.error("Database save error:", error);
+      throw new Error("Failed to save event to database");
     }
   }
 
@@ -138,7 +141,7 @@ class ScrapingService {
   async batchSaveEvents(events, hostId = null) {
     const results = {
       successful: [],
-      failed: []
+      failed: [],
     };
 
     for (const event of events) {
@@ -148,7 +151,7 @@ class ScrapingService {
       } catch (error) {
         results.failed.push({
           event: event.title,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -171,4 +174,4 @@ class ScrapingService {
 
 // Export singleton instance
 export const scrapingService = new ScrapingService();
-export default ScrapingService; 
+export default ScrapingService;

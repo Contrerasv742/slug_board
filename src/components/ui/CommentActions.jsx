@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
-import { supabase } from '../../lib/supabase.js';
+import React, { useState } from "react";
+import { supabase } from "../../lib/supabase.js";
 
-const CommentActions = ({ commentId, userId, authorId, content, onCommentUpdated, onCommentDeleted }) => {
+const CommentActions = ({
+  commentId,
+  userId,
+  authorId,
+  content,
+  onCommentUpdated,
+  onCommentDeleted,
+}) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(content);
@@ -19,19 +26,19 @@ const CommentActions = ({ commentId, userId, authorId, content, onCommentUpdated
 
   const handleSaveEdit = async () => {
     if (!editContent.trim()) {
-      alert('Comment cannot be empty');
+      alert("Comment cannot be empty");
       return;
     }
 
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('EventComments')
+        .from("EventComments")
         .update({
           content: editContent.trim(),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', commentId)
+        .eq("id", commentId)
         .select()
         .single();
 
@@ -44,8 +51,8 @@ const CommentActions = ({ commentId, userId, authorId, content, onCommentUpdated
 
       setIsEditing(false);
     } catch (error) {
-      console.error('Error updating comment:', error);
-      alert('Failed to update comment. Please try again.');
+      console.error("Error updating comment:", error);
+      alert("Failed to update comment. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -57,7 +64,7 @@ const CommentActions = ({ commentId, userId, authorId, content, onCommentUpdated
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this comment?')) {
+    if (!confirm("Are you sure you want to delete this comment?")) {
       return;
     }
 
@@ -65,15 +72,15 @@ const CommentActions = ({ commentId, userId, authorId, content, onCommentUpdated
     try {
       // Delete comment votes first
       await supabase
-        .from('CommentUpvotes')
+        .from("CommentUpvotes")
         .delete()
-        .eq('comment_id', commentId);
+        .eq("comment_id", commentId);
 
       // Delete the comment
       const { error } = await supabase
-        .from('EventComments')
+        .from("EventComments")
         .delete()
-        .eq('id', commentId);
+        .eq("id", commentId);
 
       if (error) throw error;
 
@@ -82,8 +89,8 @@ const CommentActions = ({ commentId, userId, authorId, content, onCommentUpdated
         onCommentDeleted(commentId);
       }
     } catch (error) {
-      console.error('Error deleting comment:', error);
-      alert('Failed to delete comment. Please try again.');
+      console.error("Error deleting comment:", error);
+      alert("Failed to delete comment. Please try again.");
     } finally {
       setLoading(false);
       setShowDropdown(false);
@@ -113,7 +120,7 @@ const CommentActions = ({ commentId, userId, authorId, content, onCommentUpdated
             disabled={loading || !editContent.trim()}
             className="px-3 py-1 text-xs bg-purple-500 hover:bg-purple-600 text-white rounded-[10px] transition-colors disabled:opacity-50"
           >
-            {loading ? 'Saving...' : 'Save'}
+            {loading ? "Saving..." : "Save"}
           </button>
         </div>
       </div>
@@ -127,7 +134,11 @@ const CommentActions = ({ commentId, userId, authorId, content, onCommentUpdated
         disabled={loading}
         className="p-1 hover:bg-gray-600 rounded-full transition-colors disabled:opacity-50 opacity-0 group-hover:opacity-100"
       >
-        <svg className="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+        <svg
+          className="w-4 h-4 text-gray-400"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
           <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
         </svg>
       </button>
@@ -150,13 +161,13 @@ const CommentActions = ({ commentId, userId, authorId, content, onCommentUpdated
               className="w-full text-left px-3 py-2 text-xs font-medium text-red-600 
                 hover:bg-red-50 transition-colors duration-150 rounded-b-[10px]"
             >
-              {loading ? 'Deleting...' : 'Delete'}
+              {loading ? "Deleting..." : "Delete"}
             </button>
           </div>
 
           {/* Backdrop to close dropdown */}
-          <div 
-            className="fixed inset-0 z-40" 
+          <div
+            className="fixed inset-0 z-40"
             onClick={() => setShowDropdown(false)}
           />
         </>
@@ -165,4 +176,4 @@ const CommentActions = ({ commentId, userId, authorId, content, onCommentUpdated
   );
 };
 
-export default CommentActions; 
+export default CommentActions;

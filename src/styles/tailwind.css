@@ -91,7 +91,14 @@
 
 /* Main Starship Gradient (Pink to Purple) */
 .bg-starship-gradient {
-  background: linear-gradient(135deg, #ff1493 0%, #ff69b4 25%, #da70d6 50%, #9370db 75%, #8a2be2 100%);
+  background: linear-gradient(
+    135deg,
+    #ff1493 0%,
+    #ff69b4 25%,
+    #da70d6 50%,
+    #9370db 75%,
+    #8a2be2 100%
+  );
 }
 
 /* Alternative Starship Variations */
@@ -100,7 +107,14 @@
 }
 
 .bg-starship-vivid {
-  background: linear-gradient(135deg, #ff1493 0%, #ff4500 25%, #ff69b4 50%, #da70d6 75%, #9370db 100%);
+  background: linear-gradient(
+    135deg,
+    #ff1493 0%,
+    #ff4500 25%,
+    #ff69b4 50%,
+    #da70d6 75%,
+    #9370db 100%
+  );
 }
 
 .bg-starship-purple {
@@ -109,25 +123,53 @@
 
 /* Radial version (like spotlight effect) */
 .bg-starship-radial {
-  background: radial-gradient(circle at 30% 30%, #ff1493 0%, #ff69b4 25%, #da70d6 50%, #9370db 75%, #8a2be2 100%);
+  background: radial-gradient(
+    circle at 30% 30%,
+    #ff1493 0%,
+    #ff69b4 25%,
+    #da70d6 50%,
+    #9370db 75%,
+    #8a2be2 100%
+  );
 }
 
 /* With subtle opacity for elegance */
 .bg-starship-elegant {
-  background: linear-gradient(135deg, rgba(255,20,147,0.9) 0%, rgba(255,105,180,0.9) 25%, rgba(218,112,214,0.9) 50%, rgba(147,112,219,0.9) 75%, rgba(138,43,226,0.9) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 20, 147, 0.9) 0%,
+    rgba(255, 105, 180, 0.9) 25%,
+    rgba(218, 112, 214, 0.9) 50%,
+    rgba(147, 112, 219, 0.9) 75%,
+    rgba(138, 43, 226, 0.9) 100%
+  );
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Animated gradient (optional) */
 .bg-starship-animated {
-  background: linear-gradient(135deg, #ff1493, #ff69b4, #da70d6, #9370db, #8a2be2);
+  background: linear-gradient(
+    135deg,
+    #ff1493,
+    #ff69b4,
+    #da70d6,
+    #9370db,
+    #8a2be2
+  );
   background-size: 300% 300%;
   animation: gradientShift 6s ease infinite;
 }
 
 .text-starship-animated {
-  background: linear-gradient(135deg, #ff1493, #ff69b4, #da70d6, #9370db, #8a2be2);
+  background: linear-gradient(
+    135deg,
+    #ff1493,
+    #ff69b4,
+    #da70d6,
+    #9370db,
+    #8a2be2
+  );
   background-size: 300% 300%;
   animation: gradientShift 6s ease infinite;
   -webkit-background-clip: text;
@@ -136,20 +178,26 @@
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes gradient-shift {
-  0% { 
-    background-position: 0% 50%; 
+  0% {
+    background-position: 0% 50%;
   }
-  50% { 
-    background-position: 100% 50%; 
+  50% {
+    background-position: 100% 50%;
   }
-  100% { 
-    background-position: 0% 50%; 
+  100% {
+    background-position: 0% 50%;
   }
 }
 
@@ -160,7 +208,7 @@
 /* Text colors that work well with these gradients */
 .text-starship-contrast {
   color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .text-starship-dark {
@@ -169,16 +217,24 @@
 
 /* Button styles to complement the gradient */
 .btn-starship {
-  background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.9) 100%);
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
   color: #8a2be2;
-  border: 1px solid rgba(255,255,255,0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   font-weight: 600;
 }
 
 .btn-starship:hover {
-  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(138,43,226,0.3);
+  box-shadow: 0 4px 12px rgba(138, 43, 226, 0.3);
 }
 
 /* Profile Animation */
@@ -187,7 +243,15 @@
   display: inline-block;
   border-radius: 50%;
   padding: 2px;
-  background: linear-gradient(45deg, #ff1493, #ff69b4, #da70d6, #9370db, #8a2be2, #ff1493);
+  background: linear-gradient(
+    45deg,
+    #ff1493,
+    #ff69b4,
+    #da70d6,
+    #9370db,
+    #8a2be2,
+    #ff1493
+  );
   background-size: 300% 300%;
   animation: gradientRotate 3s ease infinite;
 }

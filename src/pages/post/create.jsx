@@ -1,47 +1,77 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase.js';
-import { scrapeEventData, scrapeLiveEvents, scrapeBatchEvents, checkScrapingCapability } from '../../utils/improvedScraper.js';
-import Header from '../../components/common/Header.jsx';
-import Sidebar from '../../components/common/Sidebar.jsx';
-import UpVoteSection from '../../components/ui/Vote-Buttons.jsx';
-import ActionButton from '../../components/ui/Action-Button.jsx';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../lib/supabase.js";
+import {
+  scrapeEventData,
+  scrapeLiveEvents,
+  scrapeBatchEvents,
+  checkScrapingCapability,
+} from "../../utils/improvedScraper.js";
+import Header from "../../components/common/Header.jsx";
+import Sidebar from "../../components/common/Sidebar.jsx";
+import UpVoteSection from "../../components/ui/Vote-Buttons.jsx";
+import ActionButton from "../../components/ui/Action-Button.jsx";
 
-import '../../styles/home.css'
-import '../../styles/create-post.css'
+import "../../styles/home.css";
+import "../../styles/create-post.css";
 
 const CreatePostPage = () => {
   const navigate = useNavigate();
   const { user, profile, loading } = useAuth();
-  const [postTitle, setPostTitle] = useState('');
-  const [postDescription, setPostDescription] = useState('');
+  const [postTitle, setPostTitle] = useState("");
+  const [postDescription, setPostDescription] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedInterests, setSelectedInterests] = useState([]);
-  const [interestSearch, setInterestSearch] = useState('');
+  const [interestSearch, setInterestSearch] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [showMoreInterests, setShowMoreInterests] = useState(false);
 
   // Enhanced scraping functionality (NO PYTHON NEEDED!)
   const [scrapedEvents, setScrapedEvents] = useState([]);
   const [isScraping, setIsScraping] = useState(false);
-  const [scrapingUrl, setScrapingUrl] = useState('');
-  const [scrapingMode, setScrapingMode] = useState('single'); // 'single', 'batch', 'live'
+  const [scrapingUrl, setScrapingUrl] = useState("");
+  const [scrapingMode, setScrapingMode] = useState("single"); // 'single', 'batch', 'live'
   const [scrapingResults, setScrapingResults] = useState(null);
 
   const predefinedInterests = [
-    'Photography', 'Coding', 'Music', 'Sports', 'Art', 'Reading',
-    'Gaming', 'Travel', 'Food', 'Fitness', 'Movies', 'Nature',
-    'Dancing', 'Writing', 'Cooking', 'Science', 'Technology', 'Fashion',
-    'Theater', 'Volunteering', 'Hiking', 'Meditation', 'Languages', 'History',
-    'Economics', 'Business', 'Politics', 'Philosophy', 'Psychology', 'Health'
+    "Photography",
+    "Coding",
+    "Music",
+    "Sports",
+    "Art",
+    "Reading",
+    "Gaming",
+    "Travel",
+    "Food",
+    "Fitness",
+    "Movies",
+    "Nature",
+    "Dancing",
+    "Writing",
+    "Cooking",
+    "Science",
+    "Technology",
+    "Fashion",
+    "Theater",
+    "Volunteering",
+    "Hiking",
+    "Meditation",
+    "Languages",
+    "History",
+    "Economics",
+    "Business",
+    "Politics",
+    "Philosophy",
+    "Psychology",
+    "Health",
   ];
 
   // Enhanced browser-based scraping (NO PYTHON!)
   const handleBrowserScraping = async () => {
     if (!scrapingUrl.trim()) {
-      alert('Please enter a URL to scrape');
+      alert("Please enter a URL to scrape");
       return;
     }
 
@@ -49,29 +79,31 @@ const CreatePostPage = () => {
     setScrapingResults(null);
 
     try {
-      console.log('🚀 Starting browser-based scraping (NO PYTHON NEEDED!)...');
-      
-      if (scrapingMode === 'live') {
+      console.log("🚀 Starting browser-based scraping (NO PYTHON NEEDED!)...");
+
+      if (scrapingMode === "live") {
         // Live real-time scraping
         const events = await scrapeLiveEvents(scrapingUrl);
         setScrapedEvents(events);
         setScrapingResults({
           success: true,
           message: `Successfully scraped ${events.length} events in real-time!`,
-          method: 'Browser Live Scraping'
+          method: "Browser Live Scraping",
         });
-      } else if (scrapingMode === 'batch') {
+      } else if (scrapingMode === "batch") {
         // Batch scraping multiple URLs
-        const urls = scrapingUrl.split('\n').filter(url => url.trim());
+        const urls = scrapingUrl.split("\n").filter((url) => url.trim());
         const results = await scrapeBatchEvents(urls);
-        
-        const allEvents = results.filter(r => r.success).flatMap(r => r.events);
+
+        const allEvents = results
+          .filter((r) => r.success)
+          .flatMap((r) => r.events);
         setScrapedEvents(allEvents);
         setScrapingResults({
           success: true,
-          message: `Batch scraped ${allEvents.length} events from ${results.filter(r => r.success).length}/${urls.length} URLs`,
-          method: 'Browser Batch Scraping',
-          details: results
+          message: `Batch scraped ${allEvents.length} events from ${results.filter((r) => r.success).length}/${urls.length} URLs`,
+          method: "Browser Batch Scraping",
+          details: results,
         });
       } else {
         // Single URL scraping with enhanced methods
@@ -80,16 +112,15 @@ const CreatePostPage = () => {
         setScrapingResults({
           success: true,
           message: `Found ${events.length} events using browser scraping!`,
-          method: 'Browser JavaScript Scraping'
+          method: "Browser JavaScript Scraping",
         });
       }
-
     } catch (error) {
-      console.error('Browser scraping failed:', error);
+      console.error("Browser scraping failed:", error);
       setScrapingResults({
         success: false,
         message: `Scraping failed: ${error.message}`,
-        method: 'Browser Scraping Error'
+        method: "Browser Scraping Error",
       });
     } finally {
       setIsScraping(false);
@@ -99,15 +130,15 @@ const CreatePostPage = () => {
   // Check if URL is scrapable
   const checkScrapingCompatibility = async () => {
     if (!scrapingUrl.trim()) return;
-    
+
     try {
       const capability = await checkScrapingCapability(scrapingUrl);
       alert(`
 🔍 Scraping Analysis:
 • Platform: ${capability.platform}
-• Accessible: ${capability.accessible ? '✅ Yes' : '❌ No'}  
-• CORS Enabled: ${capability.corsEnabled ? '✅ Yes' : '⚠️ Proxy Required'}
-• Recommendation: ${capability.accessible ? 'Ready to scrape!' : 'May need CORS proxy'}
+• Accessible: ${capability.accessible ? "✅ Yes" : "❌ No"}  
+• CORS Enabled: ${capability.corsEnabled ? "✅ Yes" : "⚠️ Proxy Required"}
+• Recommendation: ${capability.accessible ? "Ready to scrape!" : "May need CORS proxy"}
       `);
     } catch (error) {
       alert(`Analysis failed: ${error.message}`);
@@ -123,21 +154,22 @@ const CreatePostPage = () => {
 
   // Sample URLs for demonstration
   const sampleUrls = {
-    santacruz: 'https://www.cityofsantacruz.com/community/special-events',
-    eventbrite: 'https://www.eventbrite.com/d/ca--santa-cruz/events/',
-    meetup: 'https://www.meetup.com/find/?keywords=tech&location=Santa%20Cruz%2C%20CA',
-    facebook: 'https://www.facebook.com/events/search/?q=santa%20cruz%20events'
+    santacruz: "https://www.cityofsantacruz.com/community/special-events",
+    eventbrite: "https://www.eventbrite.com/d/ca--santa-cruz/events/",
+    meetup:
+      "https://www.meetup.com/find/?keywords=tech&location=Santa%20Cruz%2C%20CA",
+    facebook: "https://www.facebook.com/events/search/?q=santa%20cruz%20events",
   };
 
   // Get interests to display based on current state
   const getDisplayedInterests = () => {
-    const availableInterests = predefinedInterests.filter(interest => 
-      !selectedInterests.includes(interest)
+    const availableInterests = predefinedInterests.filter(
+      (interest) => !selectedInterests.includes(interest),
     );
 
     if (interestSearch.trim()) {
-      return availableInterests.filter(interest =>
-        interest.toLowerCase().includes(interestSearch.toLowerCase())
+      return availableInterests.filter((interest) =>
+        interest.toLowerCase().includes(interestSearch.toLowerCase()),
       );
     }
 
@@ -150,9 +182,9 @@ const CreatePostPage = () => {
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       setSelectedImage(file);
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         setImagePreview(e.target.result);
@@ -162,40 +194,40 @@ const CreatePostPage = () => {
   };
 
   const handleImageClick = () => {
-    document.getElementById('image-upload-input').click();
+    document.getElementById("image-upload-input").click();
   };
 
   const handleInterestToggle = (interest) => {
-    setSelectedInterests(prev => 
-      prev.includes(interest) 
-        ? prev.filter(i => i !== interest)
-        : [...prev, interest]
+    setSelectedInterests((prev) =>
+      prev.includes(interest)
+        ? prev.filter((i) => i !== interest)
+        : [...prev, interest],
     );
   };
 
   const validateForm = () => {
     const errors = {};
-    
+
     if (!postTitle.trim()) {
-      errors.title = 'Title is required';
+      errors.title = "Title is required";
     }
-    
+
     if (!postDescription.trim()) {
-      errors.description = 'Description is required';
+      errors.description = "Description is required";
     }
-    
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     try {
       const eventData = {
         title: postTitle,
         description: postDescription,
-        location: 'Santa Cruz, CA',
+        location: "Santa Cruz, CA",
         start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         end_time: new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString(),
         is_free: true,
@@ -203,58 +235,59 @@ const CreatePostPage = () => {
         external_url: null,
         category: null,
         related_interests: selectedInterests,
-        event_type: 'user_created',
-        source: 'manual',
+        event_type: "user_created",
+        source: "manual",
         host_id: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         upvotes_count: 0,
         downvotes_count: 0,
         comments_count: 0,
-        rsvp_count: 0
+        rsvp_count: 0,
       };
 
       const { data, error } = await supabase
-        .from('Events')
+        .from("Events")
         .insert([eventData])
         .select()
         .single();
 
       if (error) throw error;
 
-      console.log('Event created successfully:', data);
-      navigate('/home');
+      console.log("Event created successfully:", data);
+      navigate("/home");
     } catch (error) {
-      console.error('Error creating event:', error);
-      alert('Failed to create event. Please try again.');
+      console.error("Error creating event:", error);
+      alert("Failed to create event. Please try again.");
     }
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-global-1 flex items-center justify-center">
-      <div className="text-white text-xl">Loading...</div>
-    </div>;
+    return (
+      <div className="min-h-screen bg-global-1 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
   }
 
   if (!user) {
-    navigate('/login');
+    navigate("/login");
     return null;
   }
 
   return (
     <div className="min-h-screen bg-global-1">
-      <Header 
-        userName={profile?.name || user?.email || 'User'}
-        userHandle={profile?.username || `@${user?.email?.split('@')[0]}`}
+      <Header
+        userName={profile?.name || user?.email || "User"}
+        userHandle={profile?.username || `@${user?.email?.split("@")[0]}`}
         userAvatar={profile?.avatar_url}
       />
-      
-      <div className="flex flex-1 pt-16 sm:pt-18 lg:pt-24"> 
-        <Sidebar/>
+
+      <div className="flex flex-1 pt-16 sm:pt-18 lg:pt-24">
+        <Sidebar />
 
         <main className="flex-1 p-6 sm:p-6 lg:pl-[16%] lg:p-[24px_48px] flex justify-center">
           <div className="flex flex-col gap-[20px] lg:gap-[20px] w-[95%] sm:w-[85%] lg:w-[80%] max-w-[800px] mx-auto">
-
             {/* Page Information */}
             <div className="mb-0 lg:mb-0 text-center">
               <div className="create-post-title">
@@ -266,7 +299,8 @@ const CreatePostPage = () => {
                 <div className="create-post-subtitle">
                   <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse shadow-[0_0_12px_rgba(147,122,250,0.8)] relative z-10"></span>
                   <p className="text-white/90 text-sm lg:text-base font-medium drop-shadow-md relative z-10">
-                    Fill in all required information • 🚀 NEW: Browser scraping (NO PYTHON!)
+                    Fill in all required information • 🚀 NEW: Browser scraping
+                    (NO PYTHON!)
                   </p>
                 </div>
               </div>
@@ -275,31 +309,40 @@ const CreatePostPage = () => {
             {/* NEW: Enhanced Browser-Based Event Scraping Section */}
             <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-[25px] p-4 mb-4 border border-purple-500/20">
               <h3 className="text-white text-lg font-medium mb-3 flex items-center">
-                🌐 Browser Event Scraping <span className="text-sm text-green-400 ml-2">(NO PYTHON REQUIRED!)</span>
+                🌐 Browser Event Scraping{" "}
+                <span className="text-sm text-green-400 ml-2">
+                  (NO PYTHON REQUIRED!)
+                </span>
               </h3>
-              
+
               {/* Scraping Mode Selector */}
               <div className="flex gap-2 mb-3">
                 <button
-                  onClick={() => setScrapingMode('single')}
+                  onClick={() => setScrapingMode("single")}
                   className={`px-3 py-1 rounded-[10px] text-sm transition-colors ${
-                    scrapingMode === 'single' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300'
+                    scrapingMode === "single"
+                      ? "bg-purple-600 text-white"
+                      : "bg-gray-700 text-gray-300"
                   }`}
                 >
                   Single URL
                 </button>
                 <button
-                  onClick={() => setScrapingMode('live')}
+                  onClick={() => setScrapingMode("live")}
                   className={`px-3 py-1 rounded-[10px] text-sm transition-colors ${
-                    scrapingMode === 'live' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300'
+                    scrapingMode === "live"
+                      ? "bg-purple-600 text-white"
+                      : "bg-gray-700 text-gray-300"
                   }`}
                 >
                   Live Scraping
                 </button>
                 <button
-                  onClick={() => setScrapingMode('batch')}
+                  onClick={() => setScrapingMode("batch")}
                   className={`px-3 py-1 rounded-[10px] text-sm transition-colors ${
-                    scrapingMode === 'batch' ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300'
+                    scrapingMode === "batch"
+                      ? "bg-purple-600 text-white"
+                      : "bg-gray-700 text-gray-300"
                   }`}
                 >
                   Batch URLs
@@ -312,12 +355,12 @@ const CreatePostPage = () => {
                   value={scrapingUrl}
                   onChange={(e) => setScrapingUrl(e.target.value)}
                   placeholder={
-                    scrapingMode === 'batch' 
+                    scrapingMode === "batch"
                       ? "Enter multiple URLs (one per line):\nhttps://eventbrite.com/...\nhttps://meetup.com/..."
                       : "Enter event website URL (e.g., https://eventbrite.com/...)"
                   }
                   className="flex-1 bg-gray-800 text-white rounded-[10px] px-3 py-2 text-sm resize-none"
-                  rows={scrapingMode === 'batch' ? 3 : 1}
+                  rows={scrapingMode === "batch" ? 3 : 1}
                 />
                 <button
                   onClick={checkScrapingCompatibility}
@@ -348,14 +391,20 @@ const CreatePostPage = () => {
                 disabled={isScraping || !scrapingUrl.trim()}
                 className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-[15px] transition-colors text-sm font-medium disabled:cursor-not-allowed"
               >
-                {isScraping ? '🔄 Scraping...' : '🚀 Scrape Events (Browser-Only)'}
+                {isScraping
+                  ? "🔄 Scraping..."
+                  : "🚀 Scrape Events (Browser-Only)"}
               </button>
 
               {/* Scraping Results */}
               {scrapingResults && (
-                <div className={`mt-3 p-3 rounded-[10px] text-sm ${
-                  scrapingResults.success ? 'bg-green-900/30 text-green-300' : 'bg-red-900/30 text-red-300'
-                }`}>
+                <div
+                  className={`mt-3 p-3 rounded-[10px] text-sm ${
+                    scrapingResults.success
+                      ? "bg-green-900/30 text-green-300"
+                      : "bg-red-900/30 text-red-300"
+                  }`}
+                >
                   <div className="font-medium">{scrapingResults.method}</div>
                   <div>{scrapingResults.message}</div>
                   {scrapingResults.details && (
@@ -370,7 +419,9 @@ const CreatePostPage = () => {
             {/* Scraped Events Quick Load */}
             {scrapedEvents.length > 0 && (
               <div className="bg-purple-900/20 rounded-[20px] p-3 mb-4">
-                <p className="text-white text-sm mb-2">✨ Scraped Events (Click to load):</p>
+                <p className="text-white text-sm mb-2">
+                  ✨ Scraped Events (Click to load):
+                </p>
                 <div className="grid grid-cols-1 gap-2">
                   {scrapedEvents.slice(0, 5).map((event, index) => (
                     <button
@@ -380,7 +431,8 @@ const CreatePostPage = () => {
                     >
                       <div className="font-medium text-sm">{event.title}</div>
                       <div className="text-xs text-gray-300 mt-1">
-                        {event.location} • {event.source} • {event.interests?.join(', ')}
+                        {event.location} • {event.source} •{" "}
+                        {event.interests?.join(", ")}
                       </div>
                     </button>
                   ))}
@@ -404,10 +456,12 @@ const CreatePostPage = () => {
                 className={`w-full bg-global-3 text-global-1 rounded-[20px] px-4 py-3 lg:px-6 lg:py-4 
                   text-sm lg:text-base transition-colors duration-200 
                   focus:outline-none focus:ring-2 focus:ring-purple-500
-                  ${validationErrors.title ? 'border-2 border-red-500' : ''}`}
+                  ${validationErrors.title ? "border-2 border-red-500" : ""}`}
               />
               {validationErrors.title && (
-                <p className="text-red-400 text-xs mt-1">{validationErrors.title}</p>
+                <p className="text-red-400 text-xs mt-1">
+                  {validationErrors.title}
+                </p>
               )}
             </div>
 
@@ -424,10 +478,12 @@ const CreatePostPage = () => {
                 className={`w-full bg-global-3 text-global-1 rounded-[20px] px-4 py-3 lg:px-6 lg:py-4 
                   text-sm lg:text-base transition-colors duration-200 resize-none
                   focus:outline-none focus:ring-2 focus:ring-purple-500
-                  ${validationErrors.description ? 'border-2 border-red-500' : ''}`}
+                  ${validationErrors.description ? "border-2 border-red-500" : ""}`}
               />
               {validationErrors.description && (
-                <p className="text-red-400 text-xs mt-1">{validationErrors.description}</p>
+                <p className="text-red-400 text-xs mt-1">
+                  {validationErrors.description}
+                </p>
               )}
             </div>
 
@@ -450,15 +506,17 @@ const CreatePostPage = () => {
                   overflow-hidden"
               >
                 {imagePreview ? (
-                  <img 
-                    src={imagePreview} 
-                    alt="Preview" 
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
                     className="w-full h-full object-cover rounded-[18px]"
                   />
                 ) : (
                   <div className="text-center">
                     <div className="text-gray-600 text-2xl mb-2">📷</div>
-                    <p className="text-gray-600 text-sm">Click to upload an image</p>
+                    <p className="text-gray-600 text-sm">
+                      Click to upload an image
+                    </p>
                   </div>
                 )}
               </div>
@@ -469,7 +527,7 @@ const CreatePostPage = () => {
               <label className="block text-white text-sm lg:text-base font-medium mb-2">
                 Interests & Tags
               </label>
-              
+
               {/* Search Bar */}
               <input
                 type="text"
@@ -479,13 +537,13 @@ const CreatePostPage = () => {
                 className="w-full bg-global-3 text-global-1 rounded-[15px] px-4 py-2 text-sm 
                   mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
-              
+
               {/* Selected Interests */}
               {selectedInterests.length > 0 && (
                 <div className="mb-3">
                   <p className="text-white text-sm mb-2">Selected:</p>
                   <div className="flex flex-wrap gap-2">
-                    {selectedInterests.map(interest => (
+                    {selectedInterests.map((interest) => (
                       <span
                         key={interest}
                         onClick={() => handleInterestToggle(interest)}
@@ -498,10 +556,10 @@ const CreatePostPage = () => {
                   </div>
                 </div>
               )}
-              
+
               {/* Available Interests */}
               <div className="flex flex-wrap gap-2">
-                {getDisplayedInterests().map(interest => (
+                {getDisplayedInterests().map((interest) => (
                   <span
                     key={interest}
                     onClick={() => handleInterestToggle(interest)}
@@ -511,15 +569,17 @@ const CreatePostPage = () => {
                     + {interest}
                   </span>
                 ))}
-                
-                {!interestSearch.trim() && !showMoreInterests && getDisplayedInterests().length === 5 && (
-                  <button
-                    onClick={() => setShowMoreInterests(true)}
-                    className="text-purple-400 hover:text-purple-300 text-sm underline"
-                  >
-                    Show more...
-                  </button>
-                )}
+
+                {!interestSearch.trim() &&
+                  !showMoreInterests &&
+                  getDisplayedInterests().length === 5 && (
+                    <button
+                      onClick={() => setShowMoreInterests(true)}
+                      className="text-purple-400 hover:text-purple-300 text-sm underline"
+                    >
+                      Show more...
+                    </button>
+                  )}
               </div>
             </div>
 
