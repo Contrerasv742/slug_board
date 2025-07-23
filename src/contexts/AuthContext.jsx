@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase.js";
-import SimpleLoadingScreen from "../components/common/SimpleLoadingScreen.jsx";
-import { mockUser, mockProfile, checkSupabaseConnection } from "../lib/offlineMode.js";
+// Removed SimpleLoadingScreen and offlineMode.js imports
 
 const AuthContext = createContext({});
 
@@ -18,40 +17,12 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Add timeout to prevent infinite loading and fallback to demo mode
-  useEffect(() => {
-    const timeout = setTimeout(async () => {
-      if (loading) {
-        console.warn("Auth loading timeout reached, checking for fallback mode");
-        
-        const isConnected = await checkSupabaseConnection();
-        if (!isConnected) {
-          console.info("Supabase unavailable, using demo mode");
-          setUser(mockUser);
-          setProfile(mockProfile);
-        }
-        
-        setLoading(false);
-      }
-    }, 5000); // 5 second timeout
-
-    return () => clearTimeout(timeout);
-  }, [loading]);
+  // Removed timeout logic - auth loading is handled naturally by Supabase responses
 
   useEffect(() => {
     // Get initial session with error handling
     const initializeAuth = async () => {
       try {
-        // Check Supabase connection first
-        const isConnected = await checkSupabaseConnection();
-        if (!isConnected) {
-          console.info("Supabase unavailable during initialization, using demo mode");
-          setUser(mockUser);
-          setProfile(mockProfile);
-          setLoading(false);
-          return;
-        }
-
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -68,10 +39,6 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
-        // Fallback to demo mode on error
-        console.info("Falling back to demo mode due to error");
-        setUser(mockUser);
-        setProfile(mockProfile);
         setLoading(false);
       }
     };
@@ -268,14 +235,8 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
   };
 
-  // Show loading screen only if actually loading
-  if (loading) {
-    return (
-      <AuthContext.Provider value={value}>
-        <SimpleLoadingScreen message="Initializing SlugBoard..." />
-      </AuthContext.Provider>
-    );
-  }
+  // Remove loading screen - just provide context without blocking UI
+  // Loading state is handled by individual components that need it
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
