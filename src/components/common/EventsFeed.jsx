@@ -368,9 +368,6 @@ const EventsFeed = ({
             </div>
           )}
 
-          {/* Post Image */}
-          <div className="w-full h-32 sm:h-36 lg:h-80 bg-global-5 rounded-[20px] sm:rounded-[25px] lg:rounded-[35px] mb-3 lg:mb-[20px]"></div>
-
           {/* Post Actions */}
           <div className="flex items-center gap-2 sm:gap-3 lg:gap-[12px] flex-wrap">
             {/* Upvote Section */}
