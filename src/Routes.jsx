@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // Import General Pages
 import LoginPage from './pages/general/login.jsx';
 import HomePage from './pages/general/home.jsx';
+import ExplorePage from './pages/general/explore.jsx';
+import PopularPage from './pages/general/popular.jsx';
 import MapPage from './pages/general/map.jsx';
 
 // Import User Pages
@@ -21,8 +23,8 @@ const AppRoutes = () => {
         {/* Feeds */}
         <Route path="/" element={<HomePage/>} />
         <Route path="/home" element={<HomePage/>} />
-        <Route path="/explore" element={<HomePage/>} />
-        <Route path="/popular" element={<HomePage/>} />
+        <Route path="/explore" element={<ExplorePage/>} />
+        <Route path="/popular" element={<PopularPage/>} />
 
         {/* Post Pages */}
         <Route path="/post" element={<PostDetailPage/>} />

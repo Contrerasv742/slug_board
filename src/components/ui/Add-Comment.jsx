@@ -1,15 +1,67 @@
 import { useState } from 'react';
+import { supabase } from '../../lib/supabase.js';
 
-export default function ExpandableComment() {
+export default function ExpandableComment({ eventId, userId, onCommentAdded }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleCommentSubmit = () => {
-    if (newComment.trim()) {
-      console.log('Comment submitted:', newComment);
-      // Handle comment submission logic here
+  const handleCommentSubmit = async () => {
+    if (!newComment.trim() || !eventId || !userId) {
+      console.error('Missing required fields for comment submission');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Insert new comment into database
+      const { data, error } = await supabase
+        .from('EventComments')
+        .insert([
+          {
+            event_id: eventId,
+            user_id: userId,
+            content: newComment.trim(),
+            parent_id: null, // Top-level comment
+            upvotes_count: 0,
+            downvotes_count: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        ])
+        .select(`
+          *,
+          profiles:user_id (
+            name,
+            username,
+            avatar_url
+          )
+        `)
+        .single();
+
+      if (error) throw error;
+
+      // Update event comments count
+      await supabase.rpc('increment', { 
+        table_name: 'Events', 
+        row_id: eventId, 
+        field_name: 'comments_count' 
+      });
+
+      // Notify parent component about new comment
+      if (onCommentAdded && data) {
+        onCommentAdded(data);
+      }
+
+      // Reset form
       setNewComment('');
-      setIsExpanded(false); // Optionally collapse after submission
+      setIsExpanded(false);
+
+      console.log('Comment submitted successfully:', data);
+    } catch (error) {
+      console.error('Error submitting comment:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,24 +96,28 @@ export default function ExpandableComment() {
         placeholder="What are your thoughts?"
         className="text-gray-800 text-lg lg:text-[22px] font-normal
         bg-transparent border-none outline-none resize-none
-        placeholder-gray-400 w-full min-h-[40px] py-0 px-0" autoFocus
+        placeholder-gray-400 w-full min-h-[40px] py-0 px-0"
+        autoFocus
+        disabled={loading}
       />
       <div className="flex justify-end gap-2 mt-3">
         <button
           onClick={() => setIsExpanded(false)}
+          disabled={loading}
           className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 lg:px-8
           lg:py-3 rounded-[20px] transition-colors duration-200 text-sm
-          lg:text-[16px]"
+          lg:text-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Cancel
         </button>
         <button
           onClick={handleCommentSubmit}
+          disabled={loading || !newComment.trim()}
           className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2
           lg:px-8 lg:py-3 rounded-[20px] transition-colors duration-200 text-sm
-          lg:text-[16px]"
+          lg:text-[16px] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Post Comment
+          {loading ? 'Posting...' : 'Post Comment'}
         </button>
       </div>
     </div>

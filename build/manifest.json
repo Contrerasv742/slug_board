@@ -1,0 +1,10 @@
+{
+  "name": "Slug Board",
+  "short_name": "SlugBoard",
+  "description": "A React application built with Vite and Tailwind CSS",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#646cff",
+  "background_color": "#ffffff",
+  "icons": []
+}

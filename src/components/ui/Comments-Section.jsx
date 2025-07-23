@@ -1,7 +1,189 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase.js';
 import UpVotesSection from './Vote-Buttons.jsx';
+import CommentActions from './CommentActions.jsx';
 
-const CommentSection = ({ comments }) => {
+const CommentSection = ({ eventId, userId, comments: initialComments = [] }) => {
+  const [comments, setComments] = useState(initialComments);
+  const [loading, setLoading] = useState(false);
+
+  // Load comments from database when component mounts
+  useEffect(() => {
+    if (eventId) {
+      loadComments();
+    }
+  }, [eventId]);
+
+  const loadComments = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('EventComments')
+        .select(`
+          *,
+          profiles:user_id (
+            name,
+            username,
+            avatar_url
+          )
+        `)
+        .eq('event_id', eventId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      // Transform flat comments into nested structure
+      const transformedComments = transformCommentsToNested(data);
+      setComments(transformedComments);
+    } catch (error) {
+      console.error('Error loading comments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const transformCommentsToNested = (flatComments) => {
+    const commentMap = {};
+    const rootComments = [];
+
+    // First pass: create comment map
+    flatComments.forEach(comment => {
+      commentMap[comment.id] = {
+        ...comment,
+        userName: comment.profiles?.name || comment.profiles?.username || 'Anonymous',
+        timeAgo: formatTimeAgo(comment.created_at),
+        upvotes: comment.upvotes_count || 0,
+        downvotes: comment.downvotes_count || 0,
+        content: comment.content,
+        replies: []
+      };
+    });
+
+    // Second pass: build nested structure
+    flatComments.forEach(comment => {
+      if (comment.parent_id && commentMap[comment.parent_id]) {
+        commentMap[comment.parent_id].replies.push(commentMap[comment.id]);
+      } else {
+        rootComments.push(commentMap[comment.id]);
+      }
+    });
+
+    return rootComments;
+  };
+
+  const formatTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return '1 day ago';
+    if (diffInDays < 7) return `${diffInDays} days ago`;
+    
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    if (diffInWeeks === 1) return '1 week ago';
+    if (diffInWeeks < 4) return `${diffInWeeks} weeks ago`;
+    
+    return date.toLocaleDateString();
+  };
+
+  const handleCommentVote = async (commentId, voteType) => {
+    if (!userId) {
+      console.error('User must be logged in to vote');
+      return;
+    }
+
+    try {
+      // Check if user already voted on this comment
+      const { data: existingVote, error: fetchError } = await supabase
+        .from('CommentUpvotes')
+        .select('*')
+        .eq('comment_id', commentId)
+        .eq('user_id', userId)
+        .single();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
+      }
+
+      if (existingVote) {
+        if (existingVote.vote_type === voteType) {
+          // Remove vote
+          await supabase
+            .from('CommentUpvotes')
+            .delete()
+            .eq('id', existingVote.id);
+
+          // Update comment count
+          const updateField = voteType === 'upvote' ? 'upvotes_count' : 'downvotes_count';
+          await supabase.rpc('decrement', { 
+            table_name: 'EventComments', 
+            row_id: commentId, 
+            field_name: updateField 
+          });
+        } else {
+          // Switch vote type
+          await supabase
+            .from('CommentUpvotes')
+            .update({ vote_type: voteType })
+            .eq('id', existingVote.id);
+
+          // Update comment counts
+          const oldField = existingVote.vote_type === 'upvote' ? 'upvotes_count' : 'downvotes_count';
+          const newField = voteType === 'upvote' ? 'upvotes_count' : 'downvotes_count';
+          
+          await supabase.rpc('decrement', { 
+            table_name: 'EventComments', 
+            row_id: commentId, 
+            field_name: oldField 
+          });
+          await supabase.rpc('increment', { 
+            table_name: 'EventComments', 
+            row_id: commentId, 
+            field_name: newField 
+          });
+        }
+      } else {
+        // Create new vote
+        await supabase
+          .from('CommentUpvotes')
+          .insert([
+            {
+              comment_id: commentId,
+              user_id: userId,
+              vote_type: voteType,
+              created_at: new Date().toISOString()
+            }
+          ]);
+
+        // Update comment count
+        const updateField = voteType === 'upvote' ? 'upvotes_count' : 'downvotes_count';
+        await supabase.rpc('increment', { 
+          table_name: 'EventComments', 
+          row_id: commentId, 
+          field_name: updateField 
+        });
+      }
+
+      // Reload comments to reflect changes
+      await loadComments();
+    } catch (error) {
+      console.error('Error handling comment vote:', error);
+    }
+  };
+
+  const handleCommentUpdated = () => {
+    // Reload comments to reflect changes
+    loadComments();
+  };
+
+  const handleCommentDeleted = () => {
+    // Reload comments to reflect changes
+    loadComments();
+  };
 
   const CollapseButton = ({ isCollapsed, onClick, hasReplies }) => {
     if (!hasReplies) return null;
@@ -131,10 +313,22 @@ const CommentSection = ({ comments }) => {
         <div className={`${depth > 0 ? 'ml-10 lg:ml-12' : ''} mb-4 lg:mb-6 group relative z-10 hover-trigger`}>
           <div className="bg-transparent rounded-[20px] p-0 lg:p-0">
             {/* Comment Header */}
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-3 group">
               <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br
-                from-blue-400 to-purple-500 rounded-full"></div>
-              <div className="flex items-center gap-2">
+                from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                {comment.profiles?.avatar_url ? (
+                  <img 
+                    src={comment.profiles.avatar_url} 
+                    alt={comment.userName}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="text-white font-bold text-xs lg:text-sm">
+                    {comment.userName.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-1">
                 <span className="text-white text-sm lg:text-[18px] font-normal">
                   {comment.userName}
                 </span>
@@ -142,6 +336,16 @@ const CommentSection = ({ comments }) => {
                   {comment.timeAgo}
                 </span>
               </div>
+              
+              {/* Comment Actions */}
+              <CommentActions 
+                commentId={comment.id}
+                userId={userId}
+                authorId={comment.user_id}
+                content={comment.content}
+                onCommentUpdated={handleCommentUpdated}
+                onCommentDeleted={handleCommentDeleted}
+              />
             </div>
 
             {/* Comment Content - padded to align with vote buttons */}
@@ -154,8 +358,13 @@ const CommentSection = ({ comments }) => {
               <div className="flex items-center gap-2 mb-4">
                 <UpVotesSection
                   upvotes={comment.upvotes}
+                  downvotes={comment.downvotes}
+                  eventId={comment.id} // Using comment ID for vote tracking
+                  userId={userId}
                   light={false}
                   small={true}
+                  upvote_action={() => handleCommentVote(comment.id, 'upvote')}
+                  downvote_action={() => handleCommentVote(comment.id, 'downvote')}
                 />
                 <button className="text-purple-400 hover:text-purple-300 text-xs lg:text-[14px]">
                   Reply
@@ -182,6 +391,14 @@ const CommentSection = ({ comments }) => {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="bg-transparent min-h-screen p-6 flex items-center justify-center">
+        <div className="text-white text-lg">Loading comments...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-transparent min-h-screen p-6">

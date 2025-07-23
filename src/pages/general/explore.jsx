@@ -6,7 +6,7 @@ import Sidebar from '../../components/common/Sidebar.jsx';
 import EventsFeed from '../../components/common/EventsFeed.jsx';
 import '../../styles/home.css'
 
-const HomePage = () => {
+const ExplorePage = () => {
   const { user, profile, loading } = useAuth();
 
   if (loading) {
@@ -38,7 +38,7 @@ const HomePage = () => {
       {/* Header */}
       <Header 
         showSearch={true}
-        searchPlaceholder="Search Posts"
+        searchPlaceholder="Explore Events"
         userName={profile?.name || profile?.username || 'John Doe'}
         userHandle={profile?.username ? `@${profile.username}` : '@johndoe'}
         userAvatar={profile?.avatar_url || "/images/default-avatar.png"}
@@ -62,16 +62,28 @@ const HomePage = () => {
 
         {/* Feed Content */}
         <main className="flex-1 lg:pl-[16%] p-6 sm:p-6 lg:p-[44px_48px] flex justify-center">
-          <EventsFeed 
-            feedType="all"
-            limit={50}
-            autoRefresh={true}
-            showCreateButton={true}
-          />
+          <div className="w-full max-w-[800px]">
+            {/* Explore Page Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-white text-2xl sm:text-3xl lg:text-[38px] lg:leading-tight font-light drop-shadow-lg">
+                Explore Events
+              </h1>
+              <p className="text-white/70 text-sm lg:text-base mt-2">
+                Discover diverse events from the community and beyond
+              </p>
+            </div>
+
+            <EventsFeed 
+              feedType="explore"
+              limit={75}
+              autoRefresh={false}
+              showCreateButton={false}
+            />
+          </div>
         </main>
       </div>
     </div>
   );
 };
 
-export default HomePage;
+export default ExplorePage; 

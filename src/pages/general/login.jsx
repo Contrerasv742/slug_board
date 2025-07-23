@@ -1,31 +1,88 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/ui/Button';
 import EditText from '../../components/ui/EditText';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { user, signIn, signInWithProvider, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !loading) {
+      navigate('/home');
+    }
+  }, [user, loading, navigate]);
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
+    setError(''); // Clear error when user types
   };
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
+    setError(''); // Clear error when user types
   };
 
-  const handleSubmit = () => {
-    console.log('Login attempt:', { email, password });
+  const handleSubmit = async () => {
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const { data, error } = await signIn(email, password);
+      
+      if (error) {
+        setError(error.message);
+      } else if (data.user) {
+        navigate('/home');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSocialLogin = (provider) => {
-    console.log(`Login with ${provider}`);
+  const handleSocialLogin = async (provider) => {
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await signInWithProvider(provider);
+      
+      if (error) {
+        setError(error.message);
+      }
+      // Note: OAuth redirect will handle navigation
+    } catch (err) {
+      setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-global-1 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     // Page Settings
@@ -34,8 +91,9 @@ const Login = () => {
 
       {/* Header Section */}
       <div className="flex flex-row items-center justify-start w-full mt-4
-        sm:mt-6 lg:mt-[16px]"> <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12
-          md:h-12 lg:w-[40px] lg:h-[40px] bg-global-2 rounded-sm">
+        sm:mt-6 lg:mt-[16px]"> 
+        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-[40px] 
+          lg:h-[40px] bg-global-2 rounded-sm">
           <img
             src="/images/standing-sammy.png"
             className="w-full h-full object-contain"
@@ -49,105 +107,124 @@ const Login = () => {
       </div>
 
       {/* Login Form Container */}
-      <div className="w-[350px] bg-global-3 rounded-[16px] p-[24px] shadow-lg flex flex-col"> 
+      <div className="bg-global-3 rounded-[35px] p-6 sm:p-8 lg:p-[40px_48px]
+        w-full max-w-md sm:max-w-lg lg:max-w-[520px] shadow-xl">
         
-        {/* Login Icon */}
-        <div className="flex justify-center mb-[12px]">
-          <div className="bg-global-3 rounded-[10px] p-[8px] shadow-md border border-gray-200">
-            <img 
-              src="/images/img_downloading_updates.png" 
-              alt="login icon" 
-              className="w-[32px] h-[32px]"
-            />
-          </div>
-        </div>
-
-        {/* Title and Description */}
-        <div className="text-center mb-[16px]">
-          <h2 className="text-global-1 font-ropa text-[24px] leading-[26px] font-normal mb-[6px]">
-            Sign in with email
+        {/* Welcome Text */}
+        <div className="text-center mb-6 lg:mb-8">
+          <h2 className="text-global-1 font-ropa text-xl sm:text-2xl 
+            lg:text-[32px] lg:leading-[35px] font-normal mb-2">
+            Welcome Back
           </h2>
-          <p className="text-global-3 font-ropa text-[14px] leading-[16px] font-normal px-[20px]">
-            Make a new account to post events and connect with others
+          <p className="text-global-2 text-sm sm:text-base lg:text-[18px] 
+            lg:leading-[20px]">
+            Sign in to your account
           </p>
         </div>
 
-        {/* Form Fields */}
-        <div className="space-y-[12px] mb-[10px]">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-[15px]">
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        )}
+
+        {/* Email Input */}
+        <div className="mb-4 lg:mb-6">
           <EditText
-            id={69}
             placeholder="Email"
             value={email}
             onChange={handleEmailChange}
             type="email"
-            leftIcon="/images/img_envelope.png"
-            className="text-[12px] lg:text-lg py-[12px] px-[12px] pl-[36px] h-[36px]"
+            className="w-full"
+            disabled={isLoading}
           />
-
-          <div className="relative">
-            <EditText
-              id={420}
-              placeholder="Password"
-              value={password}
-              onChange={handlePasswordChange}
-              type={showPassword ? "text" : "password"}
-              leftIcon="/images/img_lock.png"
-              className="text-[12px] lg:text-lg py-[12px] px-[12px] pl-[36px] h-[36px]"
-            />
-            <button
-              type="button"
-              onClick={togglePasswordVisibility}
-              className="absolute right-[8px] top-1/2 transform -translate-y-1/2"
-            >
-              <img 
-                src="/images/img_invisible.png" 
-                alt="toggle password visibility" 
-                className="w-[18px] h-[18px]"
-              />
-            </button>
-          </div>
         </div>
 
-        {/* Forgot Password Link */}
-        <div className="text-right mb-[10px]">
-          <button className="text-global-1 font-ropa text-[12px] leading-[14px] font-normal hover:underline">
-            Forgot password?
+        {/* Password Input */}
+        <div className="mb-6 lg:mb-8 relative">
+          <EditText
+            placeholder="Password"
+            value={password}
+            onChange={handlePasswordChange}
+            type={showPassword ? "text" : "password"}
+            className="w-full pr-12"
+            disabled={isLoading}
+          />
+          <button
+            type="button"
+            onClick={togglePasswordVisibility}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2
+              text-global-2 hover:text-global-1 transition-colors"
+            disabled={isLoading}
+          >
+            <img
+              src="/images/img_lock.png"
+              alt={showPassword ? "Hide password" : "Show password"}
+              className="w-5 h-5 lg:w-6 lg:h-6"
+            />
           </button>
         </div>
 
-        {/* Get Started Button */}
+        {/* Sign In Button */}
         <Button
           onClick={handleSubmit}
-          variant="primary"
-          size="medium"
           fullWidth
-          className="mb-[12px] text-[12px] lg:text-xl h-[36px] flex items-center justify-center"
+          className="mb-4 lg:mb-6"
+          disabled={isLoading}
         >
-          Get Started
+          {isLoading ? 'Signing In...' : 'Sign In'}
         </Button>
 
-        {/* Or Sign In With */}
-        <div className="text-center mb-[12px]">
-          <p className="text-global-2 font-ropa text-[12px] leading-[14px] font-normal">
-            Or sign in with
-          </p>
+        {/* Divider */}
+        <div className="flex items-center mb-4 lg:mb-6">
+          <div className="flex-1 border-t border-global-2"></div>
+          <span className="px-4 text-global-2 text-sm">or</span>
+          <div className="flex-1 border-t border-global-2"></div>
         </div>
 
         {/* Social Login Buttons */}
-        <div className="flex flex-row justify-center items-center gap-[8px]">
-          {['Google', 'LinkedIn', 'Apple'].map((provider) => (
+        <div className="space-y-3 lg:space-y-4 mb-6">
+          <button
+            onClick={() => handleSocialLogin('google')}
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-3 p-3 lg:p-4
+              border border-global-2 rounded-[15px] hover:bg-gray-50 
+              transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <img src="/images/google.png" alt="Google" className="w-5 h-5" />
+            <span className="text-global-1 font-ropa text-sm lg:text-base">
+              Continue with Google
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleSocialLogin('apple')}
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-3 p-3 lg:p-4
+              border border-global-2 rounded-[15px] hover:bg-gray-50 
+              transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <img src="/images/apple.png" alt="Apple" className="w-5 h-5" />
+            <span className="text-global-1 font-ropa text-sm lg:text-base">
+              Continue with Apple
+            </span>
+          </button>
+        </div>
+
+        {/* Sign Up Link */}
+        <div className="text-center">
+          <p className="text-global-2 text-sm lg:text-base">
+            Don't have an account?{' '}
             <button
-              key={provider}
-              onClick={() => handleSocialLogin(provider)}
-              className="flex items-center justify-center bg-global-2 rounded-[8px] shadow-md hover:shadow-lg transition-shadow duration-200 w-[90px] h-[32px]"
+              onClick={() => navigate('/create-new-user')}
+              className="text-purple-600 hover:text-purple-700 font-medium
+                transition-colors"
+              disabled={isLoading}
             >
-              <img 
-                src={`/images/${provider.toLowerCase()}.png`}
-                alt={`Sign in with ${provider}`} 
-                className="max-w-[70%] max-h-[70%] object-contain"
-              />
+              Sign up
             </button>
-          ))}
+          </p>
         </div>
       </div>
     </div>
