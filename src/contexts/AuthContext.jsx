@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase.js";
+import SimpleLoadingScreen from "../components/common/SimpleLoadingScreen.jsx";
+import { mockUser, mockProfile, checkSupabaseConnection } from "../lib/offlineMode.js";
 
 const AuthContext = createContext({});
 
@@ -16,26 +18,80 @@ export const AuthProvider = ({ children }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Add timeout to prevent infinite loading and fallback to demo mode
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadUserProfile(session.user.id);
-      } else {
+    const timeout = setTimeout(async () => {
+      if (loading) {
+        console.warn("Auth loading timeout reached, checking for fallback mode");
+        
+        const isConnected = await checkSupabaseConnection();
+        if (!isConnected) {
+          console.info("Supabase unavailable, using demo mode");
+          setUser(mockUser);
+          setProfile(mockProfile);
+        }
+        
         setLoading(false);
       }
-    });
+    }, 5000); // 5 second timeout
+
+    return () => clearTimeout(timeout);
+  }, [loading]);
+
+  useEffect(() => {
+    // Get initial session with error handling
+    const initializeAuth = async () => {
+      try {
+        // Check Supabase connection first
+        const isConnected = await checkSupabaseConnection();
+        if (!isConnected) {
+          console.info("Supabase unavailable during initialization, using demo mode");
+          setUser(mockUser);
+          setProfile(mockProfile);
+          setLoading(false);
+          return;
+        }
+
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          setLoading(false);
+          return;
+        }
+
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await loadUserProfile(session.user.id);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+        // Fallback to demo mode on error
+        console.info("Falling back to demo mode due to error");
+        setUser(mockUser);
+        setProfile(mockProfile);
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await loadUserProfile(session.user.id);
-      } else {
-        setProfile(null);
+      try {
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await loadUserProfile(session.user.id);
+        } else {
+          setProfile(null);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error in auth state change:", error);
         setLoading(false);
       }
     });
@@ -56,12 +112,16 @@ export const AuthProvider = ({ children }) => {
         // If profile doesn't exist, create one
         if (error.code === "PGRST116") {
           await createUserProfile(userId);
+        } else {
+          // For other errors, just continue without profile
+          setProfile(null);
         }
       } else {
         setProfile(data);
       }
     } catch (error) {
       console.error("Error in loadUserProfile:", error);
+      setProfile(null);
     } finally {
       setLoading(false);
     }
@@ -89,11 +149,13 @@ export const AuthProvider = ({ children }) => {
 
       if (error) {
         console.error("Error creating user profile:", error);
+        setProfile(null);
       } else {
         setProfile(data);
       }
     } catch (error) {
       console.error("Error in createUserProfile:", error);
+      setProfile(null);
     }
   };
 
@@ -205,6 +267,15 @@ export const AuthProvider = ({ children }) => {
     signInWithProvider,
     updateProfile,
   };
+
+  // Show loading screen only if actually loading
+  if (loading) {
+    return (
+      <AuthContext.Provider value={value}>
+        <SimpleLoadingScreen message="Initializing SlugBoard..." />
+      </AuthContext.Provider>
+    );
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -8,13 +8,7 @@ import "../../styles/home.css";
 const HomePage = () => {
   const { user, profile, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-global-1 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
+  // Don't show loading screen for HomePage - let it render with defaults
 
   return (
     <div className="flex flex-col min-h-screen bg-global-1 font-ropa">
