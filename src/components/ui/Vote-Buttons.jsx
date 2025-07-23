@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase.js';
+import { incrementField, decrementField } from '../../utils/databaseHelpers.js';
 
 const UpVotesSection = ({
   upvotes = 0,
@@ -80,11 +81,7 @@ const UpVotesSection = ({
 
           // Update event count
           const updateField = newVoteType === 'upvote' ? 'upvotes_count' : 'downvotes_count';
-          await supabase.rpc('decrement', { 
-            table_name: 'Events', 
-            row_id: eventId, 
-            field_name: updateField 
-          });
+          await decrementField('Events', eventId, updateField);
 
           return 'removed';
         } else {
@@ -100,16 +97,8 @@ const UpVotesSection = ({
           const oldField = existingVote.vote_type === 'upvote' ? 'upvotes_count' : 'downvotes_count';
           const newField = newVoteType === 'upvote' ? 'upvotes_count' : 'downvotes_count';
           
-          await supabase.rpc('decrement', { 
-            table_name: 'Events', 
-            row_id: eventId, 
-            field_name: oldField 
-          });
-          await supabase.rpc('increment', { 
-            table_name: 'Events', 
-            row_id: eventId, 
-            field_name: newField 
-          });
+          await decrementField('Events', eventId, oldField);
+          await incrementField('Events', eventId, newField);
 
           return 'switched';
         }
@@ -131,11 +120,7 @@ const UpVotesSection = ({
 
         // Update event count
         const updateField = newVoteType === 'upvote' ? 'upvotes_count' : 'downvotes_count';
-        await supabase.rpc('increment', { 
-          table_name: 'Events', 
-          row_id: eventId, 
-          field_name: updateField 
-        });
+        await incrementField('Events', eventId, updateField);
 
         return 'added';
       }

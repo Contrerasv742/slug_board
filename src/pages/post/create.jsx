@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase.js';
-import { scrapeEventData, scrapeLiveEvents, scrapeBatchEvents, checkScrapingCapability } from '../../utils/eventScraper.js';
+import { scrapeEventData, scrapeLiveEvents, scrapeBatchEvents, checkScrapingCapability } from '../../utils/improvedScraper.js';
 import Header from '../../components/common/Header.jsx';
 import Sidebar from '../../components/common/Sidebar.jsx';
 import UpVoteSection from '../../components/ui/Vote-Buttons.jsx';

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase.js';
+import { incrementField, decrementField } from '../../utils/databaseHelpers.js';
 
 const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) => {
   const [rsvpStatus, setRsvpStatus] = useState(null); // null, 'going', 'interested', 'not_going'
@@ -67,11 +68,7 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
 
           // Decrement RSVP count only if it was 'going'
           if (existingRSVP.status === 'going') {
-            await supabase.rpc('decrement', { 
-              table_name: 'Events', 
-              row_id: eventId, 
-              field_name: 'rsvp_count' 
-            });
+            await decrementField('Events', eventId, 'rsvp_count');
             setRsvpCount(prev => prev - 1);
           }
 
@@ -91,19 +88,11 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
           // Update event count based on status changes
           if (existingRSVP.status === 'going' && newStatus !== 'going') {
             // Was going, now not going - decrement
-            await supabase.rpc('decrement', { 
-              table_name: 'Events', 
-              row_id: eventId, 
-              field_name: 'rsvp_count' 
-            });
+            await decrementField('Events', eventId, 'rsvp_count');
             setRsvpCount(prev => prev - 1);
           } else if (existingRSVP.status !== 'going' && newStatus === 'going') {
             // Wasn't going, now going - increment
-            await supabase.rpc('increment', { 
-              table_name: 'Events', 
-              row_id: eventId, 
-              field_name: 'rsvp_count' 
-            });
+            await incrementField('Events', eventId, 'rsvp_count');
             setRsvpCount(prev => prev + 1);
           }
 
@@ -126,11 +115,7 @@ const RSVPButton = ({ eventId, userId, initialRsvpCount = 0, className = "" }) =
 
         // Increment RSVP count only if status is 'going'
         if (newStatus === 'going') {
-          await supabase.rpc('increment', { 
-            table_name: 'Events', 
-            row_id: eventId, 
-            field_name: 'rsvp_count' 
-          });
+          await incrementField('Events', eventId, 'rsvp_count');
           setRsvpCount(prev => prev + 1);
         }
 

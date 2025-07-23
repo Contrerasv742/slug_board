@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase.js';
+import { incrementField } from '../../utils/databaseHelpers.js';
 
 export default function ExpandableComment({ eventId, userId, onCommentAdded }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -42,11 +43,7 @@ export default function ExpandableComment({ eventId, userId, onCommentAdded }) {
       if (error) throw error;
 
       // Update event comments count
-      await supabase.rpc('increment', { 
-        table_name: 'Events', 
-        row_id: eventId, 
-        field_name: 'comments_count' 
-      });
+      await incrementField('Events', eventId, 'comments_count');
 
       // Notify parent component about new comment
       if (onCommentAdded && data) {

@@ -16,6 +16,9 @@ import UserProfilePage from './pages/user/profile.jsx';
 import CreatePostPage from './pages/post/create.jsx';
 import PostDetailPage from './pages/post/view.jsx';
 
+// Import Debug Components
+import DatabaseSetup from './components/debug/DatabaseSetup.jsx';
+
 const AppRoutes = () => {
   return (
     <Router>
@@ -37,6 +40,9 @@ const AppRoutes = () => {
         {/* Other */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/map" element={<MapPage/>} />
+        
+        {/* Debug Routes */}
+        <Route path="/debug/database" element={<DatabaseSetup/>} />
       </Routes>
     </Router>
   );
