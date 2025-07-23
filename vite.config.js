@@ -22,7 +22,7 @@ export default defineConfig({
   },
   server: {
     port: 4028,
-    host: "0.0.0.0",
+    host: "localhost",
     strictPort: true,
     allowedHosts: ['.amazonaws.com', '.builtwithrocket.new']
   }

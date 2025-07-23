@@ -1,0 +1,18 @@
+# Core scraping dependencies
+selenium==4.15.2
+beautifulsoup4==4.12.2
+requests==2.31.0
+lxml==4.9.3
+
+# Web service dependencies
+flask==3.0.0
+flask-cors==4.0.0
+
+# Data processing
+pandas==2.1.4
+
+# Environment management
+python-dotenv==1.0.0
+
+# Supabase client (simplified)
+supabase==2.3.4 

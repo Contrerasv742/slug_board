@@ -7,31 +7,36 @@ class ScrapingService {
   constructor() {
     this.baseUrl =
       process.env.REACT_APP_SCRAPING_API_URL || "http://localhost:8000";
+    this.pythonScraperUrl = "http://localhost:5001"; // Python Flask service URL
   }
 
   /**
    * Trigger the Python scraper for Santa Cruz events
-   * This would call the backend API that runs the scrape_santacruz_events.py script
+   * This calls the backend API that runs the scrape_santacruz_events.py script
    */
   async scrapeSantaCruzEvents() {
     try {
-      const response = await fetch(`${this.baseUrl}/api/scrape/santacruz`, {
+      console.log('🚀 Triggering Python scraper for Santa Cruz events...');
+      
+      const response = await fetch(`${this.pythonScraperUrl}/scrape`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          url: "https://www.cityofsantacruz.com/community/special-events",
-          save_to_db: true,
-        }),
       });
 
       if (!response.ok) {
-        throw new Error(`Scraping API error: ${response.status}`);
+        throw new Error(`Python scraper error: ${response.status}`);
       }
 
       const result = await response.json();
-      return result.events || [];
+      console.log('✅ Python scraper result:', result);
+      
+      if (result.success && result.data) {
+        return result.data.events || [];
+      } else {
+        throw new Error(result.error || 'Python scraper failed');
+      }
     } catch (error) {
       console.error("Santa Cruz scraping error:", error);
       throw new Error("Failed to scrape Santa Cruz events");
@@ -160,7 +165,57 @@ class ScrapingService {
   }
 
   /**
-   * Check scraping service health
+   * Check Python scraper service health
+   */
+  async checkPythonScraperHealth() {
+    try {
+      const response = await fetch(`${this.pythonScraperUrl}/health`);
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Test Python scraper setup
+   */
+  async testPythonScraperSetup() {
+    try {
+      const response = await fetch(`${this.pythonScraperUrl}/scrape/test`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('❌ Python scraper setup test error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get scraping status
+   */
+  async getScrapingStatus() {
+    try {
+      const response = await fetch(`${this.pythonScraperUrl}/scrape/status`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('❌ Get scraping status error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check scraping service health (legacy)
    */
   async checkServiceHealth() {
     try {

@@ -32,8 +32,9 @@ const CreatePostPage = () => {
   const [scrapedEvents, setScrapedEvents] = useState([]);
   const [isScraping, setIsScraping] = useState(false);
   const [scrapingUrl, setScrapingUrl] = useState("");
-  const [scrapingMode, setScrapingMode] = useState("single"); // 'single', 'batch', 'live'
+  const [scrapingMode, setScrapingMode] = useState("single"); // 'single', 'batch', 'live', 'python'
   const [scrapingResults, setScrapingResults] = useState(null);
+  const [pythonScraperStatus, setPythonScraperStatus] = useState(null);
 
   const predefinedInterests = [
     "Photography",
@@ -124,6 +125,55 @@ const CreatePostPage = () => {
       });
     } finally {
       setIsScraping(false);
+    }
+  };
+
+  // Python-based scraping for Santa Cruz events
+  const handlePythonScraping = async () => {
+    setIsScraping(true);
+    setScrapingResults(null);
+
+    try {
+      console.log("🐍 Starting Python scraper for Santa Cruz events...");
+      
+      // First check if Python scraper is available
+      const healthCheck = await scrapingService.checkPythonScraperHealth();
+      if (!healthCheck) {
+        throw new Error("Python scraper service is not available. Please start the Python backend service.");
+      }
+
+      // Trigger the Python scraper
+      const events = await scrapingService.scrapeSantaCruzEvents();
+      
+      setScrapedEvents(events);
+      setScrapingResults({
+        success: true,
+        message: `Successfully scraped ${events.length} Santa Cruz events using Python!`,
+        method: "Python Scraper",
+      });
+    } catch (error) {
+      console.error("Python scraping error:", error);
+      setScrapingResults({
+        success: false,
+        message: `Python scraping failed: ${error.message}`,
+        method: "Python Scraper",
+      });
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
+  // Check Python scraper setup
+  const checkPythonScraperSetup = async () => {
+    try {
+      const setup = await scrapingService.testPythonScraperSetup();
+      setPythonScraperStatus(setup);
+    } catch (error) {
+      console.error("Python scraper setup check failed:", error);
+      setPythonScraperStatus({
+        success: false,
+        error: error.message
+      });
     }
   };
 
@@ -316,7 +366,7 @@ const CreatePostPage = () => {
               </h3>
 
               {/* Scraping Mode Selector */}
-              <div className="flex gap-2 mb-3">
+              <div className="flex gap-2 mb-3 flex-wrap">
                 <button
                   onClick={() => setScrapingMode("single")}
                   className={`px-3 py-1 rounded-[10px] text-sm transition-colors ${
@@ -346,6 +396,16 @@ const CreatePostPage = () => {
                   }`}
                 >
                   Batch URLs
+                </button>
+                <button
+                  onClick={() => setScrapingMode("python")}
+                  className={`px-3 py-1 rounded-[10px] text-sm transition-colors ${
+                    scrapingMode === "python"
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-700 text-gray-300"
+                  }`}
+                >
+                  🐍 Python Scraper
                 </button>
               </div>
 
@@ -387,14 +447,45 @@ const CreatePostPage = () => {
 
               {/* Scraping Button */}
               <button
-                onClick={handleBrowserScraping}
-                disabled={isScraping || !scrapingUrl.trim()}
-                className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white px-4 py-2 rounded-[15px] transition-colors text-sm font-medium disabled:cursor-not-allowed"
+                onClick={scrapingMode === "python" ? handlePythonScraping : handleBrowserScraping}
+                disabled={isScraping || (scrapingMode !== "python" && !scrapingUrl.trim())}
+                className={`w-full px-4 py-2 rounded-[15px] transition-colors text-sm font-medium disabled:cursor-not-allowed ${
+                  scrapingMode === "python" 
+                    ? "bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white"
+                    : "bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white"
+                }`}
               >
                 {isScraping
                   ? "🔄 Scraping..."
+                  : scrapingMode === "python"
+                  ? "🐍 Scrape Santa Cruz Events (Python)"
                   : "🚀 Scrape Events (Browser-Only)"}
               </button>
+
+              {/* Python Scraper Status */}
+              {scrapingMode === "python" && (
+                <div className="mt-3">
+                  <button
+                    onClick={checkPythonScraperSetup}
+                    className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded-[8px] transition-colors"
+                  >
+                    🔧 Check Python Setup
+                  </button>
+                  {pythonScraperStatus && (
+                    <div className={`mt-2 p-2 rounded-[8px] text-xs ${
+                      pythonScraperStatus.success 
+                        ? "bg-green-900/30 text-green-300" 
+                        : "bg-red-900/30 text-red-300"
+                    }`}>
+                      <div className="font-medium">Python Scraper Status:</div>
+                      <div>{pythonScraperStatus.success ? "✅ Ready" : "❌ Not Ready"}</div>
+                      {pythonScraperStatus.error && (
+                        <div className="mt-1">{pythonScraperStatus.error}</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Scraping Results */}
               {scrapingResults && (
