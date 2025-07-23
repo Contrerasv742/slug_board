@@ -20,6 +20,15 @@ export const AuthProvider = ({ children }) => {
   // Removed timeout logic - auth loading is handled naturally by Supabase responses
 
   useEffect(() => {
+    // Safety timeout to avoid infinite loading
+    const safetyTimeout = setTimeout(() => {
+      setLoading(false);
+    }, 8000); // 8 seconds fallback
+
+    return () => clearTimeout(safetyTimeout);
+  }, []);
+
+  useEffect(() => {
     // Get initial session with error handling
     const initializeAuth = async () => {
       try {

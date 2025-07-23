@@ -1,45 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import Header from "../../components/common/Header.jsx";
 import Sidebar from "../../components/common/Sidebar.jsx";
+import { useAuth } from "../../contexts/AuthContext";
 
 const UserProfilePage = () => {
-  const [isEditing, setIsEditing] = useState(false);
+  const { profile } = useAuth();
 
-  const personalityTraits = [
-    { name: "Extrovert", value: 9, color: "bg-red-500" },
-    { name: "Creative", value: 7, color: "bg-orange-500" },
-    { name: "Analytical", value: 6, color: "bg-yellow-500" },
-    { name: "Adventurous", value: 10, color: "bg-green-500" },
-    { name: "Social", value: 8, color: "bg-blue-500" },
-  ];
-
-  const goals = [
-    "Connect with fellow UC Santa Cruz students",
-    "Organize more campus events",
-  ];
-
-  const interests = ["Playing with boobies", "Pooping", "Dudes"];
-
-  const recentPosts = [
-    {
-      title: "Photography Club Meetup",
-      description: "Join us for a sunset photo walk around campus",
-      upvotes: 124,
-      timeAgo: "2 days ago",
-    },
-    {
-      title: "Study Group Formation",
-      description: "Looking for CS students for algorithm study sessions",
-      upvotes: 89,
-      timeAgo: "1 week ago",
-    },
-    {
-      title: "Campus Coffee Recommendations",
-      description: "Best spots for coffee and studying on campus",
-      upvotes: 156,
-      timeAgo: "2 weeks ago",
-    },
-  ];
+  const personalityTraits = profile?.personality_traits || [];
+  const goals = profile?.goals || [];
+  const interests = profile?.interests || [];
+  const recentPosts = []; // TODO: fetch user posts later
 
   return (
     <div className="flex flex-col min-h-screen bg-global-1 font-ropa">

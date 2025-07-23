@@ -15,6 +15,7 @@ import UserProfilePage from "./pages/user/profile.jsx";
 // Import Post Pages
 import CreatePostPage from "./pages/post/create.jsx";
 import PostDetailPage from "./pages/post/view.jsx";
+import EditPostPage from "./pages/post/edit.jsx";
 
 // Import Debug Components
 import DatabaseSetup from "./components/debug/DatabaseSetup.jsx";
@@ -33,6 +34,7 @@ const AppRoutes = () => {
         {/* Post Pages */}
         <Route path="/post" element={<PostDetailPage />} />
         <Route path="/create-post" element={<CreatePostPage />} />
+        <Route path="/edit-post" element={<EditPostPage />} />
 
         {/* User Interactable */}
         <Route path="/profile" element={<UserProfilePage />} />

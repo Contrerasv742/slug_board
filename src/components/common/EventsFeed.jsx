@@ -94,10 +94,14 @@ const EventsFeed = ({
         interests: event.related_interests || [],
       }));
 
-      // If no database events, add sample events for demo
       if (transformedEvents.length === 0) {
-        const sampleEvents = getSampleEvents();
-        setEvents(sampleEvents);
+        if (!user) {
+          // Unauthenticated users see demo data
+          setEvents(getSampleEvents());
+        } else {
+          // Authenticated user sees empty state
+          setEvents([]);
+        }
       } else {
         setEvents(transformedEvents);
       }

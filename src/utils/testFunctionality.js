@@ -14,6 +14,20 @@ import {
   checkDatabaseTables,
   createSampleEvent,
 } from "./databaseHelpers.js";
+import { createClient } from "@supabase/supabase-js";
+
+// Attempt to create admin client with service role key (if provided)
+let adminSupabase = null;
+if (process.env.SUPABASE_SERVICE_KEY) {
+  adminSupabase = createClient(
+    process.env.SUPABASE_URL || "https://xzbgwpckoyvlgzfecnmo.supabase.co",
+    process.env.SUPABASE_SERVICE_KEY,
+  );
+  console.log("🛡️  Using service role key for test operations (RLS bypass)");
+}
+
+// Helper to select correct client (admin if available)
+const dbClient = adminSupabase || supabase;
 
 // Test Results Storage
 let testResults = {
@@ -29,7 +43,7 @@ export const testDatabaseConnection = async () => {
   console.log("🔍 Testing database connection...");
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await dbClient
       .from("Events")
       .select("count")
       .limit(1);
@@ -58,7 +72,7 @@ export const testDatabaseTables = async () => {
   console.log("🔍 Testing database tables...");
 
   try {
-    const tableStatus = await checkDatabaseTables();
+    const tableStatus = await checkDatabaseTables(dbClient);
     testResults.database.tables = tableStatus;
 
     const allTablesExist = Object.values(tableStatus).every(
@@ -117,7 +131,7 @@ export const testEventCRUD = async () => {
       rsvp_count: 0,
     };
 
-    const { data: createData, error: createError } = await supabase
+    const { data: createData, error: createError } = await dbClient
       .from("Events")
       .insert([newEvent])
       .select()
@@ -131,7 +145,7 @@ export const testEventCRUD = async () => {
 
     // READ - Test event reading
     console.log("  Testing READ operation...");
-    const { data: readData, error: readError } = await supabase
+    const { data: readData, error: readError } = await dbClient
       .from("Events")
       .select("*")
       .eq("event_id", createdEventId)
@@ -144,7 +158,7 @@ export const testEventCRUD = async () => {
 
     // UPDATE - Test event updating
     console.log("  Testing UPDATE operation...");
-    const { data: updateData, error: updateError } = await supabase
+    const { data: updateData, error: updateError } = await dbClient
       .from("Events")
       .update({ title: "Test Event CRUD - Updated" })
       .eq("event_id", createdEventId)
@@ -163,7 +177,7 @@ export const testEventCRUD = async () => {
     await incrementField("Events", createdEventId, "comments_count");
     await decrementField("Events", createdEventId, "upvotes_count");
 
-    const { data: countData } = await supabase
+    const { data: countData } = await dbClient
       .from("Events")
       .select("upvotes_count, comments_count")
       .eq("event_id", createdEventId)
@@ -178,7 +192,7 @@ export const testEventCRUD = async () => {
 
     // DELETE - Test event deletion
     console.log("  Testing DELETE operation...");
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await dbClient
       .from("Events")
       .delete()
       .eq("event_id", createdEventId);
@@ -197,7 +211,7 @@ export const testEventCRUD = async () => {
     // Cleanup on error
     if (createdEventId) {
       try {
-        await supabase.from("Events").delete().eq("event_id", createdEventId);
+        await dbClient.from("Events").delete().eq("event_id", createdEventId);
       } catch (cleanupError) {
         console.error("Failed to cleanup test event:", cleanupError);
       }

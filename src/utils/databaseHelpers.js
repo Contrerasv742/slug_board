@@ -80,7 +80,7 @@ export const decrementField = async (tableName, rowId, fieldName) => {
 };
 
 // Check if database tables exist
-export const checkDatabaseTables = async () => {
+export const checkDatabaseTables = async (client = supabase) => {
   const tables = [
     "Events",
     "EventUpvotes",
@@ -92,7 +92,7 @@ export const checkDatabaseTables = async () => {
 
   for (const table of tables) {
     try {
-      const { data, error } = await supabase.from(table).select("*").limit(1);
+      const { data, error } = await client.from(table).select("*").limit(1);
 
       results[table] = {
         exists: !error,

@@ -1,6 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 const UserCreationPage = () => {
+  const navigate = useNavigate();
+  const { signUp, loading: authLoading } = useAuth();
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     // Basic Info
@@ -247,28 +252,28 @@ const UserCreationPage = () => {
     }
   };
 
-  const handleSubmit = () => {
-    // Validate all steps before submission
-    const step1Valid = validateStep1();
-    const step2Valid = validateStep2();
-    const step3Valid = validateStep3();
+  const handleSubmit = async () => {
+    // Final validation
+    if (!validateStep3()) return;
 
-    if (!step1Valid) {
-      setCurrentStep(1);
-      return;
-    }
-    if (!step2Valid) {
-      setCurrentStep(2);
-      return;
-    }
-    if (!step3Valid) {
-      setCurrentStep(3);
-      return;
-    }
+    try {
+      const { data, error } = await signUp(formData.email, formData.password, {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        major: formData.major,
+        graduation_year: formData.graduationYear,
+      });
 
-    console.log("User data:", formData);
-    // Handle form submission
-    alert("Account created successfully!");
+      if (error) {
+        alert(`Sign-up failed: ${error.message}`);
+        return;
+      }
+
+      alert("Account created! Please check your email to confirm.");
+      navigate("/home");
+    } catch (e) {
+      alert(`Unexpected error: ${e.message}`);
+    }
   };
 
   const renderStepIndicator = () => (
