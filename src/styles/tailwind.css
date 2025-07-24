@@ -119,11 +119,25 @@
   border: 1px solid rgba(255,255,255,0.2);
 }
 
-/* Animated gradient (optional) */
+/* Animated gradient */
 .bg-starship-animated {
   background: linear-gradient(135deg, #ff1493, #ff69b4, #da70d6, #9370db, #8a2be2);
   background-size: 300% 300%;
   animation: gradientShift 6s ease infinite;
+}
+
+.bg-starship-animated-violet {
+  background: linear-gradient(135deg, #8b008b, #9932cc, #9370db, #8a2be2, #7b68ee, #6a5acd);
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease infinite;
+}
+
+.purple-shimmer-custom::before {
+  background: linear-gradient(90deg, transparent, rgba(106, 90, 205, 0.2), transparent);
+}
+
+.purple-shimmer-subtle-custom::before {
+  background: linear-gradient(90deg, transparent, rgba(106, 90, 205, 0.08), transparent);
 }
 
 .text-starship-animated {

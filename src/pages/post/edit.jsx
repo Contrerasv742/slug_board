@@ -1,18 +1,18 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase.js";
 import Header from "../../components/common/Header.jsx";
 import Sidebar from "../../components/common/Sidebar.jsx";
-import UpVoteSection from "../../components/ui/Vote-Buttons.jsx";
-import ActionButton from "../../components/ui/Action-Button.jsx";
-
 import "../../styles/home.css";
 import "../../styles/create-post.css";
 
-const CreatePostPage = () => {
+const EditPostPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const eventId = searchParams.get("id");
   const { user, profile, loading } = useAuth();
+  
   const [postTitle, setPostTitle] = useState("");
   const [postDescription, setPostDescription] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
@@ -21,41 +21,56 @@ const CreatePostPage = () => {
   const [interestSearch, setInterestSearch] = useState("");
   const [validationErrors, setValidationErrors] = useState({});
   const [showMoreInterests, setShowMoreInterests] = useState(false);
+  const [loadingEvent, setLoadingEvent] = useState(true);
+  const [eventData, setEventData] = useState(null);
 
   const predefinedInterests = [
-    "Photography",
-    "Coding",
-    "Music",
-    "Sports",
-    "Art",
-    "Reading",
-    "Gaming",
-    "Travel",
-    "Food",
-    "Fitness",
-    "Movies",
-    "Nature",
-    "Dancing",
-    "Writing",
-    "Cooking",
-    "Science",
-    "Technology",
-    "Fashion",
-    "Theater",
-    "Volunteering",
-    "Hiking",
-    "Meditation",
-    "Languages",
-    "History",
-    "Economics",
-    "Business",
-    "Politics",
-    "Philosophy",
-    "Psychology",
-    "Health",
+    "Photography", "Coding", "Music", "Sports", "Art", "Reading",
+    "Gaming", "Travel", "Food", "Fitness", "Movies", "Nature",
+    "Dancing", "Writing", "Cooking", "Science", "Technology", "Fashion",
+    "Theater", "Volunteering", "Hiking", "Meditation", "Languages", 
+    "History", "Economics", "Business", "Politics", "Philosophy", 
+    "Psychology", "Health",
   ];
 
-  // Get interests to display based on current state
+  useEffect(() => {
+    if (eventId) {
+      loadEventData();
+    } else {
+      navigate("/home");
+    }
+  }, [eventId]);
+
+  const loadEventData = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("Events")
+        .select("*")
+        .eq("event_id", eventId)
+        .single();
+
+      if (error) throw error;
+
+      // Check if user owns this event
+      if (data.host_id !== user?.id) {
+        alert("You can only edit your own events.");
+        navigate("/home");
+        return;
+      }
+
+      setEventData(data);
+      setPostTitle(data.title || "");
+      setPostDescription(data.description || "");
+      setSelectedInterests(data.related_interests || []);
+    } catch (error) {
+      console.error("Error loading event:", error);
+      alert("Failed to load event data.");
+      navigate("/home");
+    } finally {
+      setLoadingEvent(false);
+    }
+  };
+
   const getDisplayedInterests = () => {
     const availableInterests = predefinedInterests.filter(
       (interest) => !selectedInterests.includes(interest),
@@ -118,45 +133,31 @@ const CreatePostPage = () => {
     if (!validateForm()) return;
 
     try {
-      const eventData = {
+      const updateData = {
         title: postTitle,
         description: postDescription,
-        location: "Santa Cruz, CA",
-        start_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        end_time: new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString(),
-        is_free: true,
-        price_info: null,
-        external_url: null,
-        category: null,
         related_interests: selectedInterests,
-        event_type: "user_created",
-        source: "manual",
-        host_id: user.id,
-        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        upvotes_count: 0,
-        downvotes_count: 0,
-        comments_count: 0,
-        rsvp_count: 0,
       };
 
       const { data, error } = await supabase
         .from("Events")
-        .insert([eventData])
+        .update(updateData)
+        .eq("event_id", eventId)
         .select()
         .single();
 
       if (error) throw error;
 
-      console.log("Event created successfully:", data);
-      navigate("/home");
+      console.log("Event updated successfully:", data);
+      navigate(`/post?id=${eventId}`);
     } catch (error) {
-      console.error("Error creating event:", error);
-      alert("Failed to create event. Please try again.");
+      console.error("Error updating event:", error);
+      alert("Failed to update event. Please try again.");
     }
   };
 
-  if (loading) {
+  if (loading || loadingEvent) {
     return (
       <div className="min-h-screen bg-global-1 flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
@@ -186,27 +187,18 @@ const CreatePostPage = () => {
             <div className="mb-0 lg:mb-0 text-center">
               <div className="create-post-title">
                 <h1 className="text-white text-2xl sm:text-3xl lg:text-[38px] lg:leading-tight font-light drop-shadow-lg relative z-10">
-                  Create a post below
+                  Edit Event
                 </h1>
               </div>
               <div>
                 <div className="create-post-subtitle">
                   <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse shadow-[0_0_12px_rgba(147,122,250,0.8)] relative z-10"></span>
                   <p className="text-white/90 text-sm lg:text-base font-medium drop-shadow-md relative z-10">
-                    Fill in all required information
+                    Update your event information
                   </p>
                 </div>
               </div>
             </div>
-
-            {/* NEW: Enhanced Browser-Based Event Scraping Section */}
-            {/* This section is removed as per the edit hint */}
-
-            {/* Scraped Events Quick Load */}
-            {/* This section is removed as per the edit hint */}
-
-            {/* Existing form fields remain the same... */}
-            {/* ... rest of the form code ... */}
 
             {/* Title Input */}
             <div className="w-full">
@@ -349,14 +341,24 @@ const CreatePostPage = () => {
             </div>
 
             {/* Submit Button */}
-            <button
-              onClick={handleSubmit}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white 
-                px-6 py-3 lg:px-8 lg:py-4 rounded-[20px] transition-colors duration-200 
-                text-sm lg:text-base font-medium"
-            >
-              Create Event Post
-            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={() => navigate(`/post?id=${eventId}`)}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white 
+                  px-6 py-3 lg:px-8 lg:py-4 rounded-[20px] transition-colors duration-200 
+                  text-sm lg:text-base font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white 
+                  px-6 py-3 lg:px-8 lg:py-4 rounded-[20px] transition-colors duration-200 
+                  text-sm lg:text-base font-medium"
+              >
+                Update Event
+              </button>
+            </div>
           </div>
         </main>
       </div>
@@ -364,4 +366,4 @@ const CreatePostPage = () => {
   );
 };
 
-export default CreatePostPage;
+export default EditPostPage; 

@@ -1,11 +1,12 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import Header from "../../components/common/Header.jsx";
 import Sidebar from "../../components/common/Sidebar.jsx";
 import EventsFeed from "../../components/common/EventsFeed.jsx";
 import "../../styles/home.css";
 
-const HomePage = () => {
+const PopularPage = () => {
   const { user, profile, loading } = useAuth();
 
   if (loading) {
@@ -16,12 +17,30 @@ const HomePage = () => {
     );
   }
 
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-global-1 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-white text-2xl mb-4">
+            Please log in to continue
+          </h2>
+          <Link
+            to="/login"
+            className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-[20px] transition-colors"
+          >
+            Go to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-global-1 font-ropa">
       {/* Header */}
       <Header
         showSearch={true}
-        searchPlaceholder="Search Posts"
+        searchPlaceholder="Search Popular Events"
         userName={profile?.name || profile?.username || "John Doe"}
         userHandle={profile?.username ? `@${profile.username}` : "@johndoe"}
         userAvatar={profile?.avatar_url || "/images/default-avatar.png"}
@@ -47,16 +66,28 @@ const HomePage = () => {
 
         {/* Feed Content */}
         <main className="flex-1 lg:pl-[16%] p-6 sm:p-6 lg:p-[44px_48px] flex justify-center">
-          <EventsFeed
-            feedType="all"
-            limit={50}
-            autoRefresh={true}
-            showCreateButton={true}
-          />
+          <div className="w-full max-w-[800px]">
+            {/* Popular Page Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-white text-2xl sm:text-3xl lg:text-[38px] lg:leading-tight font-light drop-shadow-lg">
+                Popular Events
+              </h1>
+              <p className="text-white/70 text-sm lg:text-base mt-2">
+                Trending events with the most engagement
+              </p>
+            </div>
+
+            <EventsFeed
+              feedType="all"
+              limit={30}
+              autoRefresh={false}
+              showCreateButton={false}
+            />
+          </div>
         </main>
       </div>
     </div>
   );
 };
 
-export default HomePage;
+export default PopularPage;
