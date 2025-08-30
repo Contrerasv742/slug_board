@@ -12,6 +12,8 @@ Harsh Ranjan
 
 Sehaj Singh
 
+Mohamed Badri
+
 # Usage:
 
 ```bash
